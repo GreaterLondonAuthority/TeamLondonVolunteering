@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+  theme:
+    - team_london
+id: team_london_local_tasks
+theme: team_london
+region: content
+weight: -10
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: Tabs
+  provider: core
+  label_display: '0'
+  primary: true
+  secondary: true
+visibility:
+  user_role:
+    id: user_role
+    roles:
+      site_administrator: site_administrator
+      administrator: administrator
+    negate: false
+    context_mapping:
+      user: '@user.current_user_context:current_user'

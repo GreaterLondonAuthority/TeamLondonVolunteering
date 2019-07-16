@@ -1,0 +1,29 @@
+/**
+ * @file
+ * Main layout styles.
+ *
+**/
+
+@import "../variables/utilities";
+
+.page-wrapper {
+  padding-top: 21.3rem;
+}
+
+@media (min-width: $screen-tablet) {
+  .page-wrapper {
+    padding-top: 24.8rem;
+  }
+}
+
+@media (min-width: $screen-full) {
+  .page-wrapper {
+    padding-top: 19rem;
+  }
+}
+
+
+// Custom image bg for TL volunteering on map teaser.
+.search-content__teaser-image--no-image {
+  background: url('../../../#{$images}/placeholder_160x160.png') no-repeat center;
+}

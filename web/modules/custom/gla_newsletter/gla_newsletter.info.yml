@@ -1,0 +1,5 @@
+name: Newsletter
+description: 'Provides newsletter functionality.'
+type: module
+core: 8.x
+package: GLA

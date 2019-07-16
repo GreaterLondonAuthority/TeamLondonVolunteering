@@ -1,0 +1,9 @@
+name: Search
+type: module
+core: 8.x
+package: GLA
+dependencies:
+  - facets
+  - geocoder
+  - search_api
+  - search_api_solr

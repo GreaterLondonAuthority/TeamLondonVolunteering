@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - crop.type.content_thumbnail
+  module:
+    - crop
+name: thumbnail_large
+label: 'Thumbnail Large (160px x 160px)'
+effects:
+  0a27b1ed-b962-47a0-b1ed-6e1b0c06fe25:
+    uuid: 0a27b1ed-b962-47a0-b1ed-6e1b0c06fe25
+    id: image_scale_and_crop
+    weight: -9
+    data:
+      width: 160
+      height: 160
+      anchor: center-center
+  4c4f2af1-ee7e-473f-b313-2b4d60482093:
+    uuid: 4c4f2af1-ee7e-473f-b313-2b4d60482093
+    id: crop_crop
+    weight: -10
+    data:
+      crop_type: content_thumbnail

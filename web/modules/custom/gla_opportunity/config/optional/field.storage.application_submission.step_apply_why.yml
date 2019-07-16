@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - gla_multistep_forms
+    - gla_opportunity
+id: application_submission.step_apply_why
+field_name: step_apply_why
+entity_type: application_submission
+type: multistep_separator
+settings: {  }
+module: gla_multistep_forms
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

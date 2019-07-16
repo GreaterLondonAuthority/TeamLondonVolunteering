@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.step_org_contact
+  module:
+    - gla_multistep_forms
+    - multiple_registration
+    - user
+third_party_settings:
+  multiple_registration:
+    user_additional_register_form:
+      provider: provider
+      authenticated: 0
+      volunteer: 0
+    user_additional_register_form_required:
+      authenticated: 0
+      volunteer: 0
+      provider: 0
+id: user.user.step_org_contact
+field_name: step_org_contact
+entity_type: user
+bundle: user
+label: 'Main contact name'
+description: "<p>The name of the person who will administer the account for your organisation.</p>\r\n\r\n<p>This person will be responsible for creating volunteering roles and liaising with the Team London administrator before they are published on the website.</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

@@ -1,0 +1,49 @@
+# Update the Phone field on the Provider Profile nodes
+# This is a separate migration because the original spreadsheet had address, url, and phone
+# in separate sheets and we can't 'join' them otherwise.
+
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - migrate_plus
+      - migrate_source_csv
+id: gla_provider_profiles_phone
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags: null
+migration_group: gla
+label: 'GLA Provider Profile phone field'
+source:
+  plugin: csv
+  path: 'modules/custom/gla_migrate/data/providers_phone.csv'
+  header_row_count: 1
+  keys:
+    - content_id
+process:
+  # We need to get the NID of the originally imported provider profile node
+  # so that the node can be updated rather than try to create it new.
+  nid:
+    -
+      plugin: migration_lookup
+      migration: gla_provider_profiles
+      source: content_id
+      no_stub: true
+    -
+      plugin: skip_on_empty
+      method: row
+  # What do we do about extension column? do we concatenate? if yes, how?
+  field_uk_telephone_number: phone_number
+
+destination:
+  plugin: 'entity:node'
+  default_bundle: 'provider_profile'
+  # Destination: Specify the overwrite_properties for the fields to set on the existing entities.
+  overwrite_properties:
+    - field_uk_telephone_number
+# Uncomment when running the full migrations - atm running one at a time it complains that the dependency is not met.
+#migration_dependencies:
+#  required:
+#    - gla_provider_profiles

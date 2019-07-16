@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_organisation_who_benefits
+    - node.type.provider_profile
+id: node.provider_profile.field_organisation_who_benefits
+field_name: field_organisation_who_benefits
+entity_type: node
+bundle: provider_profile
+label: 'Who benefits from your work?'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

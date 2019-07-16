@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_what_bullet_1
+    - node.type.opportunity
+id: node.opportunity.field_what_bullet_1
+field_name: field_what_bullet_1
+entity_type: node
+bundle: opportunity
+label: 'Bullet 1'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

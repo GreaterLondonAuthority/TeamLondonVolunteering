@@ -1,0 +1,12 @@
+services:
+  cache.gla_opportunity_travel_data:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin, default_backend: cache.backend.permanent_database }
+    factory: cache_factory:get
+    arguments: [gla_opportunity_travel_data]
+  gla_opportunity.unpublished_event.response_subscriber:
+    class: Drupal\gla_opportunity\ResponseSubscriber
+    arguments: ['@current_user', '@content_moderation.moderation_information']
+    tags:
+      - { name: event_subscriber }

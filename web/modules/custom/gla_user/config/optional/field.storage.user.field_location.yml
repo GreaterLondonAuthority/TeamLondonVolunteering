@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - user
+id: user.field_location
+field_name: field_location
+entity_type: user
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: london_borough
+      label: 'London Borough'
+    -
+      value: postcode
+      label: Postcode
+    -
+      value: dont_mind
+      label: 'I don''t mind where in London (show me opportunities in all areas)'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

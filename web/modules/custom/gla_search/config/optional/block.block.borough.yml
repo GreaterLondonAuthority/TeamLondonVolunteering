@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.borough
+  module:
+    - facets
+    - system
+  theme:
+    - team_london
+id: borough
+theme: team_london
+region: sidebar_left
+weight: -9
+provider: null
+plugin: 'facet_block:borough'
+settings:
+  id: 'facet_block:borough'
+  label: Borough
+  provider: facets
+  label_display: visible
+  block_id: borough
+visibility:
+  request_path:
+    id: request_path
+    pages: /search-opportunities
+    negate: false
+    context_mapping: {  }

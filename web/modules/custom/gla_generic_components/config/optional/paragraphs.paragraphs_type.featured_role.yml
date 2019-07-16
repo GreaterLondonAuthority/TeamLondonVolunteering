@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: featured_role
+label: 'Featured Role'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }

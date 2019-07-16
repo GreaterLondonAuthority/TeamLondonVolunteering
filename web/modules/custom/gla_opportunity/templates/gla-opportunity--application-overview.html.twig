@@ -1,0 +1,25 @@
+{% if sections|length == 2 %}
+  <p>{{ 'To apply for this role, please confirm your details.'|t }}</p>
+{% else %}
+  <p>{{ 'To apply for this role, please confirm your details and complete the questions.'|t }}</p>
+{% endif %}
+
+<ul class="list-unstyled">
+  {% for section in sections %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text"><strong>{{ section.label }}</strong></h3>
+          <p>{{ section.value }}</p>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          {{ section.link }}
+        </div>
+      </div>
+    </li>
+    <div class="separator"></div>
+  {% endfor %}
+</ul>
+
+<a class="button button--alt" href="{{ back_url }}">{{ 'Back'|t }}</a>
+{{ continue }}

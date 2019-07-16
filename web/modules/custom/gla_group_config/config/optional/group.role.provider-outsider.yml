@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - group.type.provider
+id: provider-outsider
+label: Outsider
+weight: -101
+internal: true
+audience: outsider
+group_type: provider
+permissions_ui: true
+permissions:
+  - 'view group_node:opportunity entity'
+  - 'view group_node:provider_profile entity'

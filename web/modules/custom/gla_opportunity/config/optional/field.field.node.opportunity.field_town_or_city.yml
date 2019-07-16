@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_town_or_city
+    - node.type.opportunity
+id: node.opportunity.field_town_or_city
+field_name: field_town_or_city
+entity_type: node
+bundle: opportunity
+label: Town/City
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - gla_multistep_forms
+    - user
+id: user.step_mail_address
+field_name: step_mail_address
+entity_type: user
+type: multistep_separator
+settings: {  }
+module: gla_multistep_forms
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

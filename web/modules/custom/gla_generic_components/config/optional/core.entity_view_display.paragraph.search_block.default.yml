@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.search_block.field_search
+    - field.field.paragraph.search_block.field_title
+    - paragraphs.paragraphs_type.search_block
+  module:
+    - block_field
+id: paragraph.search_block.default
+targetEntityType: paragraph
+bundle: search_block
+mode: default
+content:
+  field_search:
+    weight: 1
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: block_field
+    region: content
+  field_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

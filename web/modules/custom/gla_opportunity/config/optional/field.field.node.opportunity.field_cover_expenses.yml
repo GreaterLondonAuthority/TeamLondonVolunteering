@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_cover_expenses
+    - node.type.opportunity
+  module:
+    - options
+id: node.opportunity.field_cover_expenses
+field_name: field_cover_expenses
+entity_type: node
+bundle: opportunity
+label: 'Please indicate if you are able to cover any volunteer expenses – for example, travel or meal costs.'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

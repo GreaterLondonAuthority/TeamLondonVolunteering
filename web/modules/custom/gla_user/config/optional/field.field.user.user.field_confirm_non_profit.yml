@@ -1,0 +1,34 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_confirm_non_profit
+  module:
+    - multiple_registration
+    - user
+third_party_settings:
+  multiple_registration:
+    user_additional_register_form:
+      provider: provider
+      authenticated: 0
+      volunteer: 0
+    user_additional_register_form_required:
+      provider: provider
+      authenticated: 0
+      volunteer: 0
+id: user.user.field_confirm_non_profit
+field_name: field_confirm_non_profit
+entity_type: user
+bundle: user
+label: 'Please confirm that you are representing a not for profit organisation?'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

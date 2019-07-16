@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_search
+    - paragraphs.paragraphs_type.search_block
+  module:
+    - block_field
+id: paragraph.search_block.field_search
+field_name: field_search
+entity_type: paragraph
+bundle: search_block
+label: Search
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    plugin_id: 'views_exposed_filter_block:profile_search-page_1'
+    settings: {  }
+default_value_callback: ''
+settings:
+  plugin_ids:
+    'views_exposed_filter_block:profile_search-page_1': 'views_exposed_filter_block:profile_search-page_1'
+field_type: block_field

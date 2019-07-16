@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.group.field_latest_rejection_response
+    - group.type.provider
+id: group.provider.field_latest_rejection_response
+field_name: field_latest_rejection_response
+entity_type: group
+bundle: provider
+label: 'Latest rejection response'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

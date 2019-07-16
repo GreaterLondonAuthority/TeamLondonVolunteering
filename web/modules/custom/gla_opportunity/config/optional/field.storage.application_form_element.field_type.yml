@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - gla_opportunity
+    - options
+id: application_form_element.field_type
+field_name: field_type
+entity_type: application_form_element
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: checkboxes
+      label: Checkboxes
+    -
+      value: select
+      label: Select
+    -
+      value: textarea
+      label: 'Long text'
+    -
+      value: textfield
+      label: 'Short text'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,288 @@
+# Opportunities migration
+# This will import the opportunity nodes.
+
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - migrate_plus
+      - migrate_source_csv
+id: gla_opportunities
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags: null
+migration_group: gla
+label: 'GLA Opportunities content'
+source:
+  plugin: csv
+  path: 'modules/custom/gla_migrate/data/opportunities_manual_fields.csv'
+  header_row_count: 1
+  keys:
+    - content_id
+  constants:
+    file_source_url: 'https://volunteerteam.london.gov.uk/'
+    file_destination: 'public://opportunity-images/'
+process:
+  # TODO
+  # skip on value - older than 2 years
+  created: created
+  changed: last_modified
+
+  title: title
+  langcode:
+    plugin: default_value
+    source: language
+    default_value: en
+  uid:
+    plugin: migration_lookup
+    migration: gla_providers
+    source: org_content_id
+    no_stub: true
+  revision_uid:
+    plugin: migration_lookup
+    migration: gla_providers
+    source: org_content_id
+    no_stub: true
+  status:
+    plugin: default_value
+    default_value: 1
+  moderation_state:
+    plugin: default_value
+    default_value: published
+  field_old_opportunity_id: opportunity_id
+  field_include_qu1:
+    plugin: default_value
+    default_value: 'no'
+  field_include_qu2:
+    plugin: default_value
+    default_value: 'no'
+  field_start_of_ad:
+    plugin: default_value
+    default_value: 'asap'
+  field_end_of_ad:
+    plugin: default_value
+    default_value: 'none'
+  field_minimum_age:
+    plugin: default_value
+    default_value: 'none'
+  field_dates_needed:
+    plugin: static_map
+    source: recurrence_type
+    map:
+      'ongoing': 'ongoing'
+      'onetime': 'one_off'
+  field_one_off_date:
+    - plugin: skip_on_value
+      source: recurrence_type
+      method: process
+      value: 'ongoing'
+    - plugin: format_date
+      from_format: 'U'
+      to_format: 'Y-m-d'
+      source: start_date
+  field_ongoing_start_date:
+    - plugin: skip_on_value
+      source: recurrence_type
+      method: process
+      value: 'onetime'
+    - plugin: format_date
+      from_format: 'U'
+      to_format: 'Y-m-d'
+      source: start_date
+  field_ongoing_end_date:
+    - plugin: skip_on_value
+      source: recurrence_type
+      method: process
+      value: 'onetime'
+    - plugin: format_date
+      from_format: 'U'
+      to_format: 'Y-m-d'
+      source: end_date
+  # Use the migrate_file module process plugin to import the image from the source
+  field_image:
+    - plugin: skip_on_empty
+      method: process
+      source: image_attachment_path
+    - plugin: concat
+      source:
+        - constants/file_source_url
+        - image_attachment_path
+    - plugin: image_import
+      destination: 'constants/file_destination'
+      rename: TRUE
+      skip_on_error: TRUE
+
+  # Manual fields
+
+  # What commitment do you need from the volunteer? (optional)
+  field_bullet_1:
+    - plugin: callback
+      callable: strip_tags
+      source: field_bullet_1
+  field_bullet_2:
+    - plugin: callback
+      callable: strip_tags
+      source: field_bullet_2
+
+  # What cause(s) does the role support?
+  # field_causes_supported - comma separated taxonomy terms from Causes vocabulary (https://wwwdev.london.gov.uk/team-london/admin/structure/taxonomy/manage/causes/overview)
+  # Instead of custom taxonomy_by_name we could use entity_lookup (like in address migration) but not sure if we could do the parents then.
+  field_causes_supported:
+    - plugin: explode
+      delimiter: ','
+      source: field_causes_supported
+    - plugin: taxonomy_by_name
+      vocabulary: 'causes'
+      include_parents: true
+    - plugin: flatten
+
+  # What type of role is this? (choose one of the values below) - type, none, other
+  field_type_options: field_type_options
+
+  # If field_type_options is 'type' then specify type here, otherwise leave empty
+  # Not using the taxonomy Type of Role vocabulary for some reason.
+  field_type_options_type:
+    - plugin: skip_on_value
+      source: field_type_options
+      method: process
+      value: 'type'
+      not_equals: true
+    - plugin: explode
+      delimiter: ','
+      source: field_type_options_type
+    - plugin: callback
+      callable: trim
+
+  # If field_type_options is 'other' then plain text goes here, otherwise leave empty
+  field_type_options_other:
+    - plugin: skip_on_value
+      source: field_type_options
+      method: process
+      value: 'other'
+      not_equals: true
+    - plugin: get
+      source: field_type_options_other
+
+  # What skills would be useful for this role?
+  # field_what_skills_useful - comma separated taxonomy terms from Motivation vocabulary (https://wwwdev.london.gov.uk/team-london/admin/structure/taxonomy/manage/motivation/overview)
+  field_what_skills_useful:
+    - plugin: explode
+      delimiter: ','
+      source: field_what_skills_useful
+    - plugin: taxonomy_by_name
+      vocabulary: 'motivation'
+      include_parents: true
+    - plugin: flatten
+  field_what_skills_useful_other: field_what_skills_useful_other
+
+  # What skills can the volunteer gain in this role?
+  # field_what_skills_gain - comma separated taxonomy terms from Motivation vocabulary (https://wwwdev.london.gov.uk/team-london/admin/structure/taxonomy/manage/motivation/overview)
+  field_what_skills_gain:
+    - plugin: explode
+      delimiter: ','
+      source: field_what_skills_gain
+    - plugin: taxonomy_by_name
+      vocabulary: 'motivation'
+      include_parents: true
+    - plugin: flatten
+
+  # What will the volunteer be doing?
+  field_what_bullet_1:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_bullet_1
+  field_what_bullet_2:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_bullet_2
+  field_what_bullet_3:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_bullet_3
+  field_what_bullet_4:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_bullet_4
+  field_what_bullet_5:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_bullet_5
+  field_what_bullet_6:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_bullet_6
+
+  # What change will the volunteer be helping to make?
+  field_what_change_bullet_1:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_change_bullet_1
+  field_what_change_bullet_2:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_change_bullet_2
+  field_what_change_bullet_3:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_change_bullet_3
+  field_what_change_bullet_4:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_change_bullet_4
+  field_what_change_bullet_5:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_change_bullet_5
+  field_what_change_bullet_6:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_change_bullet_6
+
+  # What training will be available for the volunteer? (optional)
+  field_what_training_bullet_1:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_training_bullet_1
+  field_what_training_bullet_2:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_training_bullet_2
+  field_what_training_bullet_3:
+    - plugin: callback
+      callable: strip_tags
+      source: field_what_training_bullet_3
+
+  # Are you able to reimburse out of pocket expenses?
+  # field_cover_expenses: specific, no, discuss
+  field_cover_expenses: field_cover_expenses
+
+  # If field_cover_expenses is 'specific' then plain text goes here, otherwise leave empty
+  field_cover_expenses_specific: field_cover_expenses_specific
+
+  # Background checks
+  # field_bg_checks_required: none, dbs, other
+  field_bg_checks_required: field_bg_checks_required
+
+  # Is there any additional information you'd like to give to volunteers? (optional)
+  field_additional_bullet_1:
+    - plugin: callback
+      callable: strip_tags
+      source: field_additional_bullet_1
+  field_additional_bullet_2:
+    - plugin: callback
+      callable: strip_tags
+      source: field_additional_bullet_2
+  field_additional_bullet_3:
+    - plugin: callback
+      callable: strip_tags
+      source: field_additional_bullet_3
+
+destination:
+  plugin: 'entity:node'
+  default_bundle: 'opportunity'
+
+#migration_dependencies:
+#  required:
+#    - gla_providers

@@ -1,0 +1,72 @@
+# Update the Image fields on the Provider Profile nodes
+# This is a separate migration because the original spreadsheet had address, url, and phone
+# in separate sheets and we can't 'join' them otherwise.
+
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - migrate_plus
+      - migrate_source_csv
+id: gla_provider_profiles_images
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags: null
+migration_group: gla
+label: 'GLA Provider Profile image fields'
+source:
+  plugin: csv
+  path: 'modules/custom/gla_migrate/data/opportunities_images.csv'
+  header_row_count: 1
+  keys:
+    - large
+  constants:
+    file_source_url: 'https://volunteerteam.london.gov.uk'
+    file_destination: 'public://provider-profile-images/'
+process:
+  # We need to get the NID of the originally imported provider profile node
+  # so that the node can be updated rather than try to create it new.
+  # The entity_property_lookup process plugin is a custom plugin which tries
+  # to find an entity and return its ID based on the given property which has
+  # the given value from the source.
+  nid:
+    - plugin: explode
+      source: large
+      delimiter: '/'
+    - plugin: extract
+      index:
+        - 4
+    - plugin: entity_property_lookup
+      entity_type: "node"
+      entity_bundle: "provider_profile"
+      entity_property: "field_old_user_id"
+    - plugin: skip_on_empty
+      method: row
+
+  # Use the migrate_file module process plugin to import the image from the source
+  # todo: the image name is only the last bit of the path which is always large.jpg
+  # so we'll end up with hundreds of images with pretty much the same name
+  # Try and extract the user id from the image path and pass it on somehow to the destination path
+  # probably using concat plugin. Ideally using that as the filename of part of it, but worst case
+  # we add the images to an inner folder per provider profile or old user id, etc.
+  field_organisation_logo:
+    - plugin: concat
+      source:
+        - constants/file_source_url
+        - large
+    - plugin: image_import
+      destination: 'constants/file_destination'
+      rename: TRUE
+
+destination:
+  plugin: 'entity:node'
+  default_bundle: 'provider_profile'
+  # Destination: Specify the overwrite_properties for the fields to set on the existing entities.
+  overwrite_properties:
+    - field_organisation_logo
+# Uncomment when running the full migrations - atm running one at a time it complains that the dependency is not met.
+#migration_dependencies:
+#  required:
+#    - gla_provider_profiles

@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_org_newsletter
+    - node.type.provider_profile
+  module:
+    - gla_multistep_forms
+id: node.provider_profile.step_org_newsletter
+field_name: step_org_newsletter
+entity_type: node
+bundle: provider_profile
+label: 'Sign up to our newsletter (optional)'
+description: 'Sign up to receive news about funding opportunities and free training workshops for charities and third sector organisations.'
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

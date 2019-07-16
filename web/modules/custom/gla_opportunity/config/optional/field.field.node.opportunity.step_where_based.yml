@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_where_based
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_where_based
+field_name: step_where_based
+entity_type: node
+bundle: opportunity
+label: 'Where will the role be based?'
+description: "<p>Give the postcode for where the role will be located.</p>\r\n\r\n<p>Notes:<br>This will appear on the advert for this role so that volunteers can see the location.</p>\r\n"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

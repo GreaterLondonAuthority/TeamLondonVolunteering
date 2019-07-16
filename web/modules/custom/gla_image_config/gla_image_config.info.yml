@@ -1,0 +1,7 @@
+name: 'Image config'
+type: module
+core: 8.x
+package: GLA
+dependencies:
+  - crop
+  - image

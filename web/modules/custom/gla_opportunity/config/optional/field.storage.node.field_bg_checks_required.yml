@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_bg_checks_required
+field_name: field_bg_checks_required
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: none
+      label: 'No background checks are required'
+    -
+      value: dbs
+      label: 'A DBS check is required'
+    -
+      value: other
+      label: 'Other background checks are required'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

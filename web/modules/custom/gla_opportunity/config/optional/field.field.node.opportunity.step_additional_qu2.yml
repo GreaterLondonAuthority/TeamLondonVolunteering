@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_additional_qu2
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_additional_qu2
+field_name: step_additional_qu2
+entity_type: node
+bundle: opportunity
+label: 'Volunteer registration questions'
+description: "<p>All volunteers will complete a basic registration when they register interest in a role. You can also choose to ask volunteers the following additional questions:</p>\r\n\r\n<p><strong>Question 2: Do you have any access requirements or other special requirements we should be aware of?</strong></p>\r\n<p>This allows you to accommodate any requirements that the volunteer may have. </p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

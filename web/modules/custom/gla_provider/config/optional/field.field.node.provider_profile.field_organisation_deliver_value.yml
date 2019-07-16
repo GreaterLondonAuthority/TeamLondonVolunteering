@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_organisation_deliver_value
+    - node.type.provider_profile
+id: node.provider_profile.field_organisation_deliver_value
+field_name: field_organisation_deliver_value
+entity_type: node
+bundle: provider_profile
+label: 'How do you achieve your aims?'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

@@ -1,0 +1,348 @@
+### Start page - redirects to profile application overview if logged in.
+gla_provider.start:
+  path: '/provider-start'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderController::start'
+    _title: 'Provider profile'
+  requirements:
+    _permission: 'access content'
+
+### Dashboard.
+gla_provider.dashboard:
+  path: '/provider/dashboard'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderController::dashboard'
+    _title: 'Your organisation dashboard'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+
+### Dashboard.
+gla_provider.volunteer_interest:
+  path: '/provider/dashboard/volunteer-interest'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderController::volunteerInterest'
+    _title: 'Volunteer Interest'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+
+### Provider profile creation.
+# Overview.
+gla_provider.application_overview:
+  path: '/provider/{node}/application/overview'
+  defaults:
+     _controller: '\Drupal\gla_provider\Controller\GlaProviderController::applicationInitialOverview'
+     _title: 'Organisation profile'
+  requirements:
+    _entity_access: 'node.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+# Check answers.
+gla_provider.application_check:
+  path: '/provider/{node}/application/check'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderController::applicationCheck'
+    _title: 'Check your answers before submitting'
+  requirements:
+    _entity_access: 'node.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+# Answers saved.
+gla_provider.saved:
+  path: '/provider/{node}/saved'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderController::saved'
+    _title: 'Your profile has been saved'
+  requirements:
+    _entity_access: 'node.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+
+### Manage provider members.
+# Overview.
+gla_provider.user_add_overview:
+  path: '/provider/{group}/new-member/overview'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderController::newMemberOverview'
+    _title: 'Add a new team member'
+  requirements:
+    _group_permission: 'add users to provider'
+    _group_member: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'
+# Add member.
+gla_provider.user_add:
+  path: '/provider/{group}/new-member/add'
+  defaults:
+    _entity_form: 'user.register'
+    _title: 'Manage your members'
+  requirements:
+    _group_permission: 'add users to provider'
+    _group_member: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'
+# New member created.
+gla_provider.member_created:
+  path: '/provider/{group}/new-member/created/{email}'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderController::newMemberCreated'
+    _title: 'Your new team member account has been created'
+  requirements:
+    _group_permission: 'add users to provider'
+    _group_member: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'
+# View user.
+gla_provider.user_view:
+  path: '/member/{group}/{user}/view'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderController::memberView'
+    _title: "Manage your organisation's team members"
+  requirements:
+    user: '\d+'
+    _group_permission: 'add users to provider'
+    _group_member: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'
+# Edit.
+gla_provider.user_edit:
+  path: '/member/{group}/{user}/edit'
+  defaults:
+    _entity_form: 'user.default'
+    _title: "Manage your organisation's team members"
+  requirements:
+    user: '\d+'
+    _group_permission: 'add users to provider'
+    _group_member: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'
+# Password reset.
+gla_provider.password_reset:
+  path: '/member/{group}/{user}/password-reset'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderController::sendPasswordResetLink'
+    _title: "Manage your organisation's team members"
+  requirements:
+    user: '\d+'
+    _group_permission: 'add users to provider'
+    _group_member: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'
+# Member delete.
+gla_provider.user_delete:
+  path: '/member/{group}/{user}/delete'
+  defaults:
+    _form: '\Drupal\gla_provider\Form\DeleteMemberForm'
+    _title: 'Delete member'
+  requirements:
+    user: '\d+'
+    _group_permission: 'add users to provider'
+    _group_member: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'
+      user:
+        type: 'entity:user'
+
+### Dashboard Opportunities.
+gla_provider.dashboard_opportunities:
+  path: '/provider/dashboard/opportunities'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderDashboardController::providerOpportunityOverview'
+    _title: 'Manage your roles'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+
+### Dashboard opportunity edit.
+gla_provider.dashboard_opportunity_edit:
+  path: '/provider/dashboard/opportunities/{node}/edit'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderDashboardController::editOpportunity'
+    _title: 'Edit role'
+  requirements:
+    _entity_access: 'node.update'
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+
+### Dashboard opportunity duplicate overview.
+gla_provider.dashboard_opportunity_duplicate_overview:
+  path: '/provider/dashboard/opportunities/{node}/duplicate-overview'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderDashboardController::duplicateOpportunityOverview'
+    _title: 'Duplicate Role'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+    _entity_access: 'node.update'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+
+### Dashboard opportunity duplicate.
+gla_provider.dashboard_opportunity_duplicate:
+  path: '/provider/dashboard/opportunities/{node}/duplicate'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderDashboardController::duplicateOpportunity'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+    _entity_access: 'node.update'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+
+### Dashboard opportunity duplicate check.
+gla_provider.dashboard_opportunity_duplicate_check:
+  path: '/provider/dashboard/opportunities/{node}/duplicate-check'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderDashboardController::duplicateCheck'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+    _entity_access: 'node.update'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+
+### Dashboard opportunity duplicate check.
+gla_provider.dashboard_opportunity_duplicate_success:
+  path: '/provider/dashboard/opportunities/{node}/duplicate-success'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderDashboardController::duplicateSuccess'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+
+### Dashboard opportunity delete or archive.
+gla_provider.dashboard_archive_delete_form:
+  path: '/provider/dashboard/opportunities/{node}/{action}'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderDashboardController::providerOpportunityDeleteArchiveForm'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+    _entity_access: 'node.update'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+
+### Dashboard opportunity action success.
+gla_provider.dashboard_archive_delete_success:
+  path: '/provider/dashboard/{action}/success'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderDashboardController::providerOpportunityDeleteOrArchive'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+
+### Dashboard opportunity unpublish.
+gla_provider.dashboard_opportunity_unpublish:
+  path: '/provider/dashboard/{node}/unpublish'
+  defaults:
+    _form: '\Drupal\gla_provider\Form\UnpublishRoleForm'
+    _title: 'Unpublish Role'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+    _entity_access: 'node.update'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+
+### Dashboard opportunity change.
+gla_provider.dashboard_opportunity_change:
+  path: '/provider/dashboard/opportunities/{node}/change'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderDashboardController::changeRoleOverview'
+    _title: 'Make changes to this role'
+  requirements:
+    _permission: 'access content'
+    _user_is_logged_in: 'TRUE'
+    _entity_access: 'node.update'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+
+### Dashboard application respond.
+gla_provider.application_respond:
+  path: '/provider/dashboard/application/{application_submission}/respond'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderApplicationsController::respond'
+    _title_callback: '\Drupal\gla_provider\Controller\GlaProviderApplicationsController::respondTitle'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _entity_access: 'application_submission.respond'
+    _role: 'provider'
+  options:
+    parameters:
+      application_submission:
+        type: 'entity:application_submission'
+
+### Dashboard application respond success.
+gla_provider.application_respond_success:
+  path: '/provider/dashboard/application/{application_submission}/respond-success'
+  defaults:
+    _controller: '\Drupal\gla_provider\Controller\GlaProviderApplicationsController::respondSuccess'
+    _title: 'Your response has been sent'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _entity_access: 'application_submission.respond'
+    _role: 'provider'
+  options:
+    parameters:
+      application_submission:
+        type: 'entity:application_submission'

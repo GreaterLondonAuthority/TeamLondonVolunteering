@@ -1,0 +1,232 @@
+<?php
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function gla_newsletter_webform_submission_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  /** @var \Drupal\webform\Entity\WebformSubmission $entity */
+  $webform = $entity->getWebform();
+  if ($webform->id() == 'newsletter_sign_up') {
+    $data = $entity->getData();
+    if (!isset($data['email'], $data['select_the_newsletters_you_d_like_to_receive'])) {
+      drupal_set_message(t('Please provide an email address and the newsletters you\'d like to sign up to.'), 'warning');
+      return;
+    }
+
+    // Grab the email address and which newsletters to sign up to.
+    $email = $data['email'];
+    $newsletters = $data['select_the_newsletters_you_d_like_to_receive'];
+    $map = gla_newsletter_list_map();
+    foreach ($newsletters as $newsletter) {
+      if (isset($map[$newsletter])) {
+        $list = $map[$newsletter];
+        gla_newsletter_webform_pure360_send($list, $email);
+      }
+    }
+  }
+  elseif ($webform->id() == 'newsletter_unsubscribe') {
+    $data = $entity->getData();
+    if (!isset($data['email'])) {
+      drupal_set_message(t('Please provide an email address.'), 'warning');
+      return;
+    }
+
+    // Opt out.
+    $email = $data['email'];
+    gla_newsletter_webform_pure360_opt_out($email);
+  }
+}
+
+/**
+ * Send a request to the the Pure 360 registration endpoint.
+ *
+ * Adapted from the lgov webform_pure360 module.
+ *
+ * @param $list
+ * @param $email
+ */
+function gla_newsletter_webform_pure360_send($list, $email) {
+
+  $endpoint = 'https://response.pure360.com/interface/list.php';
+  $profile = 'volunteerteam';
+
+  // Make POST request to Pure360.
+  $pure360_request_data = [
+    'accName' => $profile,
+    'listName' => $list,
+    'email' => $email,
+  ];
+
+  $pure360_request_options = [
+    'form_params' => $pure360_request_data,
+    'timeout' => 15,
+    'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+  ];
+
+  $http_client = \Drupal::getContainer()->get('http_client');
+  try {
+    /** @var \GuzzleHttp\Psr7\Response $request */
+    $request = $http_client->request('POST', $endpoint, $pure360_request_options);
+    if ($request->getStatusCode() == 200) {
+      $body = $request->getBody()->getContents();
+      // The Pure360 api returns errors with the HTTP code 200 so we need to use
+      // strpos to actually detect whether the request has been successful or
+      // not. https://apihub.pure360.com/documentation/HTTP/references/list.
+      if (strpos(strtolower($body), 'error') !== FALSE) {
+        drupal_set_message(t('Sorry, we could not subscribe you at this time.'), 'error');
+      }
+    }
+    else {
+      drupal_set_message(t('Sorry, we could not subscribe you at this time.'), 'error');
+    }
+  }
+  catch (\Exception $e) {
+    drupal_set_message(t('Sorry, we could not subscribe you at this time.'), 'error');
+  }
+}
+
+/**
+ * Opts a recipient out of a whole profile.
+ *
+ * @param string $email
+ */
+function gla_newsletter_webform_pure360_opt_out($email) {
+
+  $endpoint = 'https://response.pure360.com/interface/list.php';
+  $profile = 'volunteerteam';
+
+  // Make POST request to Pure360.
+  $pure360_request_data = [
+    'accName' => $profile,
+    'email' => $email,
+    'mode' => 'OPTOUT',
+  ];
+
+  $pure360_request_options = [
+    'form_params' => $pure360_request_data,
+    'timeout' => 15,
+    'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+  ];
+
+  $http_client = \Drupal::getContainer()->get('http_client');
+  try {
+    /** @var \GuzzleHttp\Psr7\Response $request */
+    $request = $http_client->request('POST', $endpoint, $pure360_request_options);
+    if ($request->getStatusCode() == 200) {
+      $body = $request->getBody()->getContents();
+      // The Pure360 api returns errors with the HTTP code 200 so we need to use
+      // strpos to actually detect whether the request has been successful or
+      // not. https://apihub.pure360.com/documentation/HTTP/references/list.
+      if (strpos(strtolower($body), 'error') !== FALSE) {
+        drupal_set_message(t('Sorry, we could not unsubscribe you at this time.'), 'error');
+      }
+    }
+    else {
+      drupal_set_message(t('Sorry, we could not unsubscribe you at this time.'), 'error');
+    }
+  }
+  catch (\Exception $e) {
+    drupal_set_message(t('Sorry, we could not unsubscribe you at this time.'), 'error');
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function gla_newsletter_node_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->bundle() != 'provider_profile') {
+    return;
+  }
+
+  // When the provider profile is being saved, check if the 'sign up to
+  // newsletter' has just been ticked.
+  $old_newsletter_value = FALSE;
+  if (isset($entity->original)) {
+    $old_newsletter_value = $entity->original->get('field_organisation_newsletter')->value;
+  }
+
+  $new_newsletter_value = $entity->get('field_organisation_newsletter')->value;
+  if ($new_newsletter_value && !$old_newsletter_value) {
+    // Make request to pure360.
+    $email = Drupal::currentUser()->getEmail();
+    $list = 'Team_London_Third_Sector_Newsletter';
+    gla_newsletter_webform_pure360_send($list, $email);
+  }
+}
+
+/**
+ * Map of webform option to list name.
+ */
+function gla_newsletter_list_map() {
+  return [
+    'volunteering' => 'Team_London_Volunteering_Newsletter',
+    'major_events' => 'Team_London_Major_Events_Newsletter',
+    'third_sector' => 'Team_London_Third_Sector_Newsletter',
+  ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter.
+ */
+function gla_newsletter_form_webform_submission_newsletter_sign_up_add_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $selection_title = $form['elements']['select_the_newsletters_you_d_like_to_receive']['#title'];
+  $form['#prefix'] = '<div class="newsletter-form">';
+  $form['#suffix'] = '</div>';
+  $form['elements']['select_the_newsletters_you_d_like_to_receive']['#title'] = '<h2 class="heading--alt">' . $selection_title . '</h2>';
+  $form['elements']['first_name']['#prefix'] = '<div class="separator"></div><div class="row"><div class="col-sm-12 col-md-6">';
+  $form['elements']['last_name']['#suffix'] = '</div>';
+  $form['elements']['email']['#prefix'] = '<div class="col-sm-12 col-md-6">';
+  $form['elements']['email']['#suffix'] = '</div></div>';
+  $form['elements']['info']['#suffix'] = '</br>';
+  $form['actions']['submit']['#attributes']['class'][] = 'button--alt';
+  $form['#attached']['library'][] = 'team_london/newsletter';
+
+  // Dynamically add links.
+  $unsubscribe_link_url = \Drupal\Core\Url::fromRoute('entity.webform.canonical', ['webform' => 'newsletter_unsubscribe'])->toString();
+  $unsubscribe_link_text = $form['elements']['unsubscribe_link']['#markup'];
+  $unsubscribe_link_text = str_replace('{unsubscribe_link}', $unsubscribe_link_url, $unsubscribe_link_text);
+  $form['elements']['unsubscribe_link']['#markup'] = $unsubscribe_link_text;
+
+  // Validation.
+  $form['#validate'][] = 'gla_newsletter_newsletter_sign_up_validate';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter.
+ */
+function gla_newsletter_form_webform_submission_newsletter_unsubscribe_add_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $form['actions']['submit']['#attributes']['class'][] = 'button--alt';
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_newsletter_preprocess_webform_confirmation(&$variables) {
+  // Dynamically add links.
+  $unsubscribe_link_url = \Drupal\Core\Url::fromRoute('entity.webform.canonical', ['webform' => 'newsletter_unsubscribe'])->toString();
+  $front_url = \Drupal\Core\Url::fromRoute('<front>')->toString();
+  $text = $variables['message']['#markup'];
+  $text = str_replace('{unsubscribe_link}', $unsubscribe_link_url, $text);
+  $text = str_replace('{front}', $front_url, $text);
+  $variables['message']['#markup'] = $text;
+}
+
+/**
+ * Custom validation handler.
+ */
+function gla_newsletter_newsletter_sign_up_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  // Remove the html from teh validation message.
+  $form_errors = $form_state->getErrors();
+  // Only make any changes in the selection error is set.
+  if (isset($form_errors['select_the_newsletters_you_d_like_to_receive'])) {
+    $form_label_clean = strip_tags($form['elements']['select_the_newsletters_you_d_like_to_receive']['#title']);
+    $selection_error = t('@name field is required', ['@name' => $form_label_clean]);
+    $form_errors['select_the_newsletters_you_d_like_to_receive'] = $selection_error;
+
+    // Clear the existing form errors and reapply.
+    $form_state->clearErrors();
+    foreach ($form_errors as $name => $error_message) {
+      $form_state->setErrorByName($name, $error_message);
+    }
+  }
+}

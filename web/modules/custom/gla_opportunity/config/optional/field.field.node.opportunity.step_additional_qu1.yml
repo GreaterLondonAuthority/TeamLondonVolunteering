@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_additional_qu1
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_additional_qu1
+field_name: step_additional_qu1
+entity_type: node
+bundle: opportunity
+label: 'Volunteer registration questions'
+description: "<p>All volunteers will complete a basic registration when they register interest in a role. You can also choose to ask volunteers the following additional questions:</p>\r\n\r\n<p><strong>Question 1: Why do you want to register your interest in this role?</strong></p>\r\n<p>This question allows you to find out about the volunteer’s motivations and why they are suited to this role</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

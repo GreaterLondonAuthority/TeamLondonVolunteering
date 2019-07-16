@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_days_vol_needed
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_days_vol_needed
+field_name: step_days_vol_needed
+entity_type: node
+bundle: opportunity
+label: 'Which days is the volunteer needed?'
+description: "<p>Give the times of the week when you need the volunteer to be available for this role.</p>\r\n<p>Notes:<br>You can select multiple times.</p>\r\n"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

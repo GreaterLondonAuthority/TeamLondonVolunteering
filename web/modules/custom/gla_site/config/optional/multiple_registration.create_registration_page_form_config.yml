@@ -1,0 +1,6 @@
+multiple_registration_path_provider: provider/register
+multiple_registration_url_provider: /user/register/provider
+multiple_registration_hidden_provider: 1
+multiple_registration_path_volunteer: volunteer/register
+multiple_registration_url_volunteer: /user/register/volunteer
+multiple_registration_hidden_volunteer: 1

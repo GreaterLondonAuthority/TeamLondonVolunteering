@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_building_and_street_3
+    - node.type.opportunity
+id: node.opportunity.field_building_and_street_3
+field_name: field_building_and_street_3
+entity_type: node
+bundle: opportunity
+label: 'Address 3 (optional)'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

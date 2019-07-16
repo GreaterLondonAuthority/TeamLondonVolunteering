@@ -1,0 +1,57 @@
+# Admin settings for fixed nids.
+gla_site.registration_flow_settings:
+  path: '/admin/registration-flow/settings'
+  defaults:
+    _form: '\Drupal\gla_site\Form\RegistrationFlowSettings'
+    _title: 'Registration Flow Settings'
+  requirements:
+    _permission: 'edit gla site settings'
+### Admin provider controls.
+# Send password reset link.
+gla_site.provider_user_management.reset_link:
+  path: '/admin/people/provider-management/{user}/reset-link'
+  defaults:
+    _form: '\Drupal\gla_site\Form\ProviderManagementPasswordResetForm'
+    _title: 'Provider Management: Send password reset link'
+  requirements:
+    _permission: 'edit gla site settings'
+  options:
+    parameters:
+      user:
+        type: 'entity:user'
+# Suspend whole provider organisation.
+gla_site.provider_user_management.suspend_provider:
+  path: '/admin/people/provider-management/{group}/suspend'
+  defaults:
+    _form: '\Drupal\gla_site\Form\ProviderManagementSuspendForm'
+    _title: 'Provider Management: Suspend provider organisation'
+  requirements:
+    _permission: 'edit gla site settings'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'
+# Re-activate whole provider organisation.
+gla_site.provider_user_management.reactivate_provider:
+  path: '/admin/people/provider-management/{group}/reactivate'
+  defaults:
+    _form: '\Drupal\gla_site\Form\ProviderManagementReactivateForm'
+    _title: 'Provider Management: Re-activate provider organisation'
+  requirements:
+    _permission: 'edit gla site settings'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'
+# Completely delete whole provider organisation.
+gla_site.provider_user_management.delete_provider:
+  path: '/admin/people/provider-management/{group}/delete'
+  defaults:
+    _form: '\Drupal\gla_site\Form\ProviderManagementDeleteForm'
+    _title: 'Provider Management: Delete provider organisation'
+  requirements:
+    _permission: 'edit gla site settings'
+  options:
+    parameters:
+      group:
+        type: 'entity:group'

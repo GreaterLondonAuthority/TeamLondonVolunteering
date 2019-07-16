@@ -1,0 +1,24 @@
+{{ back_button }}
+<h3>{{ 'Check details'|t }}</h3>
+<h6>{{ title }}</h6>
+<p>{{ duplicate_text }}</p>
+<ul class="list-unstyled">
+  {% for step in steps %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text"><strong>{{ step.label|raw }}</strong></h3>
+          {% for substep in step %}
+            <p>{{ substep.value }}</p>
+          {% endfor %}
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          {{ step.link }}
+        </div>
+      </div>
+    </li>
+    <div class="separator"></div>
+  {% endfor %}
+</ul>
+
+{{ continue }}

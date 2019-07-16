@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_background_checks
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_background_checks
+field_name: step_background_checks
+entity_type: node
+bundle: opportunity
+label: 'Background checks'
+description: 'Please indicate if volunteers need to have any background checks – for example, a Disclosure and Barring Service (DBS) check for roles that involve working with children or vulnerable adults.'
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

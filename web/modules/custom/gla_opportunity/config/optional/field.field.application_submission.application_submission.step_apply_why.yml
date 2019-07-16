@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.application_submission.step_apply_why
+  module:
+    - gla_multistep_forms
+    - gla_opportunity
+id: application_submission.application_submission.step_apply_why
+field_name: step_apply_why
+entity_type: application_submission
+bundle: application_submission
+label: 'Why do you want to volunteer for this opportunity?'
+description: 'Use this question to describe your motivations to volunteer for this opportunity.'
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

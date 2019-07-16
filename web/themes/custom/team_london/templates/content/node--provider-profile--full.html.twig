@@ -1,0 +1,104 @@
+{% extends 'node.html.twig' %}
+
+{% block content %}
+  <div class="content-block">
+    {{ content.content_moderation_control }}
+    {% if node_status_info %}
+      <div class="well well--confirmation">{{ node_status_info }}</div>
+    {% endif %}
+
+    {% if provider_focus %}
+      <p class="team_page__tags-container">
+        {% for term in provider_focus %}
+          {% if term %}
+            <span><a href="{{ term.url }}">{{ term.label }}</a>{{ loop.last ? '' : ' | ' }}</span>
+          {% endif %}
+        {% endfor %}
+      </p>
+    {% endif %}
+    <div class="content-block--grey row">
+      {% if provider_logo %}
+        <div class="team_page__org-logo col-sm-12 col-md-4">
+          <img src="{{ provider_logo }}" alt="{{ 'Organisation Logo'|t }}">
+        </div>
+      {% else %}
+        <div class="team_page__org-logo col-sm-12 col-md-4">
+          <img src="{{ base_path ~ directory }}/dist/images/placeholder_550x275.png" alt="{{ 'Image of volunteers'|t }}">
+        </div>
+      {% endif %}
+      <div class="col-sm-12 col-md-8">
+        <h3 class="heading--alt">{{ 'Where to find us'|t }}</h3>
+        <p>
+          {% for address_line in provider_location %}
+            {% if address_line %}
+              <span><strong>{{ address_line }}{{ loop.last ? '' : ', ' }}</strong></span>
+            {% endif %}
+          {% endfor %}
+        </p>
+        {% if provider_website %}
+          <p><a href="{{ provider_website }}" class="provider__website">{{ provider_website }}</a></p>
+        {% endif %}
+        {% if provider_social_media.provider_fb %}
+          <a href="https://www.facebook.com/{{ provider_social_media.provider_fb }}" class="team_page__tags item-separator">{{ 'Facebook'|t }}</a>
+        {% endif %}
+        {% if provider_social_media.provider_twitter %}
+          <a href="https://twitter.com/{{ provider_social_media.provider_twitter }}" class="team_page__tags item-separator">{{ 'Twitter'|t }}</a>
+        {% endif %}
+        {% if provider_social_media.provider_ig %}
+          <a href="https://www.instagram.com/{{ provider_social_media.provider_ig }}" class="team_page__tags item-separator">{{ 'Instagram'|t }}</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if provider_aims %}
+      <div class="team_page__list">
+        <h3 class="heading--alt">{{ 'Organisation aims / mission / values'|t }}</h3>
+        <ul class="team_page__list-items">
+          {% for bullet in provider_aims %}
+            {% if bullet %}
+              <li>{{ bullet }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if provider_image %}
+      <img src="{{ provider_image }}" alt="{{ provider_image_alt }}">
+      <p class="soft-text">{{ provider_image_alt }}</p>
+    {% endif %}
+
+    {% if provider_how_aims %}
+      <h3 class="heading--alt">{{ 'How we deliver these aims'|t }}</h3>
+      {{ provider_how_aims }}
+    {% endif %}
+
+    {% if provider_who_benefits %}
+      <h3 class="heading--alt">{{ 'Who benefits from our work'|t }}</h3>
+      {{ provider_who_benefits }}
+    {% endif %}
+  </div>
+
+  {% if embedded_view['#rows'][0] is not null %}
+    <div class="provider__volunteer-roles">
+      <h2 class="heading--alt">{{ 'Volunteer roles'|t }}</h2>
+      {{ embedded_view }}
+    </div>
+  {% endif %}
+
+  {% if provider_location %}
+    <div class="content-block content-block--provider-location">
+      <h3 class="heading heading--alt">{{ 'Location'|t }}</h3>
+      <p>
+        {% for address_line in provider_location %}
+          {% if address_line %}
+            <span><strong>{{ address_line }}{{ loop.last ? '' : ', ' }}</strong></span>
+          {% endif %}
+        {% endfor %}
+      </p>
+      <div id="opportunity_map">
+        <div class="js-map gla-map" data-centre="[{{ lat }},{{ long }}]" data-markers="[[{{ lat }},{{ long }}]]"></div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

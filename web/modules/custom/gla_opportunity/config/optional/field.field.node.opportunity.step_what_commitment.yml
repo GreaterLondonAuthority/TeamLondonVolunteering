@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_what_commitment
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_what_commitment
+field_name: step_what_commitment
+entity_type: node
+bundle: opportunity
+label: 'What commitment do you need from the volunteer? (optional)'
+description: "<p>Give any details about the length of time or hours you need volunteers to commit to this role.</p>\r\n<p>Notes:<br>This will help volunteers know if they are suitable for the role.</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

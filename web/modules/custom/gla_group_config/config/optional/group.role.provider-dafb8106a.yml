@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - group.type.provider
+  enforced:
+    config:
+      - user.role.site_administrator
+id: provider-dafb8106a
+label: 'GLA Administrator'
+weight: -1
+internal: true
+audience: outsider
+group_type: provider
+permissions_ui: false
+permissions: {  }

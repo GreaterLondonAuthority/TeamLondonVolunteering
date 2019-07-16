@@ -1,0 +1,38 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.link_blocks.field_component
+    - field.field.paragraph.link_blocks.field_title
+    - paragraphs.paragraphs_type.link_blocks
+  module:
+    - paragraphs
+id: paragraph.link_blocks.default
+targetEntityType: paragraph
+bundle: link_blocks
+mode: default
+content:
+  field_component:
+    weight: 1
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: closed
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: image_and_cta
+    third_party_settings: {  }
+    type: entity_reference_paragraphs
+    region: content
+  field_title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

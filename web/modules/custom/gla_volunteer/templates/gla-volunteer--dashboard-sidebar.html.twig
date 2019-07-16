@@ -1,0 +1,9 @@
+{% block sidebar %}
+  {% for key, section in links %}
+    <h6>{{ key }}</h6>
+      {% for subsection in section %}
+      <div>{{ subsection.link }}</div>
+      <div>{{ subsection.description }}</div>
+    {% endfor %}
+  {% endfor %}
+{% endblock %}

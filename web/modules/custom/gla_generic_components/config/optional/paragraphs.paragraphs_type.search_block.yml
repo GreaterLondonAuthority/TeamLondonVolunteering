@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: search_block
+label: 'Search Block'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }

@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.group.field_restore_node_vids
+    - group.type.provider
+id: group.provider.field_restore_node_vids
+field_name: field_restore_node_vids
+entity_type: group
+bundle: provider
+label: 'Restore node vids'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

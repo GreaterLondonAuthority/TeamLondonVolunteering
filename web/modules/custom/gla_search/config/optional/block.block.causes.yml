@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.causes
+  module:
+    - facets
+  theme:
+    - team_london
+id: causes
+theme: team_london
+region: sidebar_left
+weight: -6
+provider: null
+plugin: 'facet_block:causes'
+settings:
+  id: 'facet_block:causes'
+  label: 'Causes supported'
+  provider: facets
+  label_display: visible
+  block_id: causes
+visibility: {  }

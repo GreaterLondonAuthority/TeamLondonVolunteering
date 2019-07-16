@@ -1,0 +1,50 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.image_with_blockquote.field_author
+    - field.field.paragraph.image_with_blockquote.field_image
+    - field.field.paragraph.image_with_blockquote.field_quote
+    - field.field.paragraph.image_with_blockquote.field_title
+    - image.style.content_image_small
+    - paragraphs.paragraphs_type.image_with_blockquote
+  module:
+    - image
+id: paragraph.image_with_blockquote.default
+targetEntityType: paragraph
+bundle: image_with_blockquote
+mode: default
+content:
+  field_author:
+    weight: 2
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_image:
+    weight: 3
+    label: hidden
+    settings:
+      image_style: content_image_small
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
+  field_quote:
+    weight: 1
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

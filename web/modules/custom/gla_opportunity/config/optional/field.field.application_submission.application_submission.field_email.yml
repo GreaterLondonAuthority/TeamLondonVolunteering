@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.application_submission.field_email
+  module:
+    - gla_opportunity
+id: application_submission.application_submission.field_email
+field_name: field_email
+entity_type: application_submission
+bundle: application_submission
+label: 'Email address'
+description: 'We will send a confirmation email to this address.'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: email

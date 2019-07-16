@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: key_value
+label: 'Key value'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }

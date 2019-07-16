@@ -1,0 +1,19 @@
+{{ back }}
+<h1 class="heading--title heading--alt">{{ 'Respond to volunteer'|t }}</h1>
+<p>{{ 'Role'|t }}: {{ role_details.title }}</p>
+<p>{{ 'Start date'|t }}: {{ role_details.start_date }}</p><br/>
+
+<p>{{ 'See the information about the volunteer and choose your response to their expression of interest below.'|t }}</p>
+
+<ul class="list-unstyled">
+  {% for section in submission_details %}
+    <li>
+      <h3 class="heading--text"><strong>{{ section.label }}:</strong></h3>
+      <p>{{ section.value|nl2br }}</p>
+    </li>
+    <div class="separator"></div>
+  {% endfor %}
+</ul>
+
+<h3>{{ 'Choose your response:'|t }}</h3>
+{{ response_form }}

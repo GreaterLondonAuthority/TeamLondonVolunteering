@@ -1,0 +1,6 @@
+services:
+  gla_volunteer.volunteer_owner_check:
+    class: Drupal\gla_volunteer\Access\VolunteerAccessCheck
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: access_check, applies_to: _volunteer_access_check }

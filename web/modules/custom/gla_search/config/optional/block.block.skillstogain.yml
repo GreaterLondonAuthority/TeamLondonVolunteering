@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.skills_to_gain
+  module:
+    - facets
+    - system
+  theme:
+    - team_london
+id: skillstogain
+theme: team_london
+region: sidebar_left
+weight: -4
+provider: null
+plugin: 'facet_block:skills_to_gain'
+settings:
+  id: 'facet_block:skills_to_gain'
+  label: 'Skills to Gain'
+  provider: facets
+  label_display: visible
+  block_id: skillstogain
+visibility:
+  request_path:
+    id: request_path
+    pages: /search-opportunities
+    negate: false
+    context_mapping: {  }

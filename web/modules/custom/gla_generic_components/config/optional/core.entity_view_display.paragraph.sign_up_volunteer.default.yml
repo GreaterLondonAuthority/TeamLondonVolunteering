@@ -1,0 +1,64 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.sign_up_volunteer.field_bottom_text
+    - field.field.paragraph.sign_up_volunteer.field_component_three
+    - field.field.paragraph.sign_up_volunteer.field_cta
+    - field.field.paragraph.sign_up_volunteer.field_subtext
+    - field.field.paragraph.sign_up_volunteer.field_title
+    - paragraphs.paragraphs_type.sign_up_volunteer
+  module:
+    - entity_reference_revisions
+    - link
+id: paragraph.sign_up_volunteer.default
+targetEntityType: paragraph
+bundle: sign_up_volunteer
+mode: default
+content:
+  field_bottom_text:
+    weight: 3
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_component_three:
+    type: entity_reference_revisions_entity_view
+    weight: 2
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    region: content
+  field_cta:
+    weight: 4
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    type: link
+    region: content
+  field_subtext:
+    weight: 1
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

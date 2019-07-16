@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - crop.type.content_image
+  module:
+    - crop
+name: full_width_content_image
+label: 'Full width content image (960px x 345px)'
+effects:
+  865870e3-02ba-4b16-a43a-059d64c73c36:
+    uuid: 865870e3-02ba-4b16-a43a-059d64c73c36
+    id: image_scale_and_crop
+    weight: -9
+    data:
+      width: 960
+      height: 345
+      anchor: center-center
+  f59e07f7-9b79-48c3-99a3-8b03209276d7:
+    uuid: f59e07f7-9b79-48c3-99a3-8b03209276d7
+    id: crop_crop
+    weight: -10
+    data:
+      crop_type: content_image

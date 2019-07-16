@@ -1,0 +1,53 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_status
+field_name: field_status
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: feedback
+      label: 'Update Required'
+    -
+      value: response_needed
+      label: 'Respond to Volunteer'
+    -
+      value: responded
+      label: Responded
+    -
+      value: expiring
+      label: Expiring
+    -
+      value: to_do
+      label: 'To Do'
+    -
+      value: review
+      label: Submitted
+    -
+      value: archived
+      label: Archived
+    -
+      value: published
+      label: Published
+    -
+      value: unpublished
+      label: Unpublished
+    -
+      value: approved
+      label: Approved
+    -
+      value: expired
+      label: Expired
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

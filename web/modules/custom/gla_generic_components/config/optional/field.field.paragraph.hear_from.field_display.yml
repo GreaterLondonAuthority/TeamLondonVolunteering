@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_display
+    - paragraphs.paragraphs_type.hear_from
+  module:
+    - options
+id: paragraph.hear_from.field_display
+field_name: field_display
+entity_type: paragraph
+bundle: hear_from
+label: Display
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: list
+default_value_callback: ''
+settings: {  }
+field_type: list_string

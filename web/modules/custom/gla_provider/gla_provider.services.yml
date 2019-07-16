@@ -1,0 +1,11 @@
+services:
+  gla_provider.processor:
+    class: Drupal\gla_provider\ProviderProcessor
+    arguments:
+      - '@group.membership_loader'
+      - '@database'
+      - '@entity_type.manager'
+  gla_provider.route_subscriber:
+    class: Drupal\gla_provider\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.recently_posted_roles.field_cta
+    - paragraphs.paragraphs_type.recently_posted_roles
+  module:
+    - link
+id: paragraph.recently_posted_roles.default
+targetEntityType: paragraph
+bundle: recently_posted_roles
+mode: default
+content:
+  field_cta:
+    weight: 0
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+    type: link_default
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

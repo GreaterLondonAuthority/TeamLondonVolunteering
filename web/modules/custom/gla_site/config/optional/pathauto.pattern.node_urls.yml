@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node_urls
+label: 'Node urls'
+type: 'canonical_entities:node'
+pattern: '[node:title]'
+selection_criteria:
+  02a7d9fb-1291-4ff2-87f1-54c5ac1ec2b1:
+    id: node_type
+    bundles:
+      article: article
+      landing_page: landing_page
+      opportunity: opportunity
+      page: page
+      provider_profile: provider_profile
+    negate: false
+    context_mapping:
+      node: node
+    uuid: 02a7d9fb-1291-4ff2-87f1-54c5ac1ec2b1
+selection_logic: and
+weight: 0
+relationships: {  }

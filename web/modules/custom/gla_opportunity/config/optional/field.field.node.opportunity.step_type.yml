@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_type
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_type
+field_name: step_type
+entity_type: node
+bundle: opportunity
+label: 'What type of role is this?'
+description: "<p>Select the categories below which best describes who this role is for.</p>\r\n<p>Notes:<br>This will help volunteers find a role which is appropriate for them.</p>"
+required: true
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

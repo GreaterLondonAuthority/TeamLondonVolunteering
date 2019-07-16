@@ -1,0 +1,5 @@
+services:
+  gla_site.breadcrumb:
+    class: Drupal\gla_site\Breadcrumb\GlaSiteBreadcrumbBuilder
+    tags:
+      - { name: breadcrumb_builder, priority: 2000 }

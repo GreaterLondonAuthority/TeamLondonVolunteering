@@ -1,0 +1,216 @@
+/**
+ * @file
+ * Styles for entity browser module.
+ *
+**/
+@import '../variables/colours';
+@import '../variables/utilities';
+
+.site-content button.link.tabledrag-toggle-weight {
+  display: none;
+}
+
+.entity-browser-form {
+  .eb-tabs {
+
+    ul {
+      margin: 0;
+
+      li {
+        padding: 0;
+        background-color: $background-grey;
+
+        &:before {
+          content: '';
+        }
+
+        &.active {
+          border: none;
+          background-color: $mayoral;
+
+          a {
+            color: $white;
+          }
+        }
+
+        a {
+          text-decoration: none;
+        }
+      }
+    }
+  }
+
+  .form-managed-file .form-submit {
+    border-radius: 0;
+    padding: 1.3rem 1.6rem;
+  }
+
+  .form-wrapper .form-submit {
+    background-color: $mayoral;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background-color: $mayoral--hover;
+    }
+
+    &.entity-browser-remove-selected-entity {
+      background-color: $generic-grey;
+
+      &:hover,
+      &:focus,
+      &:active {
+        background-color: $generic-grey--hover;
+      }
+    }
+  }
+
+  .form--inline .form-item,
+  .form--inline .form-wrapper {
+    display: inline-block;
+  }
+
+  .view-content {
+    position: relative;
+    max-width: 100%;
+
+    .grid-item {
+      padding: 2rem 0;
+
+      .views-field-entity-browser-select,
+      .views-field-nothing,
+      .grid-item-info-left,
+      .grid-item-info-right {
+        display: inline-block;
+      }
+
+      .grid-item-info {
+        line-height: 2.5rem;
+
+        .grid-item-info-left {
+          font-weight: bold;
+        }
+
+        .grid-item-info-right {
+          color: $generic-grey;
+        }
+      }
+      .views-field-entity-browser-select,
+      .views-field-nothing {
+        vertical-align: top;
+        margin: 0;
+      }
+
+      .views-field-entity-browser-select {
+
+        .check-custom {
+          margin: 0;
+
+          .state {
+            padding: 0.5rem;
+          }
+        }
+      }
+
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+    }
+  }
+
+  .entity-browser-use-selected,
+  .entity-browser-show-selection {
+    background-color: $mayoral;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background-color: $mayoral--hover;
+    }
+  }
+}
+
+// Selected item table.
+.entities-list {
+
+  .item-container > img {
+    display: inline-block;
+  }
+
+  .item-container > input {
+    display: inline-block;
+    border-radius: 0;
+    padding: 1.3rem 1.6rem;
+    margin-left: 1rem;
+    vertical-align: top;
+  }
+
+  .form-type-textfield {
+
+    label {
+      line-height: 1rem;
+      margin-top: 1rem;
+    }
+
+    input.form-text {
+      padding: 1rem;
+      width: 100%;
+      min-height: auto;
+    }
+  }
+
+  input.remove-button {
+    border-radius: 0;
+    padding: 1.3rem 1.6rem;
+  }
+
+  th.tabledrag-hide {
+    display: none;
+  }
+}
+
+// Responsive.
+@media (min-width: $screen-mobile) {
+
+  .entity-browser-form .view-content {
+    position: relative;
+
+    .grid-item {
+      display: inline-block;
+      width: 33%;
+
+      &:nth-child(3n+1) {
+        clear: both;
+      }
+    }
+  }
+}
+
+@media (min-width: 1250px) {
+
+  .site-content button.link.tabledrag-toggle-weight {
+    display: block;
+    background-color: #F5F5F6;
+    padding: 1.6rem;
+    text-decoration: none;
+    float: right;
+    border: 1px solid #E1E2E3;
+    border-radius: 0;
+
+    a {
+      color: $white;
+    }
+
+    &:hover,
+    &:focus,
+    &:active {
+      color: $white;
+      background-color: $icon-grey--hover;
+    }
+  }
+
+  .entities-list th.tabledrag-hide {
+    display: block;
+  }
+}

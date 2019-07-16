@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_skills_gain
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_skills_gain
+field_name: step_skills_gain
+entity_type: node
+bundle: opportunity
+label: 'What skills can the volunteer gain in this role?'
+description: "<p>Select the skills below which the volunteer can gain through doing this role.</p>\r\n<p>Notes:<br>Volunteers are more likely to register their interest in a role if they know it will help them to gain skills.</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

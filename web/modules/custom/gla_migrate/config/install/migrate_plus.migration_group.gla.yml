@@ -1,0 +1,14 @@
+id: gla
+label: 'GLA Team London Migration'
+description: 'Migrate providers, opportunities and volunteers from CSV to Drupal content types.'
+source_type: CSV
+langcode: en
+status: true
+module: null
+shared_configuration: null
+dependencies:
+  enforced:
+    module:
+      - migrate_plus
+      - migrate_source_csv
+      - migrate_file

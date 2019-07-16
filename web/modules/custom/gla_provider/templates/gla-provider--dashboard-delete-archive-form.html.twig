@@ -1,0 +1,17 @@
+{{ back }}
+<h3>{{ page_title }}</h3>
+<h6>{{ node_title }}</h6>
+{% if action == 'delete' %}
+  <span>
+    {{ 'Deleting this role will lose all data associated with it.' }}
+  </span>
+  <strong>{{ 'Would you like to delete this role?' }}</strong>
+  {{ 'Important: deleting this role cannot be undone later'|t }}
+{% else %}
+  <span>
+    {{ 'Published roles will be un-published when they are archived' }}
+  </span>
+  <strong>{{ 'Would you like to archive this role?' }}</strong>
+  {{ 'Important: archiving this role can be undone later'|t }}
+{% endif %}
+{{ form }}

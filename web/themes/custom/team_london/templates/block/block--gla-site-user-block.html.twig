@@ -1,0 +1,41 @@
+{#
+/**
+ * @file
+ * Theme override to display a block.
+ *
+ * Available variables:
+ * - plugin_id: The ID of the block implementation.
+ * - label: The configured label of the block if visible.
+ * - configuration: A list of the block's configuration values.
+ *   - label: The configured label for the block.
+ *   - label_display: The display settings for the label.
+ *   - provider: The module or other provider that provided this block plugin.
+ *   - Block plugin specific settings will also be stored here.
+ * - content: The content of this block.
+ * - attributes: array of HTML attributes populated by modules, intended to
+ *   be added to the main container tag of this template.
+ *   - id: A valid HTML ID and guaranteed unique.
+ * - title_attributes: Same as attributes, except applied to the main title
+ *   tag that appears in the template.
+ * - title_prefix: Additional output populated by modules, intended to be
+ *   displayed in front of the main title tag that appears in the template.
+ * - title_suffix: Additional output populated by modules, intended to be
+ *   displayed after the main title tag that appears in the template.
+ *
+ * @see template_preprocess_block()
+ */
+#}
+{{ attach_library('team_london/user-navigation') }}
+<div class="user-navigation">
+  <div class="container">
+    {% block content %}
+      <a class="user-navigation__home" href="{{ url('<front>') }}"><h2 class="heading">{{ 'Team London'|t }}</h2><span class="beta-tab">BETA</span></a>
+      <p>{{ 'This is a new website – your '|t }}<a href="https://www.london.gov.uk/node/51052">{{ 'feedback'|t }}</a>{{ ' will help us to improve it.'|t }}</p>
+      <ul class="text-right list-unstyled list-inline">
+        {% for link in content['#items'] %}
+          <li class="user-navigation__link">{{ link }}</li>
+        {% endfor %}
+      </ul>
+    {% endblock %}
+  </div>
+</div>

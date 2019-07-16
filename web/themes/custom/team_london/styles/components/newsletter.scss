@@ -1,0 +1,27 @@
+/**
+ * @file
+ *
+ * Newsletter signup styles.
+ *
+**/
+
+.newsletter-form {
+  .fieldset-wrapper {
+    margin-bottom: 0;
+  }
+
+  .webform-composite-hidden-title,
+  .form-item {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .custom-input {
+    font-weight: bold;
+  }
+
+  .form-text,
+  .form-email {
+    width: 100%;
+  }
+}

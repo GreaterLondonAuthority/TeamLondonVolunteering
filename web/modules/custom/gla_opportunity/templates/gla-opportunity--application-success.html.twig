@@ -1,0 +1,15 @@
+<div class="well well--confirmation">
+  <p>{{ 'We have sent you a confirmation email to the email address you provided:' }}</p>
+  <p>{{ email }}</p>
+</div>
+
+
+<h2 class="heading--alt">{{ 'What happens next'|t }}</h2>
+
+<p>{{ 'The organisation has been sent your contact details. They will be in touch soon.'|t }}</p>
+
+<p>{{ return_to_opp }}</p>
+
+{% for link in links %}
+  <p>{{ link }}</p>
+{% endfor %}

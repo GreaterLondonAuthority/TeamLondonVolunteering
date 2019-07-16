@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_anything_additional
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_anything_additional
+field_name: step_anything_additional
+entity_type: node
+bundle: opportunity
+label: 'Is there any additional information you''d like to give to volunteers? (optional)'
+description: 'Give any further details which are relevant to this role.'
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

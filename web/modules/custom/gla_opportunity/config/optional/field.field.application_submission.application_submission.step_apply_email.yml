@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.application_submission.step_apply_email
+  module:
+    - gla_multistep_forms
+    - gla_opportunity
+id: application_submission.application_submission.step_apply_email
+field_name: step_apply_email
+entity_type: application_submission
+bundle: application_submission
+label: 'What is your email address?'
+description: 'Your email address will be shared with the volunteer organisation and any responses will be sent to this address.'
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

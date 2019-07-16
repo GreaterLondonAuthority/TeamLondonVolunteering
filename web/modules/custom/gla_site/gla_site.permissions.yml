@@ -1,0 +1,4 @@
+edit gla site settings:
+  title: 'Edit custom site settings'
+  description: 'Edit custom site settings.'
+  restrict access: true

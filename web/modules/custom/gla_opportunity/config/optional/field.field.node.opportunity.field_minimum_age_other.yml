@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_minimum_age_other
+    - node.type.opportunity
+id: node.opportunity.field_minimum_age_other
+field_name: field_minimum_age_other
+entity_type: node
+bundle: opportunity
+label: 'Age in years'
+description: 'Age in years'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

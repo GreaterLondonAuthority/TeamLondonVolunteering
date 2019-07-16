@@ -1,0 +1,31 @@
+name: Site
+description: 'Provides site components.'
+type: module
+core: 8.x
+dependencies:
+  - block_content
+  - ckeditor
+  - comment
+  - contact
+  - content_moderation
+  - editor
+  - field
+  - filter
+  - gla_landing_page
+  - gla_opportunity
+  - gla_page
+  - gla_provider
+  - gla_site
+  - htmlmail
+  - mailsystem
+  - multiple_registration
+  - node
+  - password_policy
+  - pathauto
+  - pathologic
+  - rdf
+  - social_media
+  - taxonomy
+  - text
+  - workflows
+package: GLA

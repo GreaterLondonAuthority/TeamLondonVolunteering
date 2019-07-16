@@ -1,0 +1,27 @@
+bundle: gla
+excluded:
+  - gla_site.registration_flow_settings
+  - comment.type.comment
+  - core.entity_form_display.comment.comment.default
+  - core.entity_form_display.node.article.default
+  - core.entity_view_display.comment.comment.default
+  - core.entity_view_display.node.article.default
+  - core.entity_view_display.node.article.rss
+  - core.entity_view_display.node.article.teaser
+  - field.field.comment.comment.comment_body
+  - field.field.node.article.body
+  - field.field.node.article.comment
+  - field.field.node.article.field_image
+  - field.field.node.article.field_tags
+  - field.storage.node.comment
+  - field.storage.node.field_tags
+required:
+  - password_policy.password_policy.volunteer_and_provider
+  - pathologic.settings
+  - social_media.settings
+  - block.block.glauserblock
+  - block.block.socialsharingblock
+  - pathauto.pattern.node_urls
+  - views.view.admin_provider_user_management
+  - views.view.user_admin_people
+  - views.view.administerusersbyrole_people

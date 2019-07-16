@@ -1,0 +1,44 @@
+# Application form element routing definition
+application_form_element.settings_tab:
+  route_name: application_form_element.settings
+  title: 'Settings'
+  base_route: application_form_element.settings
+
+entity.application_form_element.canonical:
+  route_name: entity.application_form_element.canonical
+  base_route: entity.application_form_element.canonical
+  title: 'View'
+
+entity.application_form_element.edit_form:
+  route_name: entity.application_form_element.edit_form
+  base_route: entity.application_form_element.canonical
+  title: 'Edit'
+
+entity.application_form_element.delete_form:
+  route_name:  entity.application_form_element.delete_form
+  base_route:  entity.application_form_element.canonical
+  title: Delete
+  weight: 10
+
+# Application submission routing definition
+application_submission.settings_tab:
+  route_name: application_submission.settings
+  title: 'Settings'
+  base_route: application_submission.settings
+
+entity.application_submission.canonical:
+  route_name: entity.application_submission.canonical
+  base_route: entity.application_submission.canonical
+  title: 'View'
+
+entity.application_submission.edit_form:
+  route_name: entity.application_submission.edit_form
+  base_route: entity.application_submission.canonical
+  title: 'Edit'
+
+entity.application_submission.delete_form:
+  route_name:  entity.application_submission.delete_form
+  base_route:  entity.application_submission.canonical
+  title: Delete
+  weight: 10
+

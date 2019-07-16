@@ -1,0 +1,11 @@
+<?php
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+function gla_landing_page_field_widget_entity_reference_paragraphs_form_alter(&$element, \Drupal\Core\Form\FormStateInterface $form_state, $context) {
+  if (isset($element['#paragraph_type'], $element['subform'], $element['subform']['field_description']) && $element['#paragraph_type'] == 'wysiwyg_with_cta') {
+    $element['subform']['field_description']['widget'][0]['#allowed_formats'] = ['character_limit_675'];
+    $element['subform']['field_description']['widget'][0]['#format'] = 'character_limit_675';
+  }
+}

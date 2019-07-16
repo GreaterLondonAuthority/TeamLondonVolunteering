@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.times
+  module:
+    - facets
+    - system
+  theme:
+    - team_london
+id: times
+theme: team_london
+region: sidebar_left
+weight: -8
+provider: null
+plugin: 'facet_block:times'
+settings:
+  id: 'facet_block:times'
+  label: 'Time of day'
+  provider: facets
+  label_display: visible
+  block_id: times
+visibility:
+  request_path:
+    id: request_path
+    pages: /search-opportunities
+    negate: false
+    context_mapping: {  }

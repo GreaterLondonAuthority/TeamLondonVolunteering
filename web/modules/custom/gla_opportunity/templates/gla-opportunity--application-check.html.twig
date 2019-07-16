@@ -1,0 +1,20 @@
+<p>{{ 'The details below will be shared with the organisation advertising this opportunity.'|t }}</p>
+
+<ul class="list-unstyled">
+  {% for section in sections %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text"><strong>{{ section.label }}</strong></h3>
+          <p>{{ section.value|nl2br }}</p>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          {{ section.link }}
+        </div>
+      </div>
+    </li>
+    <div class="separator"></div>
+  {% endfor %}
+</ul>
+
+{{ continue }}

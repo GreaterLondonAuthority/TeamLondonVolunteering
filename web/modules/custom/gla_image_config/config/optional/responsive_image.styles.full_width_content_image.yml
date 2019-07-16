@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - image.style.content_image_small
+    - image.style.full_width_content_image
+  theme:
+    - gla_estate
+id: full_width_content_image
+label: 'Full width content image'
+image_style_mappings:
+  -
+    breakpoint_id: gla_estate.mobile
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: full_width_content_image
+  -
+    breakpoint_id: gla_estate.minimum
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: content_image_small
+breakpoint_group: gla_estate
+fallback_image_style: full_width_content_image

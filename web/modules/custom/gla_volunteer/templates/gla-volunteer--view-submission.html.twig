@@ -1,0 +1,24 @@
+{{ back }}
+
+<h1 class="heading--title heading--alt">{{ opportunity_title }}</h1>
+<p>{{ opportunity_link }}</p>
+{{ response_text|nl2br }}
+
+<h4 class="heading--alt">{{ 'You submitted:'|t }}</h4>
+<ul class="list-unstyled">
+  {% for step in data %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h5 class="heading--text"><strong>{{ step.label|raw }}</strong></h5>
+          {% if step.value %}
+            <p>{{ step.value }}</p>
+          {% else %}
+            <p>{{ 'Empty'|t }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </li>
+    <div class="separator"></div>
+  {% endfor %}
+</ul>

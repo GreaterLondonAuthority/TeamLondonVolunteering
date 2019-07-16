@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_one_off_date
+    - node.type.opportunity
+  module:
+    - datetime
+id: node.opportunity.field_one_off_date
+field_name: field_one_off_date
+entity_type: node
+bundle: opportunity
+label: 'One off date'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

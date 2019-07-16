@@ -1,0 +1,18 @@
+name: Opportunity
+description: 'Provides Opportunity content type and related configuration. '
+type: module
+core: 8.x
+package: GLA
+dependencies:
+  - content_moderation
+  - entity_reference_revisions
+  - field
+  - gla_opportunity
+  - menu_ui
+  - node
+  - options
+  - paragraphs
+  - path
+  - telephone
+  - text
+  - user

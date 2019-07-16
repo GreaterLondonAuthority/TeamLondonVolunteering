@@ -1,0 +1,237 @@
+{% extends 'node.html.twig' %}
+
+{% macro skills(skills) %}
+  <ul>
+  {% for skill in skills %}
+    {% if skill['#title'] %}
+      <li>{{ skill['#title'] }}</li>
+    {% endif %}
+  {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% block content %}
+  <div class="opportunity">
+    {{ content.content_moderation_control }}
+
+    {% if node_status_info %}
+      <div class="well well--confirmation">{{ node_status_info }}</div>
+    {% endif %}
+
+    {% if opp_tags_links %}
+      <p class="team_page__tags-container">
+        {% for tag in opp_tags_links %}
+          <span><a href="{{ tag.url }}">{{ tag.label }}</a>{{ loop.last ? '' : ' | ' }}</span>
+        {% endfor %}
+      </p>
+    {% endif %}
+
+    <a href="{{ register_interest_url }}" class="button button--alt">{{ 'Register my interest'|t }}</a>
+    <div class="content-block content-block--grey">
+      {% if opportunity_location %}
+        <p><strong class="text--mayoral">{{ 'Location:'|t }}</strong>
+          {% for address_line in opportunity_location %}
+            {% if address_line %}
+              <strong>{{ address_line }}{{ loop.last ? '' : ', ' }}</strong>
+            {% endif %}
+          {% endfor %}
+          <a href="#opportunity_map">{{ '(see map)'|t }}</a>
+        </p>
+      {% endif %}
+      {% if travel %}
+        <p><strong class="text--mayoral">{{ 'Travel: '|t }}</strong>{{ travel }}</p>
+      {% endif %}
+      {% if content.start_date %}
+        <p><strong class="text--mayoral">{{ 'Start date: '|t }}</strong>{{ content.start_date }}</p>
+      {% endif %}
+      {% if show_min_age %}
+        <p><strong class="text--mayoral">{{ 'Age: '|t }}</strong>{{ min_age }}+</p>
+      {% endif %}
+    </div>
+
+    {% if what_volunteer_is_doing %}
+      <div class="team_page__list">
+        <h3 class="heading--alt">{{ 'What will I be doing?'|t }}</h3>
+        <ul class="team_page__list-items">
+          {% for bullet in what_volunteer_is_doing %}
+            {% if bullet %}
+              <li>{{ bullet }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if content.field_image %}
+      <div class="opportunity__image">
+        {{ content.field_image }}
+      </div>
+      <p class="soft-text">{{ content.field_image['#items'].alt }}</p>
+    {% endif %}
+    {% if what_volunteer_is_changing %}
+      <div class="team_page__list">
+        <h3 class="heading--alt">{{ 'What impact will this have?'|t }}</h3>
+        <ul class="team_page__list-items">
+          {% for bullet in what_volunteer_is_changing %}
+            {% if bullet %}
+              <li>{{ bullet }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if when_needed %}
+      <h3 class="heading--alt">{{ 'When are you needed?'|t }}</h3>
+      <span>{{ 'Options available:' }}</span>
+      <table class="opportunity__table-sessions">
+        <tr>
+          <th></th>
+          <th>{{ 'Mon'|t }}</th>
+          <th>{{ 'Tue'|t }}</th>
+          <th>{{ 'Wed'|t }}</th>
+          <th>{{ 'Thu'|t }}</th>
+          <th>{{ 'Fri'|t }}</th>
+          <th>{{ 'Sat'|t }}</th>
+          <th>{{ 'Sun'|t }}</th>
+        </tr>
+        {% for key,sessions in when_needed %}
+          <tr>
+            <td>{{ key }}</td>
+            {% for day in sessions %}
+              <td>
+                {% if day %}
+                  <span class="opportunity__table-day"><span class="sr-only">{{ 'This time slot is available'|t }}</span></span>
+                {% else %}
+                  <span class="sr-only">{{ 'This time slot is not available'|t }}</span>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+    {% if what_commitment_needed %}
+      <div class="team_page__list">
+        <h4 class="heading">{{ 'Commitment'|t }}</h4>
+        <ul class="team_page__list-items">
+          {% for bullet in what_commitment_needed %}
+            {% if bullet %}
+              <li>{{ bullet }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if additional_information %}
+      <div class="team_page__list">
+        <h3 class="heading--alt">{{ 'What else do I need to know?'|t }}</h3>
+        <ul class="team_page__list-items">
+          {% for bullet in additional_information %}
+            {% if bullet %}
+              <li>{{ bullet }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if expenses_covered %}
+      <div class="team_page__list">
+        <h4 class="heading">{{ 'Expenses'|t }}</h4>
+        <ul class="team_page__list-items">
+          <li>{{ content.field_cover_expenses_specific }}</li>
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if background_checks %}
+      <div class="team_page__list">
+        <h4 class="heading">{{ 'Background checks'|t }}</h4>
+        <ul class="team_page__list-items">
+          <li>{{ content.field_bg_checks_required }}</li>
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if provider_exists %}
+      <h3 class="heading--alt">{{ 'About the organisation: '|t }}</h3>
+      <div class="row">
+        {% if organisation_logo %}
+          <div class="col-md-4 col-sm-6">
+            <div class="opportunity__organisation-logo">
+              <img src="{{ organisation_logo }}" alt="{{ organisation_logo_alt }}">
+            </div>
+          </div>
+        {% else %}
+          <div class="col-md-4 col-sm-6">
+            <div class="opportunity__organisation-logo">
+              <img src="{{ base_path ~ directory }}/dist/images/placeholder_550x275.png" alt="{{ 'Image of volunteers'|t }}">
+            </div>
+          </div>
+        {% endif  %}
+        <div class="col-sm-6">
+          {% if organisation_name %}
+            <p><a href="/">{{ organisation_name }}</a></p>
+          {% endif %}
+          {% if search_link %}
+            <p><a href="{{ search_link }}">{{ 'View all opportunities listed by this organisation'|t }}</a></p>
+          {% endif %}
+          {% if organisation_website %}
+            <p><a href="{{ organisation_website }}">{{ 'Website'|t }}</a></p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if skills_useful_set or skills_gain_set %}
+      <div class="opportunity__additional-info">
+        <h3 class="heading--alt">{{ 'Additional Information'|t }}</h3>
+        <div class="row">
+          {% if skills_useful_set %}
+            <div class="opportunity__skills col-md-4 col-sm-6">
+              <h6>{{ 'What skills will be useful?'|t }}</h6>
+              {{ _self.skills(what_skills_useful) }}
+            </div>
+          {% endif %}
+          {% if skills_gain_set %}
+            <div class="opportunity__skills col-md-4 col-sm-6">
+              <h6>{{ 'What skills can I gain?'|t }}</h6>
+              {{ _self.skills(content.field_what_skills_gain) }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if training_needed %}
+      <div class="team_page__list">
+        <h3 class="heading--alt">{{ 'Training'|t }}</h3>
+        <ul class="team_page__list-items">
+          {% for bullet in training_needed %}
+            {% if bullet %}
+              <li>{{ bullet }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if opportunity_location %}
+      <h3 class="heading heading--alt">{{ 'Location'|t }}</h3>
+      <p>
+        {% for address_line in opportunity_location %}
+          {% if address_line %}
+            <strong>{{ address_line }}{{ loop.last ? '' : ', ' }}</strong>
+          {% endif %}
+        {% endfor %}
+      </p>
+      <div id="opportunity_map">
+        <div class="js-map gla-map" data-centre="[{{ lat }},{{ long }}]" data-markers="[[{{ lat }},{{ long }}]]"></div>
+      </div>
+    {% endif %}
+    <a href="{{ register_interest_url }}" class="button button--alt">{{ 'Register my interest'|t }}</a>
+  </div>
+{% endblock %}

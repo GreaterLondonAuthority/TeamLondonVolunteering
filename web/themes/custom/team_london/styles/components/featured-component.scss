@@ -1,0 +1,106 @@
+/**
+ * @file
+ * Featured blocks component tweaks.
+ *
+**/
+
+@import "../variables/utilities";
+@import "../variables/typography";
+
+.component.component--featured-blocks {
+  background: transparent;
+  .top-right {
+    display: none;
+    top: 2.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .button {
+    width: 100%;
+    margin-bottom: $gutter-spacing;
+  }
+  .component__image {
+    height: 10rem;
+    width: 10rem;
+    float: left;
+    img {
+      max-width: none;
+      width: 100%;
+    }
+  }
+
+  .component__text {
+    width: calc(100% - 10rem);
+    float: left;
+    padding-left: $gutter-spacing / 2;
+    padding-right: $gutter-spacing / 2;
+  }
+
+  .component .heading--alt {
+    line-height: 1.6rem;
+    margin-top: $gutter-spacing / 2;
+  }
+
+  .soft-text {
+    margin-bottom: 0;
+  }
+}
+
+.component--featured-list {
+  a {
+    height: 10rem;
+  }
+  p {
+    font-size: $font-size-small;
+  }
+  .component  {
+    margin-bottom: 0;
+  }
+  .heading--alt {
+    margin-top: 0;
+  }
+
+  .component--link-blocks p {
+    display: none;
+  }
+}
+
+.component__text--search-col {
+  padding: 0;
+  margin-bottom: 11rem;
+}
+
+@media (min-width: $screen-mobile) {
+  .component.component--featured-blocks .top-right {
+    display: block;
+    position: absolute;
+    margin-bottom: 0;
+  }
+}
+
+
+@media (min-width: $screen-tablet) {
+  .component.component--featured-blocks {
+    .button {
+      display: none;
+    }
+    .component__image {
+      height: 16rem;
+      width: inherit;
+    }
+    .component__text {
+      width: 100%;
+      padding-left: $gutter-spacing;
+      padding-right: $gutter-spacing;
+    }
+    .component .heading--alt {
+      font-size: $font-size-base;
+      line-height: inherit;
+      margin-top: $gutter-spacing;
+    }
+  }
+  .component--featured-list .component--link-blocks p {
+    display: block;
+    font-size: $font-size-base;
+  }
+}

@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_org_logo
+    - node.type.provider_profile
+  module:
+    - gla_multistep_forms
+id: node.provider_profile.step_org_logo
+field_name: step_org_logo
+entity_type: node
+bundle: provider_profile
+label: 'Your organisation’s logo (optional)'
+description: "<p>Your logo will be displayed on the Team London website wherever your organisation is featured.</p>\r\n\r\n<p><strong>Upload your logo</strong></p>\r\n\r\n<ul>\r\n        <li>Accepted file types: JPEG, PNG</li>\r\n        <li>Maximum file size: 10MB</li>\r\n        <li>Optimum size: 400 x 400 pixels</li>\r\n</ul>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

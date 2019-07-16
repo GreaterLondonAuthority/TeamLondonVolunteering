@@ -1,0 +1,532 @@
+<?php
+
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+use Drupal\user\UserInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function gla_user_theme($existing, $type, $theme, $path) {
+  return [
+    'gla_user__email_confirm' => [
+      'variables' => [
+        'email' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function gla_user_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  if ($form_id == 'user_form' || $form_id == 'user_register_form') {
+    // Hide contact form options.
+    if (isset($form['contact'])) {
+      $form['contact']['#access'] = FALSE;
+    }
+
+    // Hide delete option for normal users.
+    if (!gla_site_is_admin()) {
+      if (isset($form['actions']['delete'])) {
+        $form['actions']['delete']['#access'] = FALSE;
+      }
+    }
+
+    $form['account']['mail']['#description'] = t('We will send a confirmation email to this address.');
+
+    // If we've come from the one-time-login link, hide user fields fields and don't use multistep.
+    $pass_reset = \Drupal::request()->query->get('pass-reset-token');
+    if ($pass_reset) {
+      $form['#disable_multistep'] = TRUE;
+      foreach ($form as $key => $value) {
+        $field = \Drupal\field\Entity\FieldConfig::loadByName('user', 'user', $key);
+        if ($field) {
+          $form[$key]['#access'] = FALSE;
+        }
+      }
+
+      $form['actions']['submit']['#value'] = t('Save and continue');
+
+      // Hide the email address field.
+      $form['account']['mail']['#access'] = FALSE;
+      $form['mail'] = [
+        '#type' => 'value',
+        '#value' => $form['account']['mail']['#default_value'],
+      ];
+
+      // Make password required.
+      $form['account']['pass']['#required'] = TRUE;
+
+      // Add redirect to correct place depending on role etc.
+      $form['actions']['submit']['#submit'][] = 'gla_user_get_login_redirect';
+
+      $password_text = t('Your password must be at least 8 characters long.');
+
+      $form['intro_text'] = [
+        '#markup' => $password_text,
+        '#weight' => -10,
+      ];
+
+      // Add text below submit form.
+      $sign_in = \Drupal\Core\Url::fromRoute('user.login')->toString();
+
+      $form['button_suffix'] = [
+        '#weight' => 100,
+        '#markup' => t('If you already have an account you can <a href="@sign_in">sign in.</a>', [
+          '@sign_in' => $sign_in,
+        ]),
+      ];
+    }
+    elseif (is_provider_member_route('user_add') || is_provider_member_route('user_edit')) {
+      // Hide the password fields.
+      $form['account']['current_pass']['#access'] = FALSE;
+      $form['account']['pass']['#access'] = FALSE;
+    }
+
+    if (isset($form['account'], $form['account']['password_policy_status'])) {
+      $form['account']['password_policy_status']['#access'] = FALSE;
+    }
+  }
+  elseif ($form_id == 'user_login_form') {
+    $form['actions']['submit']['#value'] = t('Sign in');
+
+    $url = \Drupal\Core\Url::fromRoute('multiple_registration.role_registration_page', ['rid' => 'volunteer'])->toString();
+    $reset_password = \Drupal\Core\Url::fromRoute('user.pass')->toString();
+
+    $form['intro_text'] = [
+      '#weight' => -10,
+      '#markup' => t('<p>If you don\'t have an account you can <a href="@create_account">create a new account</a></p><p>&nbsp;</p><p>If you have forgotten your password you can <a href="@request_password">request a new password</a></p>', [
+        '@create_account' => $url,
+        '@request_password' => $reset_password,
+      ]),
+    ];
+
+    // Add redirect to correct place depending on role etc.
+    $form['#submit'][] = 'gla_user_get_login_redirect';
+
+    // Add text below submit form.
+    $homepage = \Drupal\Core\Url::fromRoute('<front>')->toString();
+
+    $form['button_suffix'] = [
+      '#weight' => 100,
+      '#markup' => t('<a href="@homepage">Team London homepage</a>', [
+        '@homepage' => $homepage,
+      ]),
+    ];
+  }
+  elseif ($form_id == 'user_equal_opportunities_form') {
+    // Add a class for the autocomplete plugin.
+    if (isset($form['field_london_borough_base'], $form['field_london_borough_base']['widget'])) {
+      $form['field_london_borough_base']['widget']['#options']['_none'] = '';
+      $form['field_london_borough_base']['widget']['#attributes']['class'][] = 'select--autocomplete';
+      $form['field_london_borough_base']['widget']['#attributes']['class'][] = 'js-autocomplete';
+      $form['#attached']['library'][] = 'gla_estate/auto-complete';
+
+      // Show the description between the label and the input.
+      $form['field_london_borough_base']['widget']['#description_display'] = 'before';
+    }
+
+    if (isset($form['field_tandc'], $form['field_tandc']['widget'], $form['field_tandc']['widget']['value'])) {
+      // Show T&Cs link before checkbox.
+      $form['field_tandc']['widget']['value']['#description_display'] = 'before';
+    }
+
+  }
+  elseif ($form_id == 'user_volunteer_interests_form') {
+    // Add a class for the autocomplete plugin.
+    if (isset($form['field_loc_london_borough'], $form['field_loc_london_borough']['widget'])) {
+      $form['field_loc_london_borough']['widget']['#options']['_none'] = '';
+      $form['field_loc_london_borough']['widget']['#attributes']['class'][] = 'select--autocomplete';
+      $form['field_loc_london_borough']['widget']['#attributes']['class'][] = 'js-autocomplete';
+      $form['#attached']['library'][] = 'gla_estate/auto-complete';
+    }
+
+    // Validate these date fields on each continue step.
+    $form['#validate'][] = 'gla_user_submission_validate';
+
+    // Location required, so set default value to 'dont_mind'.
+    if (empty($form['field_location']['widget']['#default_value'])) {
+      $form['field_location']['widget']['#default_value'] = 'dont_mind';
+    }
+  }
+  elseif ($form_id == 'user_cancel_form' || $form_id == 'user_multiple_cancel_confirm') {
+    // Make custom option to assign content to current user default.
+    if (isset($form['user_cancel_method'], $form['user_cancel_method']['#options'], $form['user_cancel_method']['#options']['user_delete_reassign_self'])) {
+      $form['user_cancel_method']['#default_value'] = 'user_delete_reassign_self';
+    }
+  }
+}
+
+/**
+ * Implements hook_user_cancel_methods_alter().
+ */
+function gla_user_user_cancel_methods_alter(&$methods) {
+  // Add a custom reassign content to self method.
+  $methods['user_delete_reassign_self'] = [
+    'title' => t('Delete the account and make its content belong to your user.'),
+    'description' => t('All the account\'s content will belong to you.'),
+  ];
+}
+
+/**
+ * Implements hook_user_cancel().
+ */
+function gla_user_user_cancel($edit, UserInterface $account, $method) {
+  switch ($method) {
+    case 'user_delete_reassign_self':
+      // Find the nodes currently assigned to the user.
+      $results = db_select('node_field_data', 'nfd')
+        ->fields('nfd', ['nid'])
+        ->condition('uid', $account->id())
+        ->execute()
+        ->fetchAll();
+
+      $tags = [];
+      $node_ids = [];
+      foreach ($results as $result) {
+        $tags[] = 'node:' . $result->nid;
+        $node_ids[] = $result->nid;
+      }
+
+      // Reassign content to the current user.
+      // We do this with directly db queries so the content isn't 'saved' and
+      // moderation states etc changed.
+      $new_uid = \Drupal::currentUser()->id();
+      db_update('node_field_data')
+        ->fields(['uid' => $new_uid])
+        ->condition('uid', $account->id())
+        ->execute();
+
+      // Act on old revisions too.
+      db_update('node_field_revision')
+        ->fields(['uid' => $new_uid])
+        ->condition('uid', $account->id())
+        ->execute();
+
+      db_update('node_revision')
+        ->fields(['revision_uid' => $new_uid])
+        ->condition('revision_uid', $account->id())
+        ->execute();
+
+      // Clear the cache for these nodes.
+      \Drupal::entityTypeManager()->getStorage('node')->resetCache($node_ids);
+      Cache::invalidateTags($tags);
+
+      // The account deletion is done in _user_cancel() by faking the method to
+      // user_cancel_delete in the batch alter below.
+      // We can't delete the account here because the user account is needed in
+      // tact for now.
+      break;
+  }
+}
+
+/**
+ * Implements hook_batch_alter().
+ */
+function gla_user_batch_alter(&$batch) {
+  // Alter the batch cancelled when cancelling an account.
+  if (isset($batch['form_state'])) {
+    /** @var \Drupal\Core\Form\FormStateInterface $form_state */
+    $form_state = $batch['form_state'];
+    $user_cancel_method = $form_state->getValue('user_cancel_method');
+    if ($user_cancel_method && $user_cancel_method == 'user_delete_reassign_self') {
+      // Find the _user_cancel set and fake the method to 'user_cancel_delete'
+      // so that the account is deleted after our custom processing.
+      foreach ($batch['sets'] as $set_key => $set) {
+        if (isset($set['operations']) && !empty($set['operations'])) {
+          foreach ($set['operations'] as $op_key => $operation) {
+            if ($operation[0] == '_user_cancel') {
+              $batch['sets'][$set_key]['operations'][$op_key][1][2] = 'user_cancel_delete';
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_user_preprocess_page_title(&$variables) {
+  $route_match = \Drupal::routeMatch();
+  $route_name = $route_match->getRouteName();
+  if ($route_name == 'entity.user.edit_form') {
+    $pass_reset = \Drupal::request()->query->get('pass-reset-token');
+    if ($pass_reset && isset($variables['title']['#markup'])) {
+      $variables['title']['#markup'] = t('Create a password');
+    }
+    elseif (is_volunteer_account_details_route()) {
+      // Set title to volunteer's name.
+      $user = $route_match->getParameter('user');
+      $first_name = $user->get('field_first_name')->value;
+      $last_name = $user->get('field_last_name')->value;
+      $variables['title']['#markup'] = t('Account details: @first @last', [
+        '@first' => $first_name,
+        '@last' => $last_name,
+      ]);
+    }
+  }
+  elseif ($route_name == 'user.login' && isset($variables['title'])) {
+    $variables['title'] = t('Sign in to your account');
+  }
+  elseif ($route_name == 'gla_provider.user_add' && isset($variables['title'])) {
+    $variables['title'] = '';
+  }
+}
+
+/**
+ * Add redirect to correct place depending on role etc.
+ *
+ * We do this here rather than hook_user_login() so it is centralised for signups too.
+ */
+function gla_user_get_login_redirect($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  /** @var \Drupal\user\Entity\User $user */
+  if ($form['#form_id'] == 'user_login_form') {
+    $user_id = \Drupal::currentUser()->id();
+    $user = \Drupal\user\Entity\User::load($user_id);
+  }
+  else {
+    $user = $form_state->getFormObject()->getEntity();
+  }
+
+  /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+  $provider_processor = \Drupal::service('gla_provider.processor');
+
+  $user_roles = $user->getRoles();
+  $config = \Drupal::config('gla_site.registration_flow_settings');
+  $opportunity_id = \Drupal::request()->query->get('opportunity');
+  if ($opportunity_id) {
+    $form_state->setRedirect('gla_opportunity.apply_overview', ['node' => $opportunity_id]);
+  }
+  elseif (in_array('volunteer', $user_roles)) {
+    // If the volunteer has just signed up, take them to complete the equal opportunities info.
+    $gender = $user->get('field_gender')->getValue();
+    if (empty($gender)) {
+      // Get the nid of the equal opportunities content page.
+      $nid = $config->get('node:equal_opportunities_monitoring');
+      $form_state->setRedirect('entity.node.canonical', ['node' => $nid]);
+    }
+    else {
+      // Otherwise, take them to their dashboard.
+      $form_state->setRedirect('gla_volunteer.dashboard');
+    }
+  }
+  elseif (in_array('provider', $user_roles)) {
+    // If the provider is just signing up then take them to the create profile page.
+    $profile = $provider_processor->getUserProviderProfile($user, TRUE);
+    if (!$profile || trim($profile->getTitle()) == '') {
+      // Get nid of the create organisation profile content page.
+      $nid = $config->get('node:create_profile');
+      $form_state->setRedirect('entity.node.canonical', ['node' => $nid]);
+    }
+    else {
+      // Otherwise, take them to their dashboard.
+      $form_state->setRedirect('gla_provider.dashboard');
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function gla_user_user_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  // If this user is registering after trying to register interest in an
+  // opportunity, add the opportunity to their account info so we can go back to
+  // it after completion.
+  $opportunity_id = \Drupal::request()->query->get('opportunity');
+  if ($entity->isNew() && $opportunity_id) {
+    $entity->set('field_signed_up_from', $opportunity_id);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_user_form_node_form_alter(&$form, \Drupal\Core\Form\FormStateInterface &$form_state, $form_id) {
+
+  if ($form_id == 'node_opportunity_form' || $form_id == 'node_opportunity_edit_form') {
+    $config = \Drupal::service('config.factory')->getEditable('gla_opportunity.help_text_settings');
+
+    // Adding the help text to the prefix so is displayed on necessary steps.
+    $help_field_data = $config->getRawData();
+    foreach ($help_field_data as $machine_name => $field_text) {
+      if (isset($form[$machine_name])) {
+        $help_link = $help_field_data[$machine_name . '_link'];
+        if (!empty($field_text)) {
+          $help_text = '<p>' . t($field_text) . '</p>';
+          if (!empty($help_link)) {
+            $help_text .= '<p>' . Link::fromTextAndUrl(t('More examples of good practice for this question'), Url::fromUri($help_link, ['attributes' => ['target' => '_blank']]))->toString() . '</p>';
+          }
+          $form[$machine_name]['#suffix'] =
+          '<div class="row">
+            <div class="col-sm-12 col-md-8">
+              <div class="accordion js-accordion">
+                <a class="accordion__title">
+                  <h3>' . t('Example of best practice') . '</h3>
+                </a>
+                <div class="accordion__content">' . $help_text . '</div>
+              </div>
+            </div>
+          </div>';
+          $form['#attached']['library'][] = 'gla_estate/accordion';
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Custom validation handler to validate the node before it is submitted for approval.
+ */
+function gla_user_submission_validate($form, \Drupal\Core\Form\FormStateInterface &$form_state) {
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_location')) {
+    // Validate location selection.
+    $location = $form_state->getValue('field_location')[0]['value'];
+    $borough = $form_state->getValue('field_loc_london_borough');
+    $postcode = $form_state->getValue('field_loc_postcode')[0]['value'];
+
+    if ($location == 'london_borough' && empty($borough)) {
+      // If borough option selected must fill in borough field.
+      $form_state->setError($form, t('Please include the borough you would like to volunteer in.'));
+    }
+    elseif ($location == 'postcode' && empty($postcode)) {
+      // If postcode option selected must fill in postcode field.
+      $form_state->setError($form, t('Please include the postcode you would like to volunteer in.'));
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function gla_user_user_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+  // If this user is a volunteer or provider, redirect them to the dashboard as
+  // there's no need for them to see the user overview page.
+  $current_user = \Drupal::currentUser();
+  $roles = $current_user->getRoles();
+  if (!gla_site_is_admin() && in_array('volunteer', $roles)) {
+    $url = Url::fromRoute('gla_volunteer.dashboard')->toString();
+    $redirect = new \Symfony\Component\HttpFoundation\RedirectResponse($url);
+    $redirect->send();
+    $build["#cache"] = ['max-age' => 0];
+  }
+  elseif (!gla_site_is_admin() && in_array('provider', $roles)) {
+    $url = Url::fromRoute('gla_provider.dashboard')->toString();
+    $redirect = new \Symfony\Component\HttpFoundation\RedirectResponse($url);
+    $redirect->send();
+    $build["#cache"] = ['max-age' => 0];
+  }
+}
+
+/**
+ * Implements hook_mail_alter().
+ */
+function gla_user_mail_alter(&$message) {
+  if ($message['key'] == 'register_no_approval_required') {
+    $langcode = $message['langcode'];
+    $user = $message['params']['account'];
+    $user_role = $user->getRoles();
+
+    $lines = [
+      'custom_subject_text',
+      'custom_recipient_text',
+      'custom_top_text',
+      'one_time_login',
+      'custom_middle_text',
+      'custom_bottom_text',
+    ];
+
+    if (in_array('provider', $user_role)) {
+      foreach ($lines as $line => $value) {
+        switch ($value) {
+          case 'custom_subject_text':
+            $subject_text = 'organisation account';
+            break;
+          case 'custom_top_text':
+            $top_text = 'an organisation';
+            $message['top'] = $top_text;
+            break;
+          case 'one_time_login':
+            $one_time_login = user_pass_reset_url($user, [$message['langcode']]);
+            $message['one_time_login'] = $one_time_login;
+            break;
+          case 'custom_middle_text':
+            $middle_text = 'What happens next';
+            $message['middle'] = $middle_text;
+            break;
+          case 'custom_bottom_text':
+            $bottom_text = 'We\'ll ask you to set up an organisation profile, which we\'ll review and approve. You\'ll then be able to start advertising your volunteering roles on the Team London website.
+';
+            $message['bottom'] = $bottom_text;
+            break;
+        }
+      }
+    }
+    elseif (in_array('volunteer', $user_role)) {
+      foreach ($lines as $line => $value) {
+        switch ($value) {
+          case 'custom_subject_text':
+            $subject_text = 'volunteer account';
+            break;
+          case 'custom_recipient_text':
+            $user_name = $user->get('field_first_name')->value;
+            $recipient_text = 'Dear ' . $user_name . ',';
+            $message['addressee'] = $recipient_text;
+            break;
+          case 'custom_top_text':
+            $top_text = 'a volunteer';
+            $message['top'] = $top_text;
+            break;
+          case 'one_time_login':
+            $one_time_login = user_pass_reset_url($user, [$message['langcode']]);
+            $message['one_time_login'] = $one_time_login;
+            break;
+          case 'custom_middle_text':
+            $middle_text = 'You\'re almost there';
+            $message['middle'] = $middle_text;
+            break;
+          case 'custom_bottom_text':
+            $bottom_text = 'After creating your account you can set up a volunteer profile and register your interest for volunteering roles.
+
+Happy volunteering!
+
+Team London
+';
+            $message['bottom'] = $bottom_text;
+            break;
+        }
+      }
+    }
+
+    $message['subject'] = 'Welcome to your Team London ' . $subject_text;
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_predelete().
+ */
+function gla_user_user_predelete(Drupal\Core\Entity\EntityInterface $entity) {
+  // Add a fail-safe in case a provider user is deleted in a way we haven't
+  // captured.
+  // Through any journeys their content should be reassigned to either the next
+  // member of the group, or to the user deleting them.
+  // In case there is any content that hasn't been reassigned, transfer it to
+  // anonymous so it at least isn't deleted accidentally.
+  // (Content can be deleted through the 'organisation delete' form that GLA
+  // admins can access.)
+  if (in_array('provider', $entity->getRoles())) {
+    $nodes = \Drupal::entityQuery('node')
+      ->condition('uid', $entity->id())
+      ->execute();
+    if (!empty($nodes)) {
+      db_update('node_field_data')
+        ->fields(['uid' => 0])
+        ->condition('uid', $entity->id())
+        ->execute();
+    }
+  }
+}

@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - gla_opportunity
+id: application_submission.field_attached_form_elements
+field_name: field_attached_form_elements
+entity_type: application_submission
+type: entity_reference
+settings:
+  target_type: application_form_element
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

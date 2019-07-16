@@ -1,0 +1,375 @@
+<?php
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_search_preprocess_views_view(&$variables) {
+  $view_exec = $variables['view'];
+  /** @var \Drupal\views\Entity\View $view */
+  $view = $view_exec->storage;
+  if ($view->id() == 'profile_search') {
+    // Add the distance to the entity to be rendered.
+    foreach ($view_exec->result as $key => $result_row) {
+      /** @var Drupal\search_api\Item\ $item */
+      $item = $result_row->_item;
+      /** @var \Drupal\search_api\Item\Field $field */
+      $field = $item->getField('latlng__distance');
+      if ($field) {
+        $value = $field->getValues();
+        if ($value) {
+          // Convert to miles.
+          $km = $value[0];
+          $miles = 0.621371 * $km;
+          $variables['rows'][0]['#rows'][$key]['#node']->search_distance = round($miles, 2);
+        }
+      }
+    }
+
+    // Also show the matched location. Replicate what happens in \Drupal\search_api_location_geocoder\Plugin\search_api_location\location_input\Geocode::getParsedInput.
+    // get the alt long and reverse look.
+    $variables['address_text'] = FALSE;
+
+    /** @var \Drupal\search_api\Query\Query $location_found */
+    $search_api_query = $view_exec->query->getSearchApiQuery();
+    $location_found = $search_api_query->getOption('search_api_location');
+    if (isset($location_found[0], $location_found[0]['lat'], $location_found[0]['lon'])) {
+      $latitude = $location_found[0]['lat'];
+      $longitude = $location_found[0]['lon'];
+
+      $active_plugins = [
+        'arcgisonline' => 'arcgisonline',
+        'geoip' => 'geoip',
+        'freegeoip' => 'freegeoip',
+      ];
+
+      try {
+        /** @var \Drupal\geocoder\Geocoder $geocoder */
+        $geocoder = \Drupal::service('geocoder');
+        $address = $geocoder->reverse($latitude, $longitude, $active_plugins);
+
+        if ($address->count()) {
+          /** @var \Geocoder\Model\Address $address_found */
+          $address_found = $address->first();
+          $street_name = $address_found->getStreetName();
+          $postcode = $address_found->getPostalCode();
+          if (!empty($street_name)) {
+            $address_array[] = $street_name;
+          }
+          if (!empty($postcode)) {
+            $address_array[] = $postcode;
+          }
+
+          $variables['address_text'] = implode(', ', $address_array);
+        }
+      }
+      catch (Exception $e) {
+        // In case of any geocoder issues.
+      }
+    }
+
+    // Add sort by links.
+    $variables['sort_by_links'] = FALSE;
+    $route_name = \Drupal::routeMatch()->getRouteName();
+    $route_params = \Drupal::routeMatch()->getParameters()->all();
+    $query_params = \Drupal::request()->query->all();
+    // Ignore this on the admin edit form.
+    if ($route_name != 'entity.view.preview_form') {
+      // Go through each sort by option and add.
+      $sorts = [
+        'latlng_distance' => t('Distance'),
+        'date_sort' => t('Start Date'),
+        'field_borough' => t('Borough'),
+      ];
+
+      $links = [];
+      foreach ($sorts as $key => $value) {
+        $query_params_link = $query_params;
+        $query_params_link['sort_by'] = $key;
+        $query_params_link['sort_order'] = 'ASC';
+        $links[] = \Drupal\Core\Link::createFromRoute($value, $route_name, $route_params, ['query' => $query_params_link])->toString();
+      }
+
+      $variables['sort_by_links']['#markup'] = implode(' ', $links);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_search_preprocess_page(&$variables) {
+  $route_name = \Drupal::service('current_route_match')->getRouteName();
+  if (strpos($route_name, 'view.profile_search.') !== FALSE) {
+    $variables['#attached']['library'][] = 'gla_estate/search';
+    $variables['#attached']['library'][] = 'gla_estate/maps';
+    $variables['reset_link'] = \Drupal\Core\Url::fromRoute('view.profile_search.page_1')->toString();
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_search_preprocess_block(&$variables) {
+  if (isset($variables['configuration'], $variables['configuration']['id']) && strpos($variables['configuration']['id'], 'facet_block') !== FALSE) {
+    $facets_to_alter = [
+      'facet_block:days',
+      'facet_block:times',
+      'facet_block:causes',
+      'facet_block:individual_cause',
+      'facet_block:skills_to_gain',
+      'facet_block:useful_skills',
+      'facet_block:type_of_role',
+      'facet_block:provider_profile',
+    ];
+
+    $id = $variables['configuration']['id'];
+    if (in_array($id, $facets_to_alter)) {
+      // Set the block label to the facet label.
+      if (isset($variables['content'][0]['#facet']) && !empty($variables['content'][0]['#facet'])) {
+        /** @var \Drupal\facets\Entity\Facet $facet */
+        $facet = $variables['content'][0]['#facet'];
+        $facet_title = $facet->label();
+        if (!empty($facet_title)) {
+          $variables['label'] = $facet_title;
+        }
+
+        if (!isset($variables['content'][0]['#items']) || empty($variables['content'][0]['#items'])) {
+          $variables['label'] = FALSE;
+        }
+      }
+
+      // Specific setup.
+      if (isset($variables['content'][0]['#items']) && !empty($variables['content'][0]['#items'])) {
+        if ($id == 'facet_block:days') {
+          // Show facets in the correct order.
+          $ordered_items = [];
+          foreach ($variables['content'][0]['#items'] as &$item) {
+            $raw_value = $item['#title']['#raw_value'];
+            $day_num = date('N', strtotime($raw_value));
+            $ordered_items[$day_num] = $item;
+          }
+          $variables['content'][0]['#items'] = $ordered_items;
+          ksort($variables['content'][0]['#items']);
+        }
+        elseif ($id == 'facet_block:times') {
+          // Show facets in the correct order.
+          $ordered_items = ['morning' => '', 'afternoon' => '', 'evening' => ''];
+          foreach ($variables['content'][0]['#items'] as &$item) {
+            $raw_value = $item['#title']['#raw_value'];
+            $ordered_items[$raw_value] = $item;
+          }
+          $variables['content'][0]['#items'] = array_values($ordered_items);
+        }
+        elseif ($id == 'facet_block:causes') {
+          // Only show the top tier terms.
+          foreach ($variables['content'][0]['#items'] as &$item) {
+            unset($item['children']);
+          }
+        }
+        elseif ($id == 'facet_block:individual_cause') {
+          // Only show the lower tier terms of the 'causes' terms selected.
+          $children_tids = [];
+          $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+          $query = \Drupal::request()->query->get('f');
+          foreach ($query as $query_part) {
+            if (strpos($query_part, 'causes:') !== FALSE) {
+              $causes_tid = str_replace('causes:', '', $query_part);
+              $children_terms = $term_storage->loadChildren($causes_tid);
+              foreach ($children_terms as $term) {
+                $child_tid = $term->get('tid')->value;
+                $children_tids[$child_tid] = $child_tid;
+              }
+            }
+          }
+
+          foreach ($variables['content'][0]['#items'] as $key => $item) {
+            $tid = $item['#title']['#raw_value'];
+            if (!in_array($tid, $children_tids)) {
+              unset($variables['content'][0]['#items'][$key]);
+            }
+          }
+
+          // If it's now empty, hide the facet.
+          if (empty($variables['content'][0]['#items'])) {
+            $variables['label'] = FALSE;
+          }
+        }
+      }
+    }
+  }
+  elseif (isset($variables['elements']['#id']) && in_array($variables['elements']['#id'], ['exposedform_search', 'exposedformprofile_search_location_search'])) {
+
+    // Hide sort options.
+    if (isset($variables['content']['sort_by'])) {
+      $variables['content']['sort_by']['#access'] = FALSE;
+    }
+    if (isset($variables['content']['sort_order'])) {
+      $variables['content']['sort_order']['#access'] = FALSE;
+    }
+
+    $id = $variables['elements']['#id'];
+    $default_values = \Drupal::request()->query->all();
+    if (!isset($default_values['search_api_fulltext'])) {
+      $default_values['search_api_fulltext'] = $variables['content']['search_api_fulltext']['#default_value'];
+    }
+    if (!isset($default_values['latlng']['distance']['from'])) {
+      $default_values['latlng']['distance']['from'] = $variables['content']['latlng']['distance']['from']['#default_value'];
+    }
+    if (!isset($default_values['latlng']['value'])) {
+      $default_values['latlng']['value'] = $variables['content']['latlng']['value']['#default_value'];
+    }
+
+    // Add the view results summary to the exposed block.
+    if ($id == 'exposedform_search') {
+      global $pager_total_items;
+      $total_results = $pager_total_items[0];
+      $result_summary = t('Search results: @total results', [
+        '@total' => $total_results,
+      ]);
+
+      $input = $variables['content']['#view']->getExposedInput();
+      if (isset($input['search_api_fulltext']) && !empty($input['search_api_fulltext'])) {
+        $result_summary .= t(' for @search_term', ['@search_term' => $input['search_api_fulltext']]);
+      }
+
+      $variables['content']['summary']['#markup'] = $result_summary;
+
+      $variables['label'] = t('<h2 class="heading heading--alt">Search</h2>');
+      $variables['content']['help_text']['#markup'] = t('<p>Search by activity, cause or organisation</p>');
+      $variables['content']['help_text']['#weight'] = -10;
+
+      // Add cache tags so the total is updated when nodes are added/removed.
+      $variables['#cache']['tags'][] = 'gla_search_total';
+    }
+
+    // Show only the form we want but keep values set in other exposed filter
+    // forms.
+    if ($id == 'exposedform_search') {
+      $from_name = $variables['content']['latlng']['distance']['from']['#name'];
+      $from_value = $default_values['latlng']['distance']['from'];
+      $variables['content']['latlng']['distance']['from'] = [
+        '#type' => 'hidden',
+        '#name' => $from_name,
+        '#value' => $from_value,
+      ];
+
+      $value_name = $variables['content']['latlng']['value']['#name'];
+      $value_value = $default_values['latlng']['value'];
+      $variables['content']['latlng']['value'] = [
+        '#type' => 'hidden',
+        '#name' => $value_name,
+        '#value' => $value_value,
+      ];
+    }
+    elseif ($id == 'exposedformprofile_search_location_search') {
+      $fulltext_name = $variables['content']['search_api_fulltext']['#name'];
+      $fulltext_value = $default_values['search_api_fulltext'];
+      $variables['content']['search_api_fulltext'] = [
+        '#type' => 'hidden',
+        '#name' => $fulltext_name,
+        '#value' => $fulltext_value,
+      ];
+    }
+
+    // Labels for template.
+    switch ($id) {
+      case 'exposedformprofile_search_location_search':
+        $variables['label'] = t('Location of role');
+        $variables['content']['latlng']['#prefix'] = t('Postcode eg, NW1');
+        unset($variables['content']['latlng']['value']['#field_prefix']);
+        $variables['content']['actions']['#access'] = FALSE;
+
+        // #weight here is ignored and it is instead rendered in the order set,
+        // so unset 'distance' and reset.
+        $distance = $variables['content']['latlng']['distance'];
+        unset($variables['content']['latlng']['distance']);
+        $variables['content']['latlng']['distance'] = $distance;
+
+        // We need to make this one form look like two separate facets. Using
+        // the block--exposedformprofile-search-location-search.html.twig
+        // template markup we'll close the first expander after the value input
+        // and start a new expander for the distance radios.
+        $variables['content']['latlng']['value']['#suffix'] = '</div></div>';
+
+        $markup = '<div class="facet-block expander"><a class="expander__button js-expander__button is-active"><h3 class="facet-block__title">' . t('Distance from location') . '</h3></a><div class="expander__content">';
+        $variables['content']['latlng']['distance']['#prefix'] = $markup;
+        break;
+    }
+  }
+
+  // Facets/blocks to be expanded by default on page load.
+  $expanded = [
+    'exposedformprofile_search_location_search',
+    'facet_block:days',
+    'facet_block:times',
+    'facet_block:borough',
+  ];
+
+  $variables['expanded'] = FALSE;
+  if (isset($id) && in_array($id, $expanded)) {
+    // Set var to expand these.
+    $variables['expanded'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_search_form_views_exposed_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $view = $form_state->getStorage('view');
+  if ($view && strpos($form['#id'], 'views-exposed-form-profile-search-') !== FALSE) {
+    $form['search_api_fulltext']['#title_display'] = 'invisible';
+    if (isset($form['latlng'], $form['latlng']['distance'], $form['latlng']['distance']['from'])) {
+      $form['latlng']['distance']['from']['#type'] = 'radios';
+      $form['latlng']['distance']['from']['#default_value'] = max(array_keys($form['latlng']['distance']['from']['#options']));
+      $form['latlng']['distance']['from']['#field_prefix'] = FALSE;
+
+      // Make the distance radio submit the form on change on the search page only.
+      $route = \Drupal::routeMatch()->getRouteName();
+      if ($route == 'view.profile_search.page_1') {
+        $form['latlng']['distance']['from']['#attributes'] = [
+          'onChange' => 'this.form.submit();',
+        ];
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function gla_search_node_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  // Clear the search results total number cache when content is published or
+  // unpublished only.
+  if (!isset($entity->original)) {
+    return;
+  }
+
+  $type = $entity->bundle();
+  $types = ['opportunity', 'provider_profile'];
+  if (!in_array($type, $types)) {
+    return;
+  }
+
+  $new_state = $entity->get('moderation_state')->value;
+  $old_state = $entity->original->get('moderation_state')->value;
+  if ($new_state == $old_state) {
+    // No change, do nothing.
+    $clear_cache = FALSE;
+  }
+  elseif ($new_state == 'published') {
+    // Being added to the index, clear the cache.
+    $clear_cache = TRUE;
+  }
+  elseif ($old_state == 'published') {
+    // Being removed from the index, clear the cache.
+    $clear_cache = TRUE;
+  }
+  else {
+    $clear_cache = FALSE;
+  }
+
+  if ($clear_cache) {
+    \Drupal\Core\Cache\Cache::invalidateTags(['gla_search_total']);
+  }
+}

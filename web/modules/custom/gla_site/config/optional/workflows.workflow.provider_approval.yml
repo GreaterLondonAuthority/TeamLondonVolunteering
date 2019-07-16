@@ -1,0 +1,124 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.opportunity
+    - node.type.provider_profile
+  module:
+    - content_moderation
+id: provider_approval
+label: 'Provider approval'
+type: content_moderation
+type_settings:
+  states:
+    approved:
+      published: false
+      default_revision: false
+      label: 'Approved (awaiting scheduled publish)'
+      weight: 0
+    archived:
+      published: false
+      default_revision: true
+      label: Archived
+      weight: 2
+    draft:
+      published: false
+      default_revision: false
+      label: 'Draft version'
+      weight: -2
+    published:
+      label: Published
+      published: true
+      default_revision: true
+      weight: 1
+    ready_for_review:
+      published: false
+      default_revision: false
+      label: 'Ready for review'
+      weight: -1
+    unpublished:
+      published: false
+      default_revision: true
+      label: Unpublished
+      weight: -3
+  transitions:
+    approve:
+      label: Approve
+      from:
+        - ready_for_review
+      to: published
+      weight: -2
+    approve_await_scheduled_publish:
+      label: 'Approve (await scheduled publish)'
+      from:
+        - ready_for_review
+      to: approved
+      weight: -1
+    archive:
+      label: Archive
+      from:
+        - approved
+        - draft
+        - published
+        - ready_for_review
+        - unpublished
+      to: archived
+      weight: 5
+    changes_needed:
+      label: 'Changes needed'
+      from:
+        - approved
+        - ready_for_review
+      to: draft
+      weight: 0
+    create_new_draft:
+      label: 'Create New Draft'
+      to: draft
+      weight: -5
+      from:
+        - draft
+        - published
+    republish:
+      label: Republish
+      from:
+        - unpublished
+      to: published
+      weight: 2
+    restore_to_draft:
+      label: 'Restore to Draft'
+      from:
+        - unpublished
+      to: draft
+      weight: 3
+    scheduled_publish:
+      label: 'Scheduled publish'
+      from:
+        - approved
+      to: published
+      weight: 1
+    submit_for_approval:
+      label: 'Submit for approval'
+      from:
+        - approved
+        - draft
+      to: ready_for_review
+      weight: -4
+    unarchive:
+      label: Unarchive
+      from:
+        - archived
+      to: draft
+      weight: 4
+    unpublish:
+      label: Unpublish
+      from:
+        - approved
+        - draft
+        - published
+        - ready_for_review
+      to: unpublished
+      weight: -3
+  entity_types:
+    node:
+      - opportunity
+      - provider_profile

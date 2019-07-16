@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_advertising_dates
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_advertising_dates
+field_name: step_advertising_dates
+entity_type: node
+bundle: opportunity
+label: 'When do you want to advertise this role?'
+description: 'Give a start and end date for when you would like this role to be advertised on our website.'
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

@@ -1,0 +1,90 @@
+langcode: en
+status: true
+dependencies: {  }
+name: GLA
+machine_name: gla
+description: 'GLA features.'
+assignments:
+  alter:
+    core: true
+    uuid: true
+    user_permissions: false
+    enabled: true
+    weight: 0
+  base:
+    types:
+      config:
+        node_type: node_type
+      content:
+        user: user
+    enabled: true
+    weight: -2
+  core:
+    types:
+      config:
+        date_format: date_format
+        menu: menu
+    enabled: true
+    weight: 5
+  dependency:
+    enabled: false
+    weight: 15
+  exclude:
+    types:
+      config:
+        features_bundle: features_bundle
+    curated: true
+    module:
+      installed: true
+      profile: true
+      namespace: true
+      namespace_any: false
+    enabled: true
+    weight: -5
+  existing:
+    enabled: true
+    weight: 12
+  forward_dependency:
+    enabled: true
+    weight: 4
+  namespace:
+    enabled: false
+    weight: 0
+  optional:
+    types:
+      config:
+        features_bundle: features_bundle
+    enabled: true
+    weight: 0
+  packages:
+    enabled: true
+    weight: -20
+  profile:
+    curated: true
+    standard:
+      files: true
+      dependencies: true
+    types:
+      config:
+        block: block
+        language_content_settings: language_content_settings
+        configurable_language: configurable_language
+        migration: migration
+        shortcut_set: shortcut_set
+        tour: tour
+    enabled: true
+    weight: 10
+  site:
+    types:
+      config:
+        action: action
+        contact_form: contact_form
+        rdf_mapping: rdf_mapping
+        taxonomy_vocabulary: taxonomy_vocabulary
+        editor: editor
+        filter_format: filter_format
+        workflow: workflow
+    enabled: true
+    weight: 7
+profile_name: ''
+is_profile: false

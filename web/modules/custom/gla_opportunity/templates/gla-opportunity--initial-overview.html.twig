@@ -1,0 +1,78 @@
+<p>{{ 'Complete the steps below to create a volunteering role and submit it for approval.'|t }}</p>
+
+<p>{{ 'Once your role has been approved, we will list it on our website.'|t }}</p>
+
+<h4>{{ 'Opportunity overview'|t }}</h4>
+<ul class="list-unstyled">
+
+{% for field in fields.opp_overview %}
+  <li>
+    <div class="row">
+      <div class="col-sm-8 col-md-10">
+        <h3 class="heading--text">{{ field.link }}</h3>
+      </div>
+      <div class="col-sm-4 col-md-2 end-sm">
+        <div class="status-block status-block--pink text-left">{{ field.value }}</div>
+      </div>
+    </div>
+    <div class="separator"></div>
+  </li>
+{% endfor %}
+</ul>
+
+
+<h4>{{ 'Opportunity details'|t }}</h4>
+<ul class="list-unstyled">
+  {% for field in fields.opp_details %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text">{{ field.link }}</h3>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          <div class="status-block status-block--pink text-left">{{ field.value }}</div>
+        </div>
+      </div>
+      <div class="separator"></div>
+    </li>
+  {% endfor %}
+</ul>
+
+
+<h4>{{ 'Additional information'|t }}</h4>
+<ul class="list-unstyled">
+  {% for field in fields.additional %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text">{{ field.link }}</h3>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          <div class="status-block status-block--pink text-left">{{ field.value }}</div>
+        </div>
+      </div>
+      <div class="separator"></div>
+    </li>
+  {% endfor %}
+</ul>
+
+
+<h4>{{ 'Questions for volunteers (optional)'|t }}</h4>
+<ul class="list-unstyled">
+  {% for field in fields.volunteer_questions %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text">{{ field.link }}</h3>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          <div class="status-block status-block--pink text-left">{{ field.value }}</div>
+        </div>
+      </div>
+      <div class="separator"></div>
+    </li>
+  {% endfor %}
+</ul>
+
+
+{{ continue }}

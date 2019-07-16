@@ -1,0 +1,34 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.featured_role.field_opportunity
+    - field.field.paragraph.featured_role.field_tag
+    - paragraphs.paragraphs_type.featured_role
+id: paragraph.featured_role.default
+targetEntityType: paragraph
+bundle: featured_role
+mode: default
+content:
+  field_opportunity:
+    weight: 0
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_tag:
+    weight: 1
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_end_of_ad_specific
+    - node.type.opportunity
+  module:
+    - datetime
+id: node.opportunity.field_end_of_ad_specific
+field_name: field_end_of_ad_specific
+entity_type: node
+bundle: opportunity
+label: 'Specific date'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

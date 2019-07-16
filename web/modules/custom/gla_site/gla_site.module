@@ -1,0 +1,355 @@
+<?php
+
+use Drupal\Core\Breadcrumb\Breadcrumb;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_site_preprocess_page(&$variables) {
+  if (!\Drupal::currentUser()->hasPermission('access administration pages')) {
+    // Hide status messages on user journeys as they will be a part of the content.
+    $status_messages = drupal_get_messages('status');
+  }
+}
+
+/**
+ * Implements hook_system_breadcrumb_alter().
+ */
+function gla_site_system_breadcrumb_alter(Breadcrumb &$breadcrumb, RouteMatchInterface $route_match, array $context) {
+  if ($breadcrumb) {
+    $existing_breadcrumb_links = $breadcrumb->getLinks();
+
+    // Create a new breadcrumb object so we add these ones first.
+    $breadcrumb = new Breadcrumb();
+
+    // London.gov home breadcrumb.
+    $london_gov_url = Url::fromUri('https://www.london.gov.uk');
+    $breadcrumb->addLink(Link::fromTextAndUrl(t('Home'), $london_gov_url));
+
+    // TeamLondon home breadcrumb.
+    $breadcrumb->addLink(Link::createFromRoute('Team London', '<front>'));
+
+    // Add the default ones.
+    foreach ($existing_breadcrumb_links as $link) {
+      // Don't add the default home breadcrumb item as we're overriding this.
+      if ($link->getUrl()->getRouteName() != '<front>') {
+        $breadcrumb->addLink($link);
+      }
+    }
+
+    $breadcrumb->addCacheContexts(['route']);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function gla_site_node_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  $user_created_nodes = [
+    'opportunity',
+    'provider_profile',
+  ];
+
+  // Only do this processing if it's one of the node types above and has an
+  // original.
+  if (in_array($entity->bundle(), $user_created_nodes) && isset($entity->original)) {
+    // Check if the title has been changed.
+    $original_title = $entity->original->getTitle();
+    $title = $entity->getTitle();
+    if ($original_title != $title) {
+      // Trim the node title as we've had to set it as a space initially as it
+      // can't be null.
+      $title = trim($title);
+
+      // If the user has deleted the title, set it as a space.
+      if (empty($title)) {
+        $title = ' ';
+      }
+
+      $entity->setTitle($title);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_fieldset().
+ */
+function gla_site_preprocess_fieldset(&$variables) {
+  if (isset($variables['element']['day'], $variables['element']['month'], $variables['element']['year'])) {
+    $variables['element']['wrap_date'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view_field().
+ */
+function gla_site_preprocess_views_view_field(&$variables) {
+  // Only act on the manage content view.
+  if ($variables['view']->id() == 'manage_content_revisions') {
+    if ($variables['field']->field == 'nothing') {
+      /** @var \Drupal\node\Entity\Node $node */
+      $node = $variables['row']->_entity;
+      // Our custom fields.
+      switch ($variables['field']->options['id']) {
+        case 'nothing':
+          // Link to the latest version of the node.
+          $route_name = 'entity.node.canonical';
+          $moderation_info = \Drupal::getContainer()->get('content_moderation.moderation_information');
+          if ($moderation_info->hasPendingRevision($node)) {
+            $route_name = 'entity.node.latest_version';
+          }
+
+          $variables['output'] = Link::createFromRoute(t('View latest version'), $route_name, ['node' => $node->id()]);
+          break;
+      }
+    }
+    elseif ($variables['field']->field == 'title') {
+      // The rewrite empty result setting on the view isn't working on items
+      // that are empty after the value is trimmed. Do it manually here.
+      if (empty($variables['output'])) {
+        $variables['output'] = '<not yet completed>';
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function gla_site_entity_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+  if ($view_mode == 'full' && !isset($build['content_moderation_control']) && gla_site_is_admin() && $entity->getEntityTypeId() == 'node') {
+    // Show the content moderation form to admins (where applicable).
+    // Altered from \Drupal\content_moderation\EntityOperations::entityView as
+    // we want to show the option to unpublish on the default revision too.
+    $moderation_info = \Drupal::getContainer()->get('content_moderation.moderation_information');
+    if (!$moderation_info->isModeratedEntity($entity)) {
+      return;
+    }
+    if (isset($entity->in_preview) && $entity->in_preview) {
+      return;
+    }
+    // If the component is not defined for this display, we have nothing to do.
+    if (!$display->getComponent('content_moderation_control')) {
+      return;
+    }
+
+    $entity->custom_unpublish_moderation_form = TRUE;
+    $build['content_moderation_control'] = \Drupal::formBuilder()->getForm('\Drupal\content_moderation\Form\EntityModerationForm', $entity);
+  }
+  elseif (!gla_site_is_admin() && isset($build['content_moderation_control'])) {
+    // Non-admins shouldn't see the moderation form on the node view page.
+    unset($build['content_moderation_control']);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_site_form_content_moderation_entity_moderation_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // Change how the moderation form is displayed on the provider check answers page.
+  $entity = $form_state->get('entity');
+  $route_match = \Drupal::routeMatch();
+  if ($route_match->getRouteName() == 'entity.node.canonical' && isset($entity->custom_unpublish_moderation_form) && $entity->custom_unpublish_moderation_form) {
+    $form['#theme'][0] = '';
+    $form['current']['#access'] = FALSE;
+    $form['revision_log']['#access'] = FALSE;
+    // Convert to an 'unpublish' button (if applicable).
+    if (isset($form['new_state']['#options'], $form['new_state']['#options']['unpublished'])) {
+      $form['submit']['#value'] = t('Unpublish this live content immediately');
+      $form['submit']['#attributes'] = [
+        'class' => [
+          'link',
+        ],
+      ];
+      $form['new_state'] = [
+        '#type' => 'value',
+        '#value' => 'unpublished',
+      ];
+    }
+    else {
+      // If node is already unpublished, hide the form altogether.
+      $form['submit']['#access'] = FALSE;
+      $form['new_state']['#access'] = FALSE;
+    }
+  }
+}
+
+/**
+ * Helper function to check whether the current user is an admin.
+ */
+function gla_site_is_admin() {
+  $admin_roles = [
+    'administrator',
+    'site_administrator',
+  ];
+  $user = \Drupal::currentUser();
+  $user_roles = $user->getRoles();
+  foreach ($admin_roles as $admin_role) {
+    if (in_array($admin_role, $user_roles)) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_block_access().
+ */
+function gla_site_block_access(\Drupal\block\Entity\Block $block, $operation, \Drupal\Core\Session\AccountInterface $account) {
+  $plugin = $block->getPluginId();
+  if ($plugin == 'social_sharing_block' && $operation == 'view') {
+    $route_match = \Drupal::routeMatch();
+    if ($route_match->getRouteName() != 'entity.node.canonical') {
+      // Hide share links on any node pages other than the node view.
+      return \Drupal\Core\Access\AccessResult::forbidden();
+    }
+    else {
+      // To show the block on the homepage we have to enable it for landing
+      // pages, but we only want it on the front page.
+      $node = $route_match->getParameter('node');
+      if ($node && $node instanceof \Drupal\node\Entity\Node) {
+        if ($node->bundle() == 'landing_page' && !\Drupal::service('path.matcher')->isFrontPage()) {
+          return \Drupal\Core\Access\AccessResult::forbidden();
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function gla_site_cron() {
+  // We want to run this once a day.
+  $interval = 60 * 60 * 24;
+  $now = time();
+
+  $next_execution = \Drupal::state()->get('gla_site.cron_next_execution');
+  $next_execution = !empty($next_execution) ? $next_execution : 0;
+  if ($now >= $next_execution) {
+
+    // Get the base url.
+    $gla_menu_settings = \Drupal::config('gla_menu')->get();
+    if ($gla_menu_settings && isset($gla_menu_settings['base'])) {
+      $base_url = $gla_menu_settings['base'] . '/what-we-do/volunteering/search';
+    }
+
+    // Send the reminders.
+    gla_site_feedback_reminders($base_url);
+
+    // Set next execution time.
+    \Drupal::state()->set('gla_site.cron_next_execution', $now + $interval);
+  }
+}
+
+/**
+ * Send reminder emails.
+ */
+function gla_site_feedback_reminders($base_url) {
+
+  /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+  $provider_processor = Drupal::service('gla_provider.processor');
+
+  // Opportunities.
+  $seven_days = 60 * 60 * 24 * 7;
+  $nids = gla_site_lookup_reminders_needed('opportunity', $seven_days);
+  if (!empty($nids)) {
+    $nodes = \Drupal\node\Entity\Node::loadMultiple($nids);
+    foreach ($nodes as $node) {
+      try {
+        $latest_revision = $provider_processor->loadLatestRevision($node);
+
+        // Send reminder email.
+        gla_opportunity_message($latest_revision, 'opportunity_feedback_reminder', $base_url);
+
+        // Set reminder status to true.
+        $latest_revision->set('field_reminder_email', 1);
+        $latest_revision->setNewRevision(FALSE);
+        $latest_revision->applicationSubmissionTriggeredSave = TRUE;
+        $latest_revision->save();
+      }
+      catch (Exception $e) {
+        continue;
+      }
+    }
+  }
+
+  // Profiles.
+  $three_days = 60 * 60 * 24 * 3;
+  $nids = gla_site_lookup_reminders_needed('provider_profile', $three_days);
+  if (!empty($nids)) {
+    $nodes = \Drupal\node\Entity\Node::loadMultiple($nids);
+    foreach ($nodes as $node) {
+      try {
+        $latest_revision = $provider_processor->loadLatestRevision($node);
+
+        // Send reminder email.
+        gla_provider_message($latest_revision, 'provider_feedback_reminder', $base_url);
+
+        // Set reminder status to true.
+        $latest_revision->set('field_reminder_email', 1);
+        $latest_revision->setNewRevision(FALSE);
+        $latest_revision->applicationSubmissionTriggeredSave = TRUE;
+        $latest_revision->save();
+      }
+      catch (Exception $e) {
+        continue;
+      }
+    }
+  }
+}
+
+/**
+ * Query the database to find which nodes to process.
+ */
+function gla_site_lookup_reminders_needed($content_type, $cutoff) {
+
+  // Get all nids where the latest revision has reminder_email status 0 (not sent).
+  $sql = "SELECT entity_id
+    FROM node_revision__field_reminder_email as nr_reminder
+    WHERE (
+        nr_reminder.bundle = '" . $content_type . "' AND
+        nr_reminder.field_reminder_email_value = '0' AND
+        nr_reminder.revision_id IN (
+            SELECT max(revision_id)
+            FROM node_revision__field_reminder_email as nr_reminder
+            GROUP BY nr_reminder.entity_id
+        )
+    )";
+
+  $email_not_sent_result = db_query($sql)->fetchAllAssoc('entity_id');
+  if (empty($email_not_sent_result)) {
+    return [];
+  }
+
+  $nids = array_keys($email_not_sent_result);
+
+  $now = time();
+  $timestamp = $now - $cutoff;
+
+  // Query content revisions.
+  $feedback_query = Drupal::database()->select('node_field_revision', 'nfr');
+  $feedback_query->fields('nfr', ['nid']);
+  $feedback_query->join('node_field_data', 'nfd', 'nfd.nid = nfr.nid');
+  $feedback_query->innerJoin('node_revision', 'nr', 'nr.vid = nfr.vid');
+  $feedback_query->join('content_moderation_state_field_revision', 'cmfr', 'cmfr.content_entity_revision_id = nfr.vid');
+  $feedback_query->innerJoin('node', 'node', 'node.nid = nfr.nid');
+  $feedback_query->condition('nfd.type', $content_type);
+  $feedback_query->condition('cmfr.workflow', 'provider_approval');
+  $feedback_query->condition('cmfr.moderation_state', 'draft');
+  $feedback_query->isNotNull('nr.revision_log');
+  $feedback_query->condition('nr.revision_timestamp', $timestamp, '<=');
+  $feedback_query->condition('nfr.nid', $nids, 'IN');
+  $feedback_query->groupBy('nfr.nid');
+
+  $result = $feedback_query->execute()->fetchAllAssoc('nid');
+  if (!empty($result)) {
+    return array_keys($result);
+  }
+
+  return [];
+}

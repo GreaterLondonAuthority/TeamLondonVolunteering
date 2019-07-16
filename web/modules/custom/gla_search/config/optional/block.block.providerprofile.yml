@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.provider_profile
+  module:
+    - facets
+    - system
+  theme:
+    - team_london
+id: providerprofile
+theme: team_london
+region: sidebar_left
+weight: -1
+provider: null
+plugin: 'facet_block:provider_profile'
+settings:
+  id: 'facet_block:provider_profile'
+  label: Organisation
+  provider: facets
+  label_display: visible
+  block_id: providerprofile
+visibility:
+  request_path:
+    id: request_path
+    pages: /search-opportunities
+    negate: false
+    context_mapping: {  }

@@ -1,0 +1,56 @@
+# Volunteers migration
+# This will import the volunteer USERS - the drupal user accounts.
+
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - migrate_plus
+      - migrate_source_csv
+id: gla_volunteers
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags: null
+migration_group: gla
+label: 'GLA Volunteer users'
+source:
+  plugin: csv
+  path: 'modules/custom/gla_migrate/data/volunteers.csv'
+  header_row_count: 1
+  keys:
+    - id
+process:
+  mail: email
+  init: email
+  roles:
+    plugin: default_value
+    default_value: "volunteer"
+  name: email
+  status:
+    plugin: default_value
+    default_value: 1
+  # Only month and year provided so php assume the 'day' part as today's date number
+  created:
+    - plugin: format_date
+      from_format: 'F - Y'
+      to_format: 'U'
+      source: registered
+  # Explode the name and assume everything up to the last word is the First name
+  field_first_name:
+    - plugin: explode
+      limit: -1
+      delimiter: ' '
+      source: name
+    - plugin: concat
+      delimiter: ' '
+  # Explode the name and assume the last item is the Last name
+  field_last_name:
+    - plugin: explode
+      delimiter: ' '
+      source: name
+    - plugin: array_pop
+
+destination:
+  plugin: 'entity:user'

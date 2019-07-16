@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.profile_search
+  module:
+    - views
+  theme:
+    - team_london
+id: exposedformprofile_search_location_search
+theme: team_london
+region: sidebar_left
+weight: -11
+provider: null
+plugin: 'views_exposed_filter_block:profile_search-page_1'
+settings:
+  id: 'views_exposed_filter_block:profile_search-page_1'
+  label: ''
+  provider: views
+  label_display: visible
+  views_label: ''
+visibility: {  }

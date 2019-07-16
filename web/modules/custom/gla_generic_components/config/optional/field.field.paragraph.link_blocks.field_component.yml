@@ -1,0 +1,66 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_component
+    - paragraphs.paragraphs_type.image_and_cta
+    - paragraphs.paragraphs_type.link_blocks
+  module:
+    - entity_reference_revisions
+id: paragraph.link_blocks.field_component
+field_name: field_component
+entity_type: paragraph
+bundle: link_blocks
+label: Component
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      image_and_cta: image_and_cta
+    target_bundles_drag_drop:
+      discover_roles:
+        weight: 14
+        enabled: false
+      featured_role:
+        weight: 15
+        enabled: false
+      featured_roles:
+        weight: 16
+        enabled: false
+      image_and_cta:
+        enabled: true
+        weight: 17
+      image_text_and_cta_block:
+        weight: 18
+        enabled: false
+      image_text_with_cta:
+        weight: 19
+        enabled: false
+      image_with_blockquote:
+        weight: 20
+        enabled: false
+      image_with_text:
+        weight: 21
+        enabled: false
+      key_value:
+        weight: 22
+        enabled: false
+      link_blocks:
+        weight: 23
+        enabled: false
+      recently_posted_roles:
+        weight: 24
+        enabled: false
+      search_and_discover:
+        weight: 25
+        enabled: false
+      search_block:
+        weight: 26
+        enabled: false
+field_type: entity_reference_revisions

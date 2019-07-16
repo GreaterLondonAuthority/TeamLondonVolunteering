@@ -1,0 +1,75 @@
+/**
+ * @file
+ * Featured blocks component tweaks.
+ *
+**/
+
+@import "../variables/utilities";
+@import "../../../gla_estate/styles/variables/positioning";
+@import "../variables/typography";
+
+.icon-cta p {
+  font-weight: bold;
+}
+
+.component--icon-cta {
+  .heading--alt {
+    margin-top: 0;
+  }
+}
+
+.icon-cta__image {
+  height: 10rem;
+  position: relative;
+  img {
+    float: left;
+  }
+  p {
+    width: calc(100% - 10rem);
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
+    text-align: left;
+    left: 10rem;
+    padding-left: $gutter-spacing;
+  }
+  a:focus,
+  a:active {
+    outline: none;
+  }
+}
+
+@media (min-width: $screen-tablet) {
+  .icon-cta {
+    position: relative;
+    height: 24rem;
+    p {
+      position: static;
+      padding: 0;
+      width: auto;
+      transform: none;
+      text-align: center;
+      font-size: $font-size-h4;
+    }
+  }
+
+  .component--icon-cta {
+    .separator {
+      display: none;
+    }
+    a:focus,
+    a:active {
+      outline-offset: -2rem;
+    }
+  }
+
+  .icon-cta__image {
+    @include center();
+    height: 15rem;
+    img {
+      width: 10rem;
+      float: none;
+      height: auto;
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{% macro steps(step_group, title, feedback) %}
+  <h2 class="heading--alt">{{ title }}</h2>
+  <ul class="list-unstyled">
+    {% for step in step_group %}
+      <li>
+        <div class="row">
+          <div class="col-sm-8 col-md-10">
+            <h3 class="heading--text"><strong>{{ step.label|raw }}</strong></h3>
+            {% if not feedback %}
+              {% for substep in step %}
+                <p>{{ substep.value }}</p>
+              {% endfor %}
+            {% endif %}
+          </div>
+          <div class="col-sm-4 col-md-2 end-sm">
+            {{ step.link }}
+          </div>
+        </div>
+      </li>
+      <div class="separator"></div>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{{ back_button }}
+<h1 class="heading--title heading--alt">{{ title }}</h1>
+<h4 class="heading--text">{{ organisation }}</h4>
+
+<p><strong>{{ 'Published'|t }}: </strong>{{ dates.published }}&nbsp;&nbsp;|&nbsp;&nbsp;<strong>{{ 'Expires'|t }}: </strong>{{ dates.expired }}</p>
+
+<div class="dashboard-action-links">
+  {% for action in available_actions %}
+    {{ action }}{{ not loop.last ? '&nbsp;&nbsp;|&nbsp;' }}
+  {% endfor %}
+</div>
+
+
+
+{% if has_changes %}
+  <div>
+    <p>{{ 'This role has changes applied that have not been submitted for approval' }}</p>
+    <span>{{ 'To publish changes:'|t }}</span>
+    <p>{{ 'Submit this role to the Team London administrator to review'|t }}</p>
+  </div>
+{% endif %}
+
+{% if feedback['#markup'] %}
+  <div class="well">
+    <h3 class="heading--text"><strong>{{ 'Team London feedback received'|t }}</strong></h3>
+    <p>{{ 'We have reviewed your opportunity and request the following feedback:'|t }}</p>
+    <p>{{ feedback }}</p>
+    <h4 class="heading--text"><strong>{{ 'Next steps'|t }}</strong></h4>
+    <p>{{ 'Amend your opportunity and re-submit for approval.'|t }}</p>
+  </div>
+{% endif %}
+
+{{ _self.steps(steps.role_at_a_glance, '1. Role at a glance'|t, feedback) }}
+{{ _self.steps(steps.role_details, '2. Role details'|t, feedback) }}
+{{ _self.steps(steps.additional_information, '3. Additional Information'|t, feedback) }}
+{{ _self.steps(steps.questions, '4. Questions for volunteers'|t, feedback) }}
+
+{{ continue }}

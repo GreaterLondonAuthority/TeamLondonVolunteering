@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.profile_search
+  module:
+    - system
+    - views
+  theme:
+    - team_london
+id: exposedform_search
+theme: team_london
+region: content
+weight: -5
+provider: null
+plugin: 'views_exposed_filter_block:profile_search-page_1'
+settings:
+  id: 'views_exposed_filter_block:profile_search-page_1'
+  label: ''
+  provider: views
+  label_display: '0'
+  views_label: ''
+visibility:
+  request_path:
+    id: request_path
+    pages: /search-opportunities
+    negate: false
+    context_mapping: {  }

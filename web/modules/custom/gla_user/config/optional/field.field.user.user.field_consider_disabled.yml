@@ -1,0 +1,31 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_consider_disabled
+  module:
+    - multiple_registration
+    - options
+    - user
+third_party_settings:
+  multiple_registration:
+    user_additional_register_form:
+      volunteer: volunteer
+      authenticated: 0
+      provider: 0
+    user_additional_register_form_required:
+      authenticated: 0
+      volunteer: 0
+      provider: 0
+id: user.user.field_consider_disabled
+field_name: field_consider_disabled
+entity_type: user
+bundle: user
+label: 'Do you consider yourself to have a disability?'
+description: 'Disability is a long-term physical or mental impairment that has a substantial and long-term impact on your ability to carry out day to day activities.'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

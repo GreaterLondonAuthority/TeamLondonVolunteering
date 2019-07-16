@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - image.style.content_image_small
+    - image.style.thumbnail
+  theme:
+    - gla_estate
+id: content_teaser
+label: 'Content teaser'
+image_style_mappings:
+  -
+    breakpoint_id: gla_estate.mobile
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: thumbnail
+  -
+    breakpoint_id: gla_estate.minimum
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: content_image_small
+breakpoint_group: gla_estate
+fallback_image_style: thumbnail

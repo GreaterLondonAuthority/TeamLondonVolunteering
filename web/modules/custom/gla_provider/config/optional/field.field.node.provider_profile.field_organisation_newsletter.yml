@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_organisation_newsletter
+    - node.type.provider_profile
+id: node.provider_profile.field_organisation_newsletter
+field_name: field_organisation_newsletter
+entity_type: node
+bundle: provider_profile
+label: 'Would you like to recieve our newsletter?'
+description: 'You can unsubscribe at any time by changing your newsletter preferences on your profile page.'
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'Yes, I’d like to receive Team London’s newsletter'
+  off_label: 'Off'
+field_type: boolean

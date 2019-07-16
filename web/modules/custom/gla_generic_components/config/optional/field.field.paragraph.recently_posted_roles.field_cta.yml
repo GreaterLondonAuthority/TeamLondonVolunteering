@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_cta
+    - paragraphs.paragraphs_type.recently_posted_roles
+  module:
+    - link
+id: paragraph.recently_posted_roles.field_cta
+field_name: field_cta
+entity_type: paragraph
+bundle: recently_posted_roles
+label: CTA
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  link_type: 17
+  title: 2
+field_type: link

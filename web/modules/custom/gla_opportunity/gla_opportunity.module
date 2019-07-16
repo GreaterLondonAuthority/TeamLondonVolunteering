@@ -1,0 +1,1352 @@
+<?php
+
+use Drupal\image\Entity\ImageStyle;
+
+/**
+ * Implements hook_preprocess_node().
+ *
+ * @param $variables
+ */
+function gla_opportunity_preprocess_node__opportunity(&$variables) {
+  // Getting the owner and provider profile of the opportunity.
+  /** @var \Drupal\node\Entity\Node $node */
+  $node = $variables['node'];
+
+  /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+  $provider_processor = \Drupal::service('gla_provider.processor');
+  $provider_profile = $provider_processor->getProviderProfileFromEntity($node);
+  $variables['provider_exists'] = 0;
+  if ($provider_profile) {
+    $variables['provider_exists'] = 1;
+    $variables['organisation_name'] = $provider_profile->link();
+    $variables['organisation_summary'] = $provider_profile->get('field_organisation_deliver_value')->value;
+    if ($provider_profile->hasField('field_organisation_logo') && $provider_profile->get('field_organisation_logo')->target_id) {
+      $image_id = $provider_profile->get('field_organisation_logo')->target_id;
+      $file = Drupal\file\Entity\File::load($image_id);
+      if ($file) {
+        $image_path = $file->getFileUri();
+        $image_alt = $provider_profile->get('field_organisation_logo')->alt;
+        $image_url = ImageStyle::load('content_image_extra_small')->buildUrl($image_path);
+        $variables['organisation_logo'] = $image_url;
+        $variables['organisation_logo_alt'] = $image_alt;
+      }
+    }
+
+    if ($provider_profile->hasField('field_organisation_web_address')) {
+      $variables['organisation_website'] = $provider_profile->get('field_organisation_web_address')->value;
+    }
+
+    // Add links to view all roles by this org.
+    $options = [
+      'query' => [
+        'f' => [
+          ':',
+          'provider_profile:' . trim($provider_profile->getTitle()),
+        ],
+      ],
+    ];
+
+    $variables['search_link'] = \Drupal\Core\Url::fromRoute('view.profile_search.page_1', [], $options)->toString();
+
+    // Add lat/long for map in template.
+    if ($node->hasField('field_lat_long')) {
+      $latlong = $node->get('field_lat_long')->getValue();
+      $variables['#attached']['library'][] = 'gla_estate/maps';
+      if (isset($latlong[0], $latlong[0]['lat'], $latlong[0]['lng']) && !empty($latlong[0]['lat']) && !empty($latlong[0]['lng'])) {
+        $variables['lat'] = $latlong[0]['lat'];
+        $variables['long'] = $latlong[0]['lng'];
+
+        // Add travel info.
+        $variables['travel']['#markup'] = gla_opportunity_get_travel_info($variables['lat'], $variables['long']);
+      }
+    }
+  }
+
+  $variables['what_skills_useful'] = [];
+  $variables['skills_useful_set'] = $variables['skills_gain_set'] = $variables['expenses_covered'] = 0;
+  if ($node->hasField('field_what_skills_useful') && !$node->get('field_what_skills_useful')->isEmpty()) {
+    $variables['skills_useful_set'] = 1;
+    if (isset($variables['content']['field_what_skills_useful'])) {
+      $variables['what_skills_useful'] = $variables['content']['field_what_skills_useful'];
+    }
+  }
+  if ($node->hasField('field_what_skills_useful_other') && !$node->get('field_what_skills_useful_other')->isEmpty()) {
+    $variables['skills_useful_set'] = 1;
+    $variables['what_skills_useful'][]['#title'] = $node->get('field_what_skills_useful_other')->value;
+  }
+  if ($node->hasField('field_what_skills_gain') && !$node->get('field_what_skills_gain')->isEmpty()) {
+    $variables['skills_gain_set'] = 1;
+  }
+  if ($node->hasField('field_cover_expenses_specific') && !$node->get('field_cover_expenses_specific')->isEmpty()) {
+    $variables['expenses_covered'] = 1;
+  }
+  if ($node->hasField('field_bg_checks_required') && !$node->get('field_bg_checks_required')->isEmpty()) {
+    $variables['background_checks'] = 1;
+  }
+
+  // Getting all the volunteer bullets.
+  for ($i = 1; $i < 7; $i++) {
+    if (isset($variables['content']["field_what_bullet_$i"]) && !empty($variables['content']["field_what_bullet_$i"][0])) {
+      $variables['what_volunteer_is_doing'][] = $variables['content']["field_what_bullet_$i"];
+    }
+    if ($node->hasField("field_what_change_bullet_$i") && !$node->get("field_what_change_bullet_$i")->isEmpty()) {
+      $variables['what_volunteer_is_changing'][] = $node->get("field_what_change_bullet_$i")->value;
+    }
+    if (isset($variables['content']["field_bullet_$i"]) && !empty($variables['content']["field_bullet_$i"][0])) {
+      $variables['what_commitment_needed'][] = $variables['content']["field_bullet_$i"];
+    }
+    if (isset($variables['content']["field_additional_bullet_$i"]) && !empty($variables['content']["field_additional_bullet_$i"][0])) {
+      $variables['additional_information'][] = $variables['content']["field_additional_bullet_$i"];
+    }
+    if (isset($variables['content']["field_what_training_bullet_$i"]) && !empty($variables['content']["field_what_training_bullet_$i"][0])) {
+      $variables['training_needed'][] = $variables['content']["field_what_training_bullet_$i"];
+    }
+  }
+
+  // Declaring these for easier iteration later on.
+  $days_of_week = [
+    'field_monday' => 'Monday',
+    'field_tuesday' => 'Tuesday',
+    'field_wednesday' => 'Wednesday',
+    'field_thursday' => 'Thursday',
+    'field_friday' => 'Friday',
+    'field_saturday' => 'Saturday',
+    'field_sunday' => 'Sunday',
+  ];
+  $sessions_of_day = ['Morning', 'Afternoon', 'Evening'];
+  $when_needed = ['Morning' => [], 'Afternoon' => [], 'Evening' => []];
+
+  // Creating array that is easy to iterate through in template.
+  foreach ($days_of_week as $key => $day) {
+    for ($i = 0; $i < 3; $i++) {
+      if (isset($variables['content'][$key][$i])) {
+        $session = $variables['content'][$key][$i]['#markup'];
+        $when_needed[$session][$day] = TRUE;
+      }
+      if (!isset($when_needed[$sessions_of_day[$i]][$day])) {
+        $when_needed[$sessions_of_day[$i]][$day] = FALSE;
+      }
+    }
+  }
+  $variables['when_needed'] = $when_needed;
+
+  // Get opportunity full address.
+  $variables['opportunity_location'][] = $variables['node']->get('field_building_and_street')->value;
+  $variables['opportunity_location'][] = $variables['node']->get('field_building_and_street_2')->value;
+  $variables['opportunity_location'][] = $variables['node']->get('field_building_and_street_3')->value;
+  $variables['opportunity_location'][] = $variables['node']->get('field_town_or_city')->value;
+  $variables['opportunity_location'][] = $variables['node']->get('field_postcode')->value;
+
+  // Opportunity tags.
+  if ($node->hasField('field_causes_supported')) {
+    foreach ($node->get('field_causes_supported')->getValue() as $tag) {
+      $term = Drupal\taxonomy\Entity\Term::load($tag['target_id']);
+      if ($term) {
+        // Generate search link for tag.
+        $search_url = \Drupal\Core\Url::fromRoute('view.profile_search.page_1', [], [
+          'query' => [
+            'f' => [
+              'causes:' . $tag['target_id'],
+            ],
+          ],
+        ]);
+
+        $variables['opp_tags_links'][] = [
+          'label' => $term->label(),
+          'url' => $search_url,
+        ];
+      }
+    };
+  }
+
+  // Minimum age.
+  $variables['show_min_age'] = 0;
+  if ($node->hasField('field_minimum_age') && !$node->get('field_minimum_age')->isEmpty()) {
+    if ($node->get('field_minimum_age')->value == 'other') {
+      $age_value = $node->get('field_minimum_age_other')->value;
+      $age_value = intval(trim($age_value));
+      // Note: We display nothing if the minimum age is 18+.
+      if ($age_value && $age_value < 16) {
+        // Minimum age is less than 16 so show this.
+        $variables['show_min_age'] = 1;
+        $variables['min_age'] = $age_value . '+';
+      }
+      elseif ($age_value && 16 <= $age_value && $age_value < 18) {
+        // Minimum age is between 16 and 18, display custom text.
+        $variables['show_min_age'] = 1;
+        $variables['min_age'] = t('Volunteers should be @age years old and above', ['@age' => $age_value]);
+      }
+    }
+  }
+
+  // Show notice if coming from the dashboard.
+  $from_dashboard = \Drupal::request()->query->get('dashboard');
+  if ($node->moderation_state->value == 'ready_for_review' && $from_dashboard) {
+    $variables['node_status_info'] = [
+      '#markup' => t('This role is currently in review and you will be notified when it is approved or feedback is given.') ,
+      '#type' => 'markup',
+    ];
+  }
+}
+
+
+/**
+ * Implements hook_theme().
+ */
+function gla_opportunity_theme($existing, $type, $theme, $path) {
+  return [
+    'gla_opportunity__saved' => [
+      'variables' => [
+        'draft_opportunities' => NULL,
+        'create_new' => NULL,
+        'return_to_profile' => NULL,
+        'read_more' => NULL,
+        'dashboard' => NULL,
+      ],
+    ],
+    'gla_opportunity__initial_overview' => [
+      'variables' => [
+        'fields' => NULL,
+        'continue' => NULL,
+      ],
+    ],
+    'gla_opportunity__opportunity_check' => [
+      'variables' => [
+        'steps' => NULL,
+        'continue' => NULL,
+      ],
+    ],
+    'gla_opportunity__application_overview' => [
+      'variables' => [
+        'sections' => NULL,
+        'continue' => NULL,
+        'back_url' => NULL,
+      ],
+    ],
+    'gla_opportunity__application_check' => [
+      'variables' => [
+        'sections' => NULL,
+        'continue' => NULL,
+      ],
+    ],
+    'gla_opportunity__register_interest_sign_in' => [
+      'variables' => [
+        'create_account' => NULL,
+        'sign_in' => NULL,
+        'back_url' => NULL,
+      ],
+    ],
+    'gla_opportunity__application_success' => [
+      'variables' => [
+        'email' => NULL,
+        'links' => NULL,
+      ],
+    ],
+    'htmlmail__gla_opportunity_opportunity_approval' => [
+      'variables' => [
+        'link' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_opportunity_form_node_opportunity_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // Alterations to the opportunity add form.
+  /** @var \Drupal\node\Entity\Node $node */
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node->bundle() !== 'opportunity') {
+    return;
+  }
+
+  /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+  $provider_processor = \Drupal::service('gla_provider.processor');
+  $log = $provider_processor->getLatestFeedback($node)['log'];
+
+  // Get state.
+  $state = $node->moderation_state->value;
+
+  // Show log message.
+  if (!empty($log) && $state == 'draft') {
+    $form['feedback'] = [
+      '#markup' => $log,
+      '#weight' => -100,
+      '#type' => 'markup',
+      '#prefix' => '<div class="well"><h4>' . t('You have received feedback on this role. Please address this and resubmit for review.') . '</h4>',
+      '#suffix' => '</div>',
+    ];
+  }
+
+  // Add preview link (which as we save the node with each change is just the node view).
+  // Get the latest version link.
+  $route_name = 'entity.node.canonical';
+  $moderation_info = \Drupal::getContainer()->get('content_moderation.moderation_information');
+  if ($moderation_info->hasPendingRevision($node)) {
+    $route_name = 'entity.node.latest_version';
+  }
+
+  $preview_url = \Drupal\Core\Url::fromRoute($route_name, ['node' => $node->id()]);
+  $form['actions']['preview_opportunity'] = [
+    '#title' => t('Preview this opportunity in a new tab'),
+    '#type' => 'link',
+    '#url' => $preview_url,
+    '#weight' => 10,
+    '#prefix' => '<span>' . t('. You can also ') . '</span>',
+    '#attributes' => [
+      'target' => '_blank',
+    ],
+  ];
+
+  // Opportunity-specific fields states.
+  if (isset($form['field_one_off_date'])) {
+    $form['field_one_off_date']['#states'] = [
+      'visible' => [
+        ':input[name="field_dates_needed"]' => ['value' => 'one_off'],
+      ],
+    ];
+  }
+
+  if (isset($form['field_ongoing_start_date'])) {
+    $form['field_ongoing_start_date']['#states'] = [
+      'visible' => [
+        ':input[name="field_dates_needed"]' => ['value' => 'ongoing'],
+      ],
+    ];
+  }
+
+  if (isset($form['field_ongoing_end_date'])) {
+    $form['field_ongoing_end_date']['#states'] = [
+      'visible' => [
+        ':input[name="field_dates_needed"]' => ['value' => 'ongoing'],
+      ],
+    ];
+  }
+
+  if (isset($form['field_type_options_type'])) {
+    $form['field_type_options_type']['#states'] = [
+      'invisible' => [
+        ':input[name="field_type_options"]' => ['value' => 'other'],
+      ],
+      'disabled' => [
+        ':input[name="field_type_options"]' => ['value' => 'none'],
+      ],
+    ];
+  }
+
+  // Hide some labels.
+  $form['field_one_off_date']['widget'][0]['#title_display'] = 'invisible';
+  $form['field_type_options']['widget']['#title_display'] = 'invisible';
+  $form['field_type_options_type']['widget']['#title_display'] = 'invisible';
+  $form['field_type_options_other']['widget'][0]['value']['#title_display'] = 'invisible';
+  $form['field_what_skills_useful']['widget']['#title_display'] = 'invisible';
+  $form['field_what_skills_gain']['widget']['#title_display'] = 'invisible';
+  $form['field_minimum_age_other']['widget'][0]['value']['#title_display'] = 'invisible';
+  $form['field_cover_expenses_specific']['widget'][0]['value']['#title_display'] = 'invisible';
+
+  // Use custom help text on alt field.
+  if (isset($form['field_image'])) {
+    $form['#after_build'][] = 'gla_opportunity_after_build';
+  }
+
+  // Change date field ranges.
+  $current_year =  date('Y');
+  $max_year = $current_year + 5;
+  $form['field_start_of_ad_specific']['widget'][0]['year']['#min'] = $current_year;
+  $form['field_start_of_ad_specific']['widget'][0]['year']['#max'] = $max_year;
+  $form['field_end_of_ad_specific']['widget'][0]['year']['#min'] = $current_year;
+  $form['field_end_of_ad_specific']['widget'][0]['year']['#max'] = $max_year;
+  $form['field_one_off_date']['widget'][0]['year']['#min'] = $current_year;
+  $form['field_one_off_date']['widget'][0]['year']['#max'] = $max_year;
+  $form['field_ongoing_start_date']['widget'][0]['year']['#min'] = $current_year;
+  $form['field_ongoing_start_date']['widget'][0]['year']['#max'] = $max_year;
+  $form['field_ongoing_end_date']['widget'][0]['year']['#min'] = $current_year;
+  $form['field_ongoing_end_date']['widget'][0]['year']['#max'] = $max_year;
+
+  // Validate these date fields on each continue step.
+  $form['#validate'][] = 'gla_opportunity_submission_validate';
+
+  // Make the borough field an autocomplete.
+  if (isset($form['field_borough'], $form['field_borough']['widget'])) {
+    $form['field_borough']['widget']['#options']['_none'] = '';
+    $form['field_borough']['widget']['#attributes']['class'][] = 'select--autocomplete';
+    $form['field_borough']['widget']['#attributes']['class'][] = 'js-autocomplete';
+    $form['#attached']['library'][] = 'gla_estate/auto-complete';
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_opportunity_preprocess_page_title(&$variables) {
+  $route_match = \Drupal::routeMatch();
+  $route_name = $route_match->getRouteName();
+  $node = $route_match->getParameter('node');
+  if ($route_name == 'entity.node.edit_form' && $node && $node->bundle() == 'opportunity') {
+    $variables['title'] = t('Create a new volunteering role');
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_opportunity_form_content_moderation_entity_moderation_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // Change how the moderation form is displayed on the provider check answers page.
+  $route_match = \Drupal::routeMatch();
+  $entity = $form_state->get('entity');
+  if (!$entity) {
+    return;
+  }
+
+  if ($route_match->getRouteName() == 'gla_opportunity.opportunity_check') {
+    // Hide other parts of the form and set the new state as ready for review.
+    $form['#theme'][0] = '';
+    $form['current']['#access'] = FALSE;
+    $form['revision_log']['#access'] = FALSE;
+    $form['submit']['#value'] = t('Submit');
+    $form['#submit'][] = 'gla_opportunity_post_submit_redirect';
+    $form['new_state'] = [
+      '#type' => 'value',
+      '#value' => 'ready_for_review',
+    ];
+
+    // We need to add validation here to ensure the provider profile node can
+    // only be submitted when all required fields validation etc passes.
+    // We reuse the provider validation here.
+    $form['#validate'][] = 'gla_provider_submission_validate';
+  }
+  elseif ($entity->hasField('field_start_of_ad_specific')) {
+    // If this node has a scheduled publish date, then hide the 'publish' option
+    // from admins so they can only change it to 'approved and awaiting publish'.
+    $publish_on = strtotime($entity->get('field_start_of_ad_specific')->value);
+    if ($publish_on && $publish_on > time()) {
+      if (isset($form['new_state']['#options']['published'])) {
+        unset($form['new_state']['#options']['published']);
+        $form['new_state']['#default_value'] = 'approved';
+      }
+    }
+    else {
+      // The node doesn't have a scheduled publish date so the admin can publish
+      // it now. Hide the 'approved' state as this isn't needed.
+      if (isset($form['new_state']['#options']['approved'])) {
+        unset($form['new_state']['#options']['approved']);
+        $form['new_state']['#default_value'] = 'published';
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function gla_opportunity_node_presave(\Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->bundle() == 'opportunity') {
+    // If this is being triggered from an application submission, then we don't
+    // want to do any of the following. The opportunity statuses are handled in
+    // gla_provider_node_presave().
+    if (isset($entity->applicationSubmissionTriggeredSave) && $entity->applicationSubmissionTriggeredSave) {
+      $entity->applicationSubmissionTriggeredSave = NULL;
+      return;
+    }
+
+    $default_state = $entity->isDefaultRevision();
+    $current_state = $entity->moderation_state->value;
+    $feedback = $entity->get('revision_log')->value;
+
+    $send_email = TRUE;
+    if (isset($entity->glaSkipEmails) && $entity->glaSkipEmails) {
+      $send_email = FALSE;
+    }
+
+    // Send emails if not through drush.
+    if ($send_email && PHP_SAPI !== 'cli' && !empty($entity->id())) {
+      if ($current_state == 'published' && $default_state == TRUE) {
+        // If opportunity is approved.
+        gla_opportunity_message($entity, 'opportunity_approval');
+      }
+      elseif ($feedback && $current_state == 'draft') {
+        // If opportunity has been given feedback.
+        gla_opportunity_message($entity, 'opportunity_feedback');
+
+        // Reset reminder email status.
+        $entity->set('field_reminder_email', 0);
+      }
+
+      if ($current_state != 'draft') {
+        // Set reminder email status as 'sent' so it's not triggered from old
+        // revisions now.
+        $entity->set('field_reminder_email', 1);
+      }
+    }
+
+    // Set the scheduler fields here for existing content too.
+    $entity->set('publish_state', 'published');
+    $entity->set('unpublish_state', 'unpublished');
+
+    // Link up the scheduler date settings.
+    $six_months_seconds = 60 * 60 * 24 * 7 * 4 * 6;
+    $start_ad_option = $entity->get('field_start_of_ad')->value;
+    // If field_start_of_ad is asap then no scheduled publish, just publish straight away.
+    $publish_on = NULL;
+    if ($start_ad_option == 'specific') {
+      // Get the specific date.
+      $start_ad_date = $entity->get('field_start_of_ad_specific')->value;
+      $publish_on = strtotime($start_ad_date);
+    }
+
+    $end_ad_option = $entity->get('field_end_of_ad')->value;
+    // Default is unpublish after 6 months. If we have a publish_on date this
+    // will be six months after that. If not, then 6 months from now.
+    $six_months_from_start = gla_opportunity_six_months_from_date();
+    if ($publish_on) {
+      $six_months_from_start = gla_opportunity_six_months_from_date($publish_on);
+    }
+    $unpublish_on = $six_months_from_start;
+
+    // If field_end_of_ad is specific then use this date (if it's less than 6 months away).
+    if ($end_ad_option == 'specific') {
+      // Get the specific date.
+      $end_ad_date = $entity->get('field_end_of_ad_specific')->value;
+      $end_ad_date = strtotime($end_ad_date);
+      if ($end_ad_date && $end_ad_date < $six_months_from_start) {
+        $unpublish_on = $end_ad_date;
+      }
+    }
+
+    // Only set the publish_on value when this node is being approved.
+    // Only set the unpublish_on value when this node is being published.
+    if ($current_state == 'approved') {
+      $entity->set('publish_on', $publish_on);
+    }
+    elseif ($current_state == 'published') {
+      $entity->set('unpublish_on', $unpublish_on);
+    }
+
+    // Location work.
+    gla_opportunity_location_processing($entity);
+
+    // Day/time work.
+    gla_opportunity_day_time_processing($entity);
+  }
+}
+
+/**
+ * Implements hook_scheduler_allow_publishing().
+ */
+function gla_opportunity_scheduler_allow_publishing(\Drupal\node\NodeInterface $node) {
+  // Don't allow the scheduled publish to take place if the content has not been approved.
+  $moderation_state = $node->get('moderation_state')->value;
+  if ($moderation_state == 'approved') {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Add redirect to correct place after submitting values.
+ */
+function gla_opportunity_post_submit_redirect($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  if ($form['#form_id'] == 'content_moderation_entity_moderation_form') {
+    $storage = $form_state->getStorage();
+
+    /** @var \Drupal\node\Entity\Node $node */
+    $node = $storage['entity'];
+    $route_name = 'entity.node.canonical';
+    $moderation_info = \Drupal::getContainer()->get('content_moderation.moderation_information');
+    if ($moderation_info->hasPendingRevision($node)) {
+      $route_name = 'entity.node.latest_version';
+    }
+
+    $form_state->setRedirect($route_name, ['node' => $node->id()]);
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_opportunity_preprocess_node(&$variables) {
+  // Temporary - add a link to apply.
+  if (isset($variables['node'], $variables['view_mode'])) {
+    $node = $variables['node'];
+    $nid = $node->id();
+    $type = $node->bundle();
+
+    if ($type == 'opportunity') {
+      switch ($variables['view_mode']) {
+        case 'default':
+        case 'full':
+          $variables['register_interest_url'] = FALSE;
+          $apply_url = \Drupal\Core\Url::fromRoute('gla_opportunity.apply_overview', ['node' => $nid]);
+          if ($apply_url) {
+            $apply_url = $apply_url->toString();
+            $variables['register_interest_url'] = [
+              '#markup' => $apply_url,
+              '#weight' => 100,
+            ];
+          }
+          break;
+
+        case 'teaser':
+          // Get the provider profile.
+          /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+          $provider_processor = \Drupal::service('gla_provider.processor');
+          $provider_profile = $provider_processor->getProviderProfileFromEntity($node);
+          if ($provider_profile) {
+            $variables['content']['provider_name']['#markup'] = $provider_profile->getTitle();
+          }
+
+          // Inject the distance if we have it.
+          if (isset($node->search_distance)) {
+            $variables['content']['distance']['#markup'] = "{$node->search_distance} miles";
+          }
+
+          // Add cache context as teaser will vary by latlng query parameters.
+          $variables['#cache']['contexts'][] = 'url.query_args:latlng';
+
+          break;
+      }
+
+      // Start date.
+      $start_date = '';
+      $when_needed = $node->get('field_dates_needed')->value;
+      switch ($when_needed) {
+        case 'one_off':
+          if ($node->get('field_one_off_date')->date) {
+            $start_date = $node->get('field_one_off_date')->date->format('d/m/Y') . ' (' . t('one off event') . ')';
+          }
+          break;
+        case 'ongoing':
+        default:
+          if ($node->get('field_ongoing_start_date')->date) {
+            $start_date = $node->get('field_ongoing_start_date')->date->format('d/m/Y') . ' (' . t('ongoing') . ')';
+          }
+          else {
+            $start_date = t('Ongoing');
+          }
+          break;
+      }
+
+      $variables['content']['start_date']['#markup'] = $start_date;
+    }
+  }
+}
+
+/**
+ * Alter form after build.
+ */
+function gla_opportunity_after_build($form, &$form_state) {
+  // Change help text for alternative text field on image upload section.
+  if (isset($form['field_image'], $form['field_image']['widget'], $form['field_image']['widget']['current'])) {
+    foreach ($form['field_image']['widget']['current'] as $key => $value) {
+      if (is_numeric($key) && isset($value['meta'], $value['meta']['alt'], $value['meta']['alt']['#description'])) {
+        $form['field_image']['widget']['current'][$key]['meta']['alt']['#description'] = t('This will be used by screen readers, search engines and when the image can\'t be loaded.');
+      }
+    }
+  }
+
+  return $form;
+}
+
+/**
+ * Implements hook_mail().
+ */
+function gla_opportunity_mail($key, &$message, $params) {
+  $options = [
+    'langcode' => $message['langcode'],
+  ];
+
+  $message['reply-to'] = \Drupal::config('system.site')->get('mail');
+
+  switch ($key) {
+    case 'opportunity_approval':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Team London: @title', ['@title' => $params['title']], $options);
+      $message['body'][] = $params['message'];
+      $message['link'] = $params['link'];
+      break;
+    case 'opportunity_feedback':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Team London: @title', ['@title' => $params['title']], $options);
+      $message['body'][] = $params['message'];
+      $message['link'] = $params['link'];
+      break;
+    case 'opportunity_feedback_reminder':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Team London: @title', ['@title' => $params['title']], $options);
+      $message['body'][] = $params['message'];
+      $message['link'] = $params['link'];
+      break;
+    case 'application_deleted':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Team London: @title', ['@title' => $params['title']], $options);
+      $message['body'][] = $params['message'];
+      break;
+  }
+}
+
+/**
+ * Sends mail message.
+ */
+function gla_opportunity_message(Drupal\Core\Entity\EntityInterface $entity, $key, $base_url = FALSE) {
+  $mail_manager = \Drupal::service('plugin.manager.mail');
+  $module = 'gla_opportunity';
+  $langcode = \Drupal::currentUser()->getPreferredLangcode();
+  $send = TRUE;
+
+  // Get applicant email and organisation name.
+  $user = $entity->getOwner();
+  $to = $user->getEmail();
+  $first_name = $user->get('field_first_name')->value;
+  $last_name = $user->get('field_last_name')->value;
+  $provider_name = $first_name . ' ' . $last_name;
+
+  $nid = $entity->id();
+  $options = [
+    'absolute' => TRUE,
+  ];
+
+  if ($base_url) {
+    $options['base_url'] = $base_url;
+  }
+
+  $provider_dashboard_link = \Drupal\Core\Url::fromRoute('gla_provider.dashboard', [], $options)->toString();
+
+  // Send opportunity approval message.
+  if ($key == 'opportunity_approval') {
+    // Pass link to email template.
+    $public_opportunity_link = \Drupal\Core\Url::fromRoute('entity.node.canonical', ['node' => $nid], $options)->toString();
+    $params['link'] = $public_opportunity_link;
+
+    // Set top of body for email template.
+    $params['message'] = t('Dear @provider,', ['@provider' => $provider_name,]);
+
+    // Title of email.
+    $params['title'] = t('Your Team London volunteering role has been approved');
+  }
+  // Send opportunity feedback given message.
+  elseif ($key == 'opportunity_feedback') {
+    // Pass link to email template.
+    $params['link'] = $provider_dashboard_link;
+
+    // Set top of body for email template.
+    $params['message'] = t('Dear @provider,', ['@provider' => $provider_name,]);
+
+    // Title of email.
+    $params['title'] = t('Changes needed to your Team London volunteering role');
+  }
+  // Send opportunity feedback reminder message.
+  elseif ($key == 'opportunity_feedback_reminder') {
+    $params['link'] = $provider_dashboard_link;
+    $params['message'] = t('Dear @provider,', ['@provider' => $provider_name,]);
+    $params['title'] = t('Reminder, you have feedback on your volunteering role');
+  }
+
+  $messenger = \Drupal::messenger();
+  /** @var \Drupal\Core\Mail\MailManager $mail_manager */
+  $result = $mail_manager->mail($module, $key, $to, $langcode, $params, NULL, $send);
+  if ($result['result'] != TRUE) {
+    $message = t('There was a problem sending your email notification to @email.', ['@email' => $to]);
+    $messenger->addMessage($message, $messenger::TYPE_ERROR);
+    return;
+  }
+
+  $message = t('An email notification has been sent to @email ', ['@email' => $to]);
+  $messenger->addMessage($message);
+}
+
+/**
+ * Custom validation handler to validate the node before it is submitted for approval.
+ */
+function gla_opportunity_submission_validate($form, \Drupal\Core\Form\FormStateInterface &$form_state) {
+
+  // Clear out non-applicable fields for the chosen options otherwise there
+  // can be confusing errors if the user changes their mind.
+  $empty_date = [[
+    'value' => NULL,
+    'day' => '',
+    'month' => '',
+    'year' => '',
+  ]];
+
+  $empty_string = [['value' => '']];
+
+  $fields_to_clear = [
+    'field_start_of_ad' => [
+      [
+        'asap',
+        'field_start_of_ad_specific',
+        $empty_date,
+      ],
+    ],
+    'field_end_of_ad' => [
+      [
+        'none',
+        'field_end_of_ad_specific',
+        $empty_date,
+      ],
+    ],
+    'field_dates_needed' => [
+      [
+        'one_off',
+        ['field_ongoing_start_date', 'field_ongoing_end_date'],
+        $empty_date,
+      ],
+      [
+        'ongoing',
+        'field_one_off_date',
+        $empty_date,
+      ],
+    ],
+    'field_minimum_age' => [
+      [
+        'none',
+        'field_minimum_age_other',
+        $empty_string,
+      ],
+    ],
+    'field_cover_expenses' => [
+      [
+        'no',
+        'field_cover_expenses_specific',
+        $empty_string,
+      ],
+    ],
+  ];
+
+  foreach ($fields_to_clear as $field => $data) {
+    $field_value = $form_state->getValue($field);
+    if (isset($field_value[0], $field_value[0]['value'])) {
+      $option = $field_value[0]['value'];
+      foreach ($data as $set) {
+        if ($option == $set[0]) {
+          // Clear out any values that might have been previously set in the
+          // specific fields.
+          if (is_array($set[1])) {
+            foreach ($set[1] as $set_item) {
+              $form_state->setValue($set_item, $set[2]);
+            }
+          }
+          else {
+            $form_state->setValue($set[1], $set[2]);
+          }
+
+          break;
+        }
+      }
+    }
+  }
+
+  // Grab advert dates, convert to timestamp.
+  $ad_end_values = $form_state->getValue('field_end_of_ad_specific');
+  $ad_end_day = $ad_end_values[0]['day'];
+  $ad_end_month = $ad_end_values[0]['month'];
+  $ad_end_year = $ad_end_values[0]['year'];
+  $ad_end_date = strtotime($ad_end_year . '-' . $ad_end_month . '-' . $ad_end_day);
+
+  $ad_start_values = $form_state->getValue('field_start_of_ad_specific');
+  $ad_start_day = $ad_start_values[0]['day'];
+  $ad_start_month = $ad_start_values[0]['month'];
+  $ad_start_year = $ad_start_values[0]['year'];
+  $ad_start_date = strtotime($ad_start_year . '-' . $ad_start_month . '-' . $ad_start_day);
+
+  // Grab volunteer availability dates, convert to timestamp.
+  $vol_end_values = $form_state->getValue('field_ongoing_end_date');
+  $vol_end_day = $vol_end_values[0]['day'];
+  $vol_end_month = $vol_end_values[0]['month'];
+  $vol_end_year = $vol_end_values[0]['year'];
+  $vol_end_date = strtotime($vol_end_year . '-' . $vol_end_month . '-' . $vol_end_day);
+
+  $vol_start_values = $form_state->getValue('field_ongoing_start_date');
+  $vol_start_day = $vol_start_values[0]['day'];
+  $vol_start_month = $vol_start_values[0]['month'];
+  $vol_start_year = $vol_start_values[0]['year'];
+  $vol_start_date = strtotime($vol_start_year . '-' . $vol_start_month . '-' . $vol_start_day);
+
+  // Grab volunteer availability one of date, convert to timestamp.
+  $vol_values = $form_state->getValue('field_one_off_date');
+  $vol_day = $vol_values[0]['day'];
+  $vol_month = $vol_values[0]['month'];
+  $vol_year = $vol_values[0]['year'];
+  $vol_date = strtotime($vol_year . '-' . $vol_month . '-' . $vol_day);
+
+  // Only set these errors when we're on the step containing these fields.
+
+  // Validate end dates of date fields.
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_start_of_ad_specific')) {
+    $field_start_of_ad = $form_state->getValue('field_start_of_ad');
+    if (isset($field_start_of_ad[0], $field_start_of_ad[0]['value']) && $field_start_of_ad[0]['value'] == 'specific' && !$ad_start_date) {
+      $form_state->setError($form, t('Start date cannot be empty.'));
+    }
+
+    $field_end_of_ad = $form_state->getValue('field_end_of_ad');
+    if (isset($field_end_of_ad[0], $field_end_of_ad[0]['value']) && $field_end_of_ad[0]['value'] == 'specific' && !$ad_end_date) {
+      $form_state->setError($form, t('End date cannot be empty.'));
+    }
+
+    if ($ad_end_date && $ad_start_date && $ad_end_date < $ad_start_date) {
+      $form_state->setError($form, t('Your advert cannot end before the start date.'));
+    }
+  }
+
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_ongoing_start_date')) {
+    $field_dates_needed = $form_state->getValue('field_dates_needed');
+    if (isset($field_dates_needed[0], $field_dates_needed[0]['value']) && $field_dates_needed[0]['value'] == 'one_off' && !$vol_date) {
+      $form_state->setError($form, t('Start date cannot be empty.'));
+    }
+
+    if ($vol_end_date && $vol_start_date && $vol_end_date < $vol_start_date) {
+      $form_state->setError($form, t('Your end date cannot be before the start date.'));
+    }
+  }
+
+  // Make sure the end date is no longer than 6 months from the start date.
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_start_of_ad')) {
+    if ($ad_end_date) {
+      // If $ad_start_date isn't set from above then we need to use the current
+      // time for this check.
+      $ad_start_date_tmp = $ad_start_date;
+      if (!$ad_start_date_tmp) {
+        $ad_start_date_tmp = time();
+      }
+
+      // Check time between them.
+      $six_months_from_start = gla_opportunity_six_months_from_date($ad_start_date_tmp);
+      if ($ad_end_date > $six_months_from_start) {
+        $form_state->setError($form, t('The end date cannot be more than 6 months after the start date.'));
+      }
+    }
+  }
+
+  // Validate all fields so they cannot be in the past.
+
+  $all_dates = [
+    'field_end_of_ad_specific' => $ad_end_date,
+    'field_start_of_ad_specific' => $ad_start_date,
+    'field_ongoing_end_date' => $vol_end_date,
+    'field_ongoing_start_date' => $vol_start_date,
+    'field_one_off_date' => $vol_date,
+  ];
+
+  $current_date = date('Y-m-d');
+  $current_timestamp = strtotime($current_date);
+  foreach ($all_dates as $date_field => $date) {
+    if (gla_multistep_forms_should_validate_field($form, $form_state, $date_field)) {
+      if (!empty($date) && $date < $current_timestamp) {
+        $form_state->setError($form, t('You cannot use a date in the past.'));
+      }
+    }
+  }
+
+  // Validate 'give details' field in expenses section.
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_cover_expenses')) {
+    $field_cover_expenses = $form_state->getValue('field_cover_expenses');
+    if (isset($field_cover_expenses[0], $field_cover_expenses[0]['value'])) {
+      $cover_expenses_option = $field_cover_expenses[0]['value'];
+      $cover_expenses_specific = $form_state->getValue('field_cover_expenses_specific');
+      if ($cover_expenses_option == 'specific' && empty($cover_expenses_specific[0]['value'])) {
+        $form_state->setError($form, t('Please give details of expenses paid.'));
+      }
+    }
+  }
+
+  // Validate 'other' field in minimum age section.
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_minimum_age')) {
+    $field_minimum_age = $form_state->getValue('field_minimum_age');
+    if (isset($field_minimum_age[0], $field_minimum_age[0]['value'])) {
+      $minimum_age_option = $field_minimum_age[0]['value'];
+      $minimum_age_specific = $form_state->getValue('field_minimum_age_other');
+      if ($minimum_age_option == 'other' && empty($minimum_age_specific[0]['value'])) {
+        $form_state->setError($form, t('Please give details of any age requirements.'));
+      }
+    }
+  }
+
+  // Validate 'other' field in role type section.
+  $type_option = $form['field_type_options']['widget']['#value'];
+  $field_other = $form['field_type_options_other']['widget'][0]['value']['#value'];
+
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_type_options')) {
+    if ($type_option == 'other' && empty($field_other)) {
+      $form_state->setError($form, t('Please specify the type of role.'));
+    }
+  }
+
+  // Make sure type values only show if selected.
+  if (isset($type_option)) {
+    // Do not also show values of unselected fields
+    switch ($type_option) {
+      case 'type':
+        $form_state->setValue('field_type_options_other', []);
+        break;
+      case 'other':
+        $form_state->setValue('field_type_options_type', []);
+        break;
+      case 'none':
+        $form_state->setValue('field_type_options_other', []);
+        $form_state->setValue('field_type_options_type', []);
+        break;
+    }
+  }
+
+  // If 'type of role' selected, must select a role type.
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_type_options_type')) {
+    $type_list_value = $form_state->getValue('field_type_options_type');
+    if ($type_option == 'type' && empty($type_list_value)) {
+      $form_state->setError($form, t('Please specify the type of role.'));
+    }
+  }
+
+  // If no options for any of the days are selected.
+  $days_of_week = [
+    'field_monday',
+    'field_tuesday',
+    'field_wednesday',
+    'field_thursday',
+    'field_friday',
+    'field_saturday',
+    'field_sunday',
+  ];
+
+  if (gla_multistep_forms_should_validate_field($form, $form_state, $days_of_week[0])) {
+    $count = 0;
+    foreach ($days_of_week as $day) {
+      $field_value = $form_state->getValue($day);
+      if (!empty($field_value)) {
+        $count += 1;
+        break;
+      }
+    }
+    if ($count == 0) {
+      $form_state->setError($form, t('Please specify what day(s) volunteers are needed.'));
+    }
+  }
+
+  // If no causes selected.
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_causes_supported')) {
+    $causes = $form_state->getValue('field_causes_supported');
+    if (empty($causes)) {
+      $form_state->setError($form, t('Please specify the cause(s) your volunteering role supports.'));
+    }
+  }
+
+  // If no skills (useful) selected.
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_what_skills_useful')) {
+    $useful_skills = $form_state->getValue('field_what_skills_useful');
+    $useful_skills_other = $form_state->getValue('field_what_skills_useful_other');
+    if (empty($useful_skills) && empty($useful_skills_other[0]['value'])) {
+      $form_state->setError($form, t('Please specify the skill(s) useful to this volunteering role.'));
+    }
+  }
+
+  // If no skills (gained) selected.
+  if (gla_multistep_forms_should_validate_field($form, $form_state, 'field_what_skills_gain')) {
+    $gain_skills = $form_state->getValue('field_what_skills_gain');
+    if (empty($gain_skills)) {
+      $form_state->setError($form, t('Please specify the skill(s) to gain from this volunteering role.'));
+    }
+  }
+}
+
+/**
+ * Handles the location work on opportunity save.
+ */
+function gla_opportunity_location_processing(\Drupal\node\Entity\Node $entity) {
+  if (!$entity->hasField('field_lat_long')) {
+    return;
+  }
+
+  // Check if any address values have changed, or if we have no lat/long value.
+  $lat_long_lookup = FALSE;
+  if (!isset($entity->original)) {
+    $lat_long_lookup = TRUE;
+  }
+  elseif (!$entity->get('field_lat_long')->lat || !$entity->get('field_lat_long')->lng) {
+    $lat_long_lookup = TRUE;
+  }
+
+  $address_fields = [
+    'field_building_and_street',
+    'field_building_and_street_2',
+    'field_town_or_city',
+    'field_postcode',
+  ];
+
+  $address_values = [];
+  foreach ($address_fields as $address_field) {
+    if ($entity->hasField($address_field) && isset($entity->original) && ($entity->get($address_field)->value != $entity->original->get($address_field)->value || $lat_long_lookup)) {
+      $lat_long_lookup = TRUE;
+      if ($entity->get($address_field)->value) {
+        $address_values[] = $entity->get($address_field)->value;
+      }
+    }
+  }
+
+  // Nothing relevant has changed so don't make the call again.
+  if (!$lat_long_lookup || empty($address_values)) {
+    return;
+  }
+
+  // Get lat/long.
+  $address = implode(' ', $address_values);
+  $options = [
+    'query' => [
+      'SingleLine' => $address,
+      'f' => 'json',
+      'outFields' => '*',
+    ],
+  ];
+
+  $http_client = \Drupal::getContainer()->get('http_client');
+  /** @var \GuzzleHttp\Psr7\Response $request */
+  $request = $http_client->request('GET', 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates', $options);
+  if ($request->getStatusCode() == 200) {
+    $json = $request->getBody()->getContents();
+    $result = json_decode($json, TRUE);
+    if (is_array($result) && isset($result['candidates'], $result['candidates'][0], $result['candidates'][0]['location'], $result['candidates'][0]['location']['x'], $result['candidates'][0]['location']['y'])) {
+      // Set the values we need for the search from the address.
+      $longitude = $result['candidates'][0]['location']['x'];
+      $latitude = $result['candidates'][0]['location']['y'];
+      $coords = [['lat' => $latitude, 'lng' => $longitude]];
+      $entity->set('field_lat_long', $coords);
+    }
+  }
+}
+
+/**
+ * Handles the day/time work on opportunity save.
+ */
+function gla_opportunity_day_time_processing(\Drupal\node\Entity\Node $entity) {
+  // Set some hidden fields for use in indexing and search.
+  // Go through each day.
+  $days = [
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday',
+  ];
+
+  $index_field_days = [];
+  $index_field_times = [];
+  foreach ($days as $day) {
+    $field_name = 'field_' . $day;
+    if ($entity->hasField($field_name)) {
+      $values = $entity->get($field_name)->getValue();
+
+      // If we've already got all three times then we don't need to loop through each.
+      if (count($index_field_times) < 3) {
+        foreach ($values as $value) {
+          $time = $value['value'];
+          $index_field_times[$time] = ['value' => $time];
+          $index_field_days[$day] = ['value' => $day];
+        }
+      }
+      elseif (!empty($values)) {
+        $index_field_days[$day] = ['value' => $day];
+      }
+    }
+  }
+
+  // Set these values in our fields for easier indexing.
+  if ($entity->hasField('field_days_list')) {
+    $entity->set('field_days_list', array_values($index_field_days));
+  }
+
+  if ($entity->hasField('field_times_list')) {
+    $entity->set('field_times_list', array_values($index_field_times));
+  }
+}
+
+/**
+ * Get travel information.
+ */
+function gla_opportunity_get_travel_info($lat, $lng) {
+
+  // Check if we have this data cached.
+  $cache = Drupal::cache('gla_opportunity_travel_data');
+  $cid = "travel:$lat:$lng:ordered";
+  $cached_data = $cache->get($cid);
+  if ($cached_data) {
+    return $cached_data->data;
+  }
+
+  // Using OSM data.
+  $strings = [];
+  $names = [
+    'bus' => '',
+    'train' => '',
+  ];
+
+  // Bus stop.
+  $strings['bus'] = "[out:json]; (
+    node(around:1000,$lat,$lng)[highway=bus_stop];
+  ); out;";
+
+  // Train station.
+  $strings['train'] = "[out:json]; (
+    node(around:1000,$lat,$lng)[railway=station];
+  ); out;";
+
+  $http_client = \Drupal::getContainer()->get('http_client');
+  foreach ($strings as $type => $string) {
+    $options = [
+      'query' => [
+        'data' => $string,
+      ],
+    ];
+
+    try {
+      /** @var \GuzzleHttp\Psr7\Response $request */
+      $request = $http_client->request('GET', 'https://overpass-api.de/api/interpreter', $options);
+      if ($request->getStatusCode() == 200) {
+        $json = $request->getBody()->getContents();
+        $result = json_decode($json, TRUE);
+        // Grab the first result with a name.
+        if (is_array($result) && isset($result['elements'])) {
+          $shortest_distance = FALSE;
+          foreach ($result['elements'] as $element) {
+            if (isset($element['tags'], $element['tags']['name'], $element['lat'], $element['lon']) && !empty($element['tags']['name']) && !empty($element['lat']) && !empty($element['lon'])) {
+              $this_point_lat = $element['lat'];
+              $this_point_lng = $element['lon'];
+
+              // Check the distance.
+              $this_distance = haversine_great_circle_distance($lat, $lng, $this_point_lat, $this_point_lng);
+              if ($shortest_distance === FALSE || $shortest_distance > $this_distance) {
+                $shortest_distance = $this_distance;
+                $names[$type] = $element['tags']['name'];
+              }
+            }
+          }
+        }
+      }
+    }
+    catch (\Exception $e) {
+      continue;
+    }
+  }
+
+  $travel_info = [];
+  if (!empty($names['train'])) {
+    $travel_info[] = t('@train station.', [
+      '@train' => $names['train'],
+    ]);
+  }
+
+  if (!empty($names['bus'])) {
+    $travel_info[] = t('@bus bus stop.', [
+      '@bus' => $names['bus'],
+    ]);
+  }
+
+  $string = implode(' ', $travel_info);
+  if (!empty($string)) {
+    // Cache this data.
+    $cache->set($cid, $string);
+  }
+
+  return $string;
+}
+
+/**
+ * Calculates the great-circle distance between two points, with
+ * the Haversine formula.
+ * @param float $latitude_from Latitude of start point in [deg decimal]
+ * @param float $longitude_from Longitude of start point in [deg decimal]
+ * @param float $latitude_to Latitude of target point in [deg decimal]
+ * @param float $longitude_to Longitude of target point in [deg decimal]
+ * @param float $earth_radius Mean earth radius in [m]
+ * @return float Distance between points in [m] (same as earthRadius)
+ *
+ * From: https://stackoverflow.com/a/10054282
+ */
+function haversine_great_circle_distance($latitude_from, $longitude_from, $latitude_to, $longitude_to, $earth_radius = 6371000) {
+  // Convert from degrees to radians.
+  $lat_from = deg2rad($latitude_from);
+  $lon_from = deg2rad($longitude_from);
+  $lat_to = deg2rad($latitude_to);
+  $lon_to = deg2rad($longitude_to);
+
+  $lat_delta = $lat_to - $lat_from;
+  $lon_delta = $lon_to - $lon_from;
+
+  $angle = 2 * asin(sqrt(pow(sin($lat_delta / 2), 2) +
+      cos($lat_from) * cos($lat_to) * pow(sin($lon_delta / 2), 2)));
+  return $angle * $earth_radius;
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ *
+ * @param $variables
+ */
+function gla_opportunity_preprocess_views_view(&$variables) {
+  if ($variables['id'] == 'current_roles') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+
+    if ($node) {
+      $node_type = $node->getType();
+
+      if ($node_type == 'provider_profile') {
+        $organisation_name = $node->getTitle();
+
+        // Add links to view all roles by this org.
+        $options = [
+          'query' => [
+            'f' => [
+              ':',
+              'provider_profile:' . trim($organisation_name),
+            ],
+          ],
+        ];
+
+        $variables['search_link'] = \Drupal\Core\Url::fromRoute('view.profile_search.page_1', [], $options)->toString();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
+function gla_opportunity_node_update(Drupal\Core\Entity\EntityInterface $entity) {
+  // When an opportunity is updated, check its group and clear the cache tag for
+  // this provider dashboard.
+  /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+  $provider_processor = \Drupal::service('gla_provider.processor');
+  $group = $provider_processor->getGroupFromEntity($entity);
+  if ($group) {
+    $tag = 'provider_opportunities_group:' . $group->id();
+    \Drupal\Core\Cache\Cache::invalidateTags([$tag]);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_opportunity_form_views_exposed_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $view = $form_state->getStorage('view');
+  if ($view && $form['#id'] == 'views-exposed-form-applications-all-applications') {
+    // Make the responsed filter submit when changed.
+    $route = \Drupal::routeMatch()->getRouteName();
+    if ($route == 'view.applications.all_applications') {
+      $form['responded']['#attributes'] = [
+        'onChange' => 'this.form.submit();',
+      ];
+    }
+  }
+}
+
+/**
+ * Get our defined six months in seconds.
+ */
+function gla_opportunity_six_months_from_date($start = FALSE) {
+  if (!$start) {
+    $start = time();
+  }
+  $date = date('Y-m-d', $start);
+  return strtotime("$date + 6 months");
+}

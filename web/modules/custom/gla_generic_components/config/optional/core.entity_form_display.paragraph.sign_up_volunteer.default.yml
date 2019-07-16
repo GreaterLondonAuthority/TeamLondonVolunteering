@@ -1,0 +1,66 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.sign_up_volunteer.field_bottom_text
+    - field.field.paragraph.sign_up_volunteer.field_component_three
+    - field.field.paragraph.sign_up_volunteer.field_cta
+    - field.field.paragraph.sign_up_volunteer.field_subtext
+    - field.field.paragraph.sign_up_volunteer.field_title
+    - paragraphs.paragraphs_type.sign_up_volunteer
+  module:
+    - link
+    - paragraphs
+id: paragraph.sign_up_volunteer.default
+targetEntityType: paragraph
+bundle: sign_up_volunteer
+mode: default
+content:
+  field_bottom_text:
+    weight: 3
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_component_three:
+    type: entity_reference_paragraphs
+    weight: 2
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: closed
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: account_steps_image_with_link
+    third_party_settings: {  }
+    region: content
+  field_cta:
+    weight: 4
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+    type: link_default
+    region: content
+  field_subtext:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

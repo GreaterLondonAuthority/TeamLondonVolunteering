@@ -1,0 +1,63 @@
+
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - migrate_plus
+      - migrate_source_csv
+id: gla_opportunities_redirects
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags: null
+migration_group: gla
+label: 'GLA Opportunities Redirects'
+source:
+  plugin: csv
+  path: 'modules/custom/gla_migrate/data/opportunities.csv'
+  header_row_count: 1
+  keys:
+    - content_id
+  constants:
+    source_prefix: 'opportunities/'
+    redirect_prefix: 'internal:/node/'
+    uid_admin: 1
+    status_code: 301
+process:
+  # We need to get the NID of the originally imported provider profile node
+  # so that the redirect can be created towards it.
+  temp_nid:
+    -
+      plugin: migration_lookup
+      migration: gla_opportunities
+      source: content_id
+      no_stub: true
+    -
+      plugin: skip_on_empty
+      method: row
+  # The old opportunities path: https://volunteerteam.london.gov.uk/opportunities/10
+  redirect_source:
+    plugin: concat
+    source:
+      - constants/source_prefix
+      - opportunity_id
+  # The redirect destination is supposed be a URI of the form "internal:/node/NID".
+  #
+  # The URI will be used by the redirect module to get the respective path alias for the node. Even if the alias
+  # changes sometime in the future, the redirect will start pointing to the new alias instead of breaking.
+  redirect_redirect:
+    plugin: concat
+    source:
+      - constants/redirect_prefix
+      - "@temp_nid"
+  uid: constants/uid_admin
+  status_code: constants/status_code
+
+destination:
+  plugin: 'entity:redirect'
+
+# Uncomment when running the full migrations - atm running one at a time it complains that the dependency is not met.
+#migration_dependencies:
+#  required:
+#    - gla_provider_profiles

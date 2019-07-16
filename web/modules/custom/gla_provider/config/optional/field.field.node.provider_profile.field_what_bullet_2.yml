@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_what_bullet_2
+    - node.type.provider_profile
+id: node.provider_profile.field_what_bullet_2
+field_name: field_what_bullet_2
+entity_type: node
+bundle: provider_profile
+label: 'Bullet 2'
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

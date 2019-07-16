@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_bg_checks_required
+    - node.type.opportunity
+  module:
+    - options
+id: node.opportunity.field_bg_checks_required
+field_name: field_bg_checks_required
+entity_type: node
+bundle: opportunity
+label: 'Are background checks required?'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

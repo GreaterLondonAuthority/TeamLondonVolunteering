@@ -1,0 +1,46 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.featured_roles.field_cta
+    - field.field.paragraph.featured_roles.field_featured_roles
+    - field.field.paragraph.featured_roles.field_title
+    - paragraphs.paragraphs_type.featured_roles
+  module:
+    - entity_reference_revisions
+    - link
+id: paragraph.featured_roles.default
+targetEntityType: paragraph
+bundle: featured_roles
+mode: default
+content:
+  field_cta:
+    weight: 2
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    type: link
+    region: content
+  field_featured_roles:
+    type: entity_reference_revisions_entity_view
+    weight: 3
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    region: content
+  field_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_bottom_text
+    - paragraphs.paragraphs_type.sign_up_volunteer
+id: paragraph.sign_up_volunteer.field_bottom_text
+field_name: field_bottom_text
+entity_type: paragraph
+bundle: sign_up_volunteer
+label: 'Bottom Text'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

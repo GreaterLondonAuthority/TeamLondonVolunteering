@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - group.type.provider
+  enforced:
+    config:
+      - user.role.provider
+id: provider-b00f4b489
+label: Provider
+weight: -7
+internal: true
+audience: outsider
+group_type: provider
+permissions_ui: false
+permissions: {  }

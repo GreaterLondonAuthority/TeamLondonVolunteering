@@ -1,0 +1,23 @@
+{{ back }}
+<h1 class="heading--title heading--alt">{{ submission_details.role_title }}</h1>
+
+<dl>
+  <dt>{{ 'Volunteer name' }}:</dt>
+  <dd>{{ submission_details.volunteer_name }}</dd>
+
+  <dt>{{ 'Volunteer email address' }}:</dt>
+  <dd>{{ submission_details.volunteer_email }}</dd>
+
+  <dt>{{ 'Application submission date' }}:</dt>
+  <dd>{{ submission_details.date_submitted }}</dd>
+
+  <dt>{{ 'Response status' }}:</dt>
+  <dd>{{ submission_details.status }}</dd>
+</dl>
+
+<div class="separator"></div>
+
+<h4 class="heading--alt">{{ 'Response given'|t }}:</h4>
+<div class="well">
+  {{ response|nl2br }}
+</div>

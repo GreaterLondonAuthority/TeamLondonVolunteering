@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies: {  }
+id: provider
+label: Provider
+weight: -7
+is_admin: null
+permissions:
+  - 'access gla_provider_image_browser entity browser pages'
+  - 'cancel account'
+  - 'edit own opportunity content'
+  - 'edit own provider_profile content'
+  - 'use provider_approval transition create_new_draft'
+  - 'use provider_approval transition restore_to_draft'
+  - 'use provider_approval transition submit_for_approval'
+  - 'view latest version'
+  - 'view opportunity revisions'
+  - 'view own unpublished content'
+  - 'view provider_profile revisions'

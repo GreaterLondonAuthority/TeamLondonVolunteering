@@ -1,0 +1,50 @@
+/**
+ * @file
+ *
+ * Team London user navigation theme styles.
+ *
+**/
+
+@import "../variables/colours";
+@import "../variables/utilities";
+
+.user-navigation {
+  background: $mayoral--active;
+  color: $white;
+  p {
+    color: $white;
+    a {
+      color: $white;
+      &:hover,
+      &:focus {
+        color: $white;
+        outline-color: $white;
+      }
+    }
+  }
+  .user-navigation__link {
+    a {
+      text-decoration: none;
+      color: $white;
+      &:hover,
+      &:focus {
+        color: $white;
+        outline-color: $white;
+      }
+    }
+    &:first-child a {
+      background: $mayoral url('../../../#{$images}/icons/icon-login.svg') no-repeat 92% center;
+      background-size: 1.5rem;
+    }
+    &:last-child a {
+      background: $mayoral url('../../../#{$images}/icons/icon-register.svg') no-repeat 92% center;
+      background-size: 1.5rem;
+    }
+  }
+
+  // Beta tab colouring.
+  .beta-tab {
+    background: $white;
+    color: $mayoral;
+  }
+}

@@ -1,0 +1,671 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.opportunity.body
+    - field.field.node.opportunity.field_additional_bullet_1
+    - field.field.node.opportunity.field_additional_bullet_2
+    - field.field.node.opportunity.field_additional_bullet_3
+    - field.field.node.opportunity.field_bg_checks_required
+    - field.field.node.opportunity.field_borough
+    - field.field.node.opportunity.field_building_and_street
+    - field.field.node.opportunity.field_building_and_street_2
+    - field.field.node.opportunity.field_building_and_street_3
+    - field.field.node.opportunity.field_bullet_1
+    - field.field.node.opportunity.field_bullet_2
+    - field.field.node.opportunity.field_causes_supported
+    - field.field.node.opportunity.field_cover_expenses
+    - field.field.node.opportunity.field_cover_expenses_specific
+    - field.field.node.opportunity.field_dates_needed
+    - field.field.node.opportunity.field_days_list
+    - field.field.node.opportunity.field_end_of_ad
+    - field.field.node.opportunity.field_end_of_ad_specific
+    - field.field.node.opportunity.field_friday
+    - field.field.node.opportunity.field_image
+    - field.field.node.opportunity.field_include_qu1
+    - field.field.node.opportunity.field_include_qu2
+    - field.field.node.opportunity.field_lat_long
+    - field.field.node.opportunity.field_minimum_age
+    - field.field.node.opportunity.field_minimum_age_other
+    - field.field.node.opportunity.field_monday
+    - field.field.node.opportunity.field_old_opportunity_id
+    - field.field.node.opportunity.field_one_off_date
+    - field.field.node.opportunity.field_ongoing_end_date
+    - field.field.node.opportunity.field_ongoing_start_date
+    - field.field.node.opportunity.field_postcode
+    - field.field.node.opportunity.field_reminder_email
+    - field.field.node.opportunity.field_saturday
+    - field.field.node.opportunity.field_start_of_ad
+    - field.field.node.opportunity.field_start_of_ad_specific
+    - field.field.node.opportunity.field_status
+    - field.field.node.opportunity.field_sunday
+    - field.field.node.opportunity.field_thursday
+    - field.field.node.opportunity.field_times_list
+    - field.field.node.opportunity.field_town_or_city
+    - field.field.node.opportunity.field_tuesday
+    - field.field.node.opportunity.field_type_options
+    - field.field.node.opportunity.field_type_options_other
+    - field.field.node.opportunity.field_type_options_type
+    - field.field.node.opportunity.field_wednesday
+    - field.field.node.opportunity.field_what_bullet_1
+    - field.field.node.opportunity.field_what_bullet_2
+    - field.field.node.opportunity.field_what_bullet_3
+    - field.field.node.opportunity.field_what_bullet_4
+    - field.field.node.opportunity.field_what_bullet_5
+    - field.field.node.opportunity.field_what_bullet_6
+    - field.field.node.opportunity.field_what_change_bullet_1
+    - field.field.node.opportunity.field_what_change_bullet_2
+    - field.field.node.opportunity.field_what_change_bullet_3
+    - field.field.node.opportunity.field_what_change_bullet_4
+    - field.field.node.opportunity.field_what_change_bullet_5
+    - field.field.node.opportunity.field_what_change_bullet_6
+    - field.field.node.opportunity.field_what_skills_gain
+    - field.field.node.opportunity.field_what_skills_useful
+    - field.field.node.opportunity.field_what_skills_useful_other
+    - field.field.node.opportunity.field_what_training_bullet_1
+    - field.field.node.opportunity.field_what_training_bullet_2
+    - field.field.node.opportunity.field_what_training_bullet_3
+    - field.field.node.opportunity.step_additional_qu1
+    - field.field.node.opportunity.step_additional_qu2
+    - field.field.node.opportunity.step_advertising_dates
+    - field.field.node.opportunity.step_anything_additional
+    - field.field.node.opportunity.step_background_checks
+    - field.field.node.opportunity.step_causes
+    - field.field.node.opportunity.step_dates_vol_needed
+    - field.field.node.opportunity.step_days_vol_needed
+    - field.field.node.opportunity.step_expenses
+    - field.field.node.opportunity.step_min_age
+    - field.field.node.opportunity.step_opp_image
+    - field.field.node.opportunity.step_skills_gain
+    - field.field.node.opportunity.step_skills_useful
+    - field.field.node.opportunity.step_title_of_role
+    - field.field.node.opportunity.step_type
+    - field.field.node.opportunity.step_what_change
+    - field.field.node.opportunity.step_what_commitment
+    - field.field.node.opportunity.step_what_doing
+    - field.field.node.opportunity.step_what_training
+    - field.field.node.opportunity.step_where_based
+    - image.style.content_image_medium
+    - node.type.opportunity
+  module:
+    - datetime
+    - geolocation
+    - gla_multistep_forms
+    - image
+    - options
+    - text
+    - user
+id: node.opportunity.default
+targetEntityType: node
+bundle: opportunity
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  content_moderation_control:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_additional_bullet_1:
+    weight: 49
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_additional_bullet_2:
+    weight: 66
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_additional_bullet_3:
+    weight: 67
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_bg_checks_required:
+    weight: 45
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_borough:
+    weight: 73
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_building_and_street:
+    weight: 68
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_building_and_street_2:
+    weight: 69
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_building_and_street_3:
+    weight: 70
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_bullet_1:
+    weight: 17
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_bullet_2:
+    weight: 58
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_causes_supported:
+    weight: 20
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_cover_expenses:
+    weight: 42
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_cover_expenses_specific:
+    weight: 43
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_dates_needed:
+    weight: 8
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_days_list:
+    weight: 74
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_end_of_ad:
+    weight: 7
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_end_of_ad_specific:
+    weight: 54
+    label: hidden
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_friday:
+    weight: 13
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_image:
+    weight: 47
+    label: hidden
+    settings:
+      image_style: content_image_medium
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
+  field_include_qu1:
+    weight: 51
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_include_qu2:
+    weight: 53
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_lat_long:
+    weight: 76
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: geolocation_latlng
+    region: content
+  field_minimum_age:
+    weight: 39
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_minimum_age_other:
+    weight: 40
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_monday:
+    weight: 9
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_one_off_date:
+    weight: 55
+    label: hidden
+    settings:
+      timezone_override: ''
+      format_type: short_date
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_ongoing_end_date:
+    weight: 57
+    label: hidden
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_ongoing_start_date:
+    weight: 56
+    label: hidden
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_postcode:
+    weight: 72
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_saturday:
+    weight: 14
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_start_of_ad:
+    weight: 5
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_start_of_ad_specific:
+    weight: 6
+    label: hidden
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_sunday:
+    weight: 15
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_thursday:
+    weight: 12
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_times_list:
+    weight: 75
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_town_or_city:
+    weight: 71
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_tuesday:
+    weight: 10
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_type_options:
+    weight: 22
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_type_options_other:
+    weight: 23
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_type_options_type:
+    weight: 24
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_wednesday:
+    weight: 11
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_what_bullet_1:
+    weight: 33
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_2:
+    weight: 59
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_3:
+    weight: 60
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_4:
+    weight: 61
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_5:
+    weight: 62
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_6:
+    weight: 63
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_change_bullet_1:
+    weight: 35
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_skills_gain:
+    weight: 31
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_what_skills_useful:
+    weight: 26
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_what_skills_useful_other:
+    weight: 27
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_what_training_bullet_1:
+    weight: 37
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_training_bullet_2:
+    weight: 64
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_training_bullet_3:
+    weight: 65
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  links:
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  step_additional_qu1:
+    weight: 50
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_additional_qu2:
+    weight: 52
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_advertising_dates:
+    weight: 4
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_anything_additional:
+    weight: 48
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_background_checks:
+    weight: 44
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_causes:
+    weight: 19
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_dates_vol_needed:
+    weight: 29
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_days_vol_needed:
+    weight: 30
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_expenses:
+    weight: 41
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_min_age:
+    weight: 38
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_opp_image:
+    weight: 46
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_skills_gain:
+    weight: 28
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_skills_useful:
+    weight: 25
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_title_of_role:
+    weight: 3
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_type:
+    weight: 21
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_what_change:
+    weight: 34
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_what_commitment:
+    weight: 16
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_what_doing:
+    weight: 32
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_what_training:
+    weight: 36
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_where_based:
+    weight: 18
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+hidden:
+  field_old_opportunity_id: true
+  field_reminder_email: true
+  field_status: true
+  field_what_change_bullet_2: true
+  field_what_change_bullet_3: true
+  field_what_change_bullet_4: true
+  field_what_change_bullet_5: true
+  field_what_change_bullet_6: true
+  langcode: true

@@ -1,0 +1,180 @@
+<?php
+
+use Drupal\Core\Entity\Entity;
+
+/**
+ * Implements hook_theme().
+ */
+function gla_volunteer_theme($existing, $type, $theme, $path) {
+  return [
+    'gla_volunteer__profile_check' => [
+      'variables' => [
+        'steps' => NULL,
+        'continue' => NULL,
+      ],
+    ],
+    'gla_volunteer__dashboard' => [
+      'variables' => [
+        'name' => NULL,
+        'show_info' => NULL,
+        'continue_link' => NULL,
+        'applications' => NULL,
+        'links' => NULL,
+      ],
+    ],
+    'gla_volunteer__view_submission' => [
+      'variables' => [
+        'back' => NULL,
+        'opportunity_link' => NULL,
+        'opportunity_title' => NULL,
+        'data' => NULL,
+        'response_text' => NULL,
+      ],
+    ],
+    'gla_volunteer__preferences_overview' => [
+      'variables' => [
+        'fields' => NULL,
+        'continue' => NULL,
+      ],
+    ],
+    'gla_volunteer__preferences_intro' => [
+      'variables' => [
+        'continue' => NULL,
+      ],
+    ],
+    'gla_volunteer__dashboard_sidebar' => [
+      'variables' => [
+        'links' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ *
+ * Update the status of the application submission (and opportunity node if
+ * needed) on save.
+ *
+ * @param Entity $entity
+ */
+function gla_volunteer_application_submission_presave(\Drupal\gla_opportunity\Entity\ApplicationSubmission $entity) {
+  if (!isset($entity->original)) {
+    $entity->set('field_status', 'draft');
+  }
+  elseif ($entity->original !== $entity) {
+    $submitted = $entity->get('submitted')->value;
+    $application_status = $entity->get('field_application_status')->value;
+    if (!$submitted) {
+      // Volunteer hasn't submitted the application yet.
+      $entity->set('field_status', 'draft');
+    }
+    else {
+      // If the application has been submitted, we'll also need to save the
+      // opportunity node so that its status is updated.
+      // First handle the application's status.
+      if (!$application_status) {
+        // Volunteer has submitted application but the provider hasn't responded.
+        $entity->set('field_status', 'awaiting_response');
+      }
+      elseif ($application_status == 'accepted') {
+        // Volunteer has submitted and the provider has responded yes.
+        $entity->set('field_status', 'accepted');
+      }
+      elseif ($application_status == 'rejected') {
+        // Volunteer has submitted and the provider has responded no.
+        $entity->set('field_status', 'unsuccessful');
+      }
+
+      // Then save the opportunity.
+      $opp_node_default = $entity->getOpportunityNode();
+      // Get the latest version of this to save, otherwise we lose any draft
+      // updates.
+      /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+      $provider_processor = Drupal::service('gla_provider.processor');
+      $opp_node = $provider_processor->loadLatestRevision($opp_node_default);
+      $opp_node->applicationSubmissionTriggeredSave = TRUE;
+      $opp_node->currentApplicationBeingSaved = $entity->id();
+      $opp_node->currentApplicationBeingSavedResponded = $entity->get('responded')->value;
+      $opp_node->setNewRevision(FALSE);
+      $opp_node->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function gla_volunteer_entity_type_alter(array &$entity_types) {
+  // We get all form modes, for all entities, and loop through them.
+  $form_modes = \Drupal::service('entity_display.repository')->getAllFormModes();
+  foreach ($form_modes as $entity_type => $display_modes) {
+    if ($entity_type !== 'user') {
+      // We are only interested in adding a handler to the User entity.
+      continue;
+    }
+
+    $user_type = $entity_types[$entity_type];
+    foreach ($display_modes as $machine_name => $form_display) {
+      if ($machine_name !== 'equal_opportunities' && $machine_name !== 'volunteer_interests') {
+        // We are only interested in adding this form mode to the definition.
+        continue;
+      }
+      // We get the default handler class. It will be enough for us.
+      $default_handler_class = $user_type->getHandlerClasses()['form']['default'];
+      // We set the form class, keyed by the machine name of our custom form mode.
+      $user_type->setFormClass($machine_name, $default_handler_class);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_volunteer_preprocess_page__volunteer__dashboard__to_do(&$variables) {
+  // Add back link to dashboard.
+  $variables['back'] = \Drupal\Core\Link::createFromRoute(t('Back'), 'gla_volunteer.dashboard', [], ['attributes' => ['class' => 'link link--chevron-back']]);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+*/
+function gla_volunteer_preprocess_page__volunteer__account__overview(&$variables) {
+  // Add back link to dashboard.
+  $variables['back'] = \Drupal\Core\Link::createFromRoute(t('Back'), 'gla_volunteer.dashboard', [], ['attributes' => ['class' => 'link link--chevron-back']]);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_volunteer_preprocess_page__volunteer__preferences__overview(&$variables) {
+  // Add back link to dashboard.
+  $variables['back'] = \Drupal\Core\Link::createFromRoute(t('Back'), 'gla_volunteer.dashboard', [], ['attributes' => ['class' => 'link link--chevron-back']]);
+}
+
+/**
+ * Check if we're on the specified volunteer route.
+ */
+function is_volunteer_account_details_route() {
+  $current_user = Drupal::currentUser();
+  $route_match = \Drupal::routeMatch();
+  if ($route_match->getRouteName() == 'entity.user.edit_form' && in_array('volunteer', $current_user->getRoles())) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Check if we're on the specified volunteer route.
+ */
+function is_volunteer_account_overview_route() {
+  $current_user = Drupal::currentUser();
+  $route_match = \Drupal::routeMatch();
+  if ($route_match->getRouteName() == 'gla_volunteer.edit_account_overview' && in_array('volunteer', $current_user->getRoles())) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+

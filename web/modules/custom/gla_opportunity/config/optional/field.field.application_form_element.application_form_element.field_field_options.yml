@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.application_form_element.field_field_options
+    - paragraphs.paragraphs_type.key_value
+  module:
+    - entity_reference_revisions
+    - gla_opportunity
+id: application_form_element.application_form_element.field_field_options
+field_name: field_field_options
+entity_type: application_form_element
+bundle: application_form_element
+label: 'Field options'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      key_value: key_value
+    target_bundles_drag_drop:
+      key_value:
+        enabled: true
+        weight: 2
+field_type: entity_reference_revisions

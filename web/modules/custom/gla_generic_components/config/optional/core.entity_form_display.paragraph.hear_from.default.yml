@@ -1,0 +1,45 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.hear_from.field_component_three
+    - field.field.paragraph.hear_from.field_display
+    - field.field.paragraph.hear_from.field_title
+    - paragraphs.paragraphs_type.hear_from
+  module:
+    - paragraphs
+id: paragraph.hear_from.default
+targetEntityType: paragraph
+bundle: hear_from
+mode: default
+content:
+  field_component_three:
+    weight: 1
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: closed
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: testimonial
+    third_party_settings: {  }
+    type: entity_reference_paragraphs
+    region: content
+  field_display:
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

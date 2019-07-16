@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_what_skills_gain
+    - node.type.opportunity
+    - taxonomy.vocabulary.motivation
+id: node.opportunity.field_what_skills_gain
+field_name: field_what_skills_gain
+entity_type: node
+bundle: opportunity
+label: 'What skills gain'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      motivation: motivation
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: motivation
+field_type: entity_reference

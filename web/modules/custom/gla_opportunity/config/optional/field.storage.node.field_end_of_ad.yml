@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_end_of_ad
+field_name: field_end_of_ad
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: specific
+      label: 'Specific date<br>For example, 25 3 2019'
+    -
+      value: none
+      label: 'No specific end date<br>A role can be advertised for up to 6 months. After that, you will need to resubmit the role for approval.'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

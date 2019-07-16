@@ -1,0 +1,9 @@
+bundle: gla
+excluded:
+  - core.entity_form_display.node.article.default
+  - core.entity_form_display.group_content.provider-group_node-opportunity.default
+  - core.entity_view_display.node.article.default
+  - core.entity_view_display.node.article.rss
+  - core.entity_view_display.node.article.teaser
+  - field.field.node.article.field_image
+  - gla_opportunity.help_text_settings.yml

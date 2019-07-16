@@ -1,0 +1,28 @@
+diff --git a/src/Controller/MultipleRegistrationController.php b/src/Controller/MultipleRegistrationController.php
+index 947be1e..2bc7c3a 100644
+--- a/src/Controller/MultipleRegistrationController.php
++++ b/src/Controller/MultipleRegistrationController.php
+@@ -10,6 +10,7 @@
+ use Drupal\Core\Language\LanguageInterface;
+ use Drupal\Core\Routing\CurrentRouteMatch;
+ use Drupal\Core\Url;
++use Drupal\user\Entity\User;
+ use Symfony\Component\DependencyInjection\ContainerInterface;
+ use Drupal\Core\Routing\RouteMatchInterface;
+ use Drupal\Core\Link;
+@@ -296,6 +297,15 @@ public static function checkFieldAccess(array $fieldRoles) {
+         break;
+     }
+ 
++    // Custom routes on which we get the roles from the user route parameter.
++    $customRoutes = \Drupal::configFactory()->get('multiple_registration.custom_routes')->get();
++    if (empty($roles) && !empty($customRoutes) && in_array($routeMatch->getRouteName(), $customRoutes)) {
++      $user = $roles = $routeMatch->getParameter('user');
++      if ($user && $user instanceof User) {
++        $roles = $user->getRoles();
++      }
++    }
++
+     $extractKeys = array_intersect($roles, $fieldRoles);
+ 
+     if (!empty($extractKeys)) {

@@ -1,0 +1,49 @@
+# Provider Groups migration
+# This migration will create the drupal 'group' and in the 'POST_ROW_SAVE' event
+# it will add all the opportunities, providers, and provider profiles as 'related entities'
+# in the group so that users in the group can have access to those nodes.
+# This is the last migration to be run as it needs to have all the nodes/users from the
+# previous migrations to add them to the group.
+
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - migrate_plus
+      - migrate_source_csv
+id: gla_provider_groups
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags: null
+migration_group: gla
+label: 'GLA Provider Groups'
+source:
+  plugin: gla_provider_groups
+  path: 'modules/custom/gla_migrate/data/providers.csv'
+  header_row_count: 1
+  keys:
+    - content_id
+process:
+  label: title
+  field_provider_profile:
+    plugin: migration_lookup
+    migration: gla_provider_profiles
+    source: content_id
+    no_stub: true
+  uid:
+    plugin: migration_lookup
+    migration: gla_providers
+    source: content_id
+    no_stub: true
+destination:
+  plugin: 'entity:group'
+  default_bundle: 'provider'
+
+# Uncomment when running the full migrations - atm running one at a time it complains that the dependency is not met.
+#migration_dependencies:
+#  required:
+#    - gla_providers
+#    - gla_provider_profiles
+#    - gla_opportunities

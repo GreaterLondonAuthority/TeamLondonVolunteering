@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_dates_needed
+field_name: field_dates_needed
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: one_off
+      label: 'One off date<br>For example, 25 3 2019'
+    -
+      value: ongoing
+      label: 'Ongoing or flexible'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

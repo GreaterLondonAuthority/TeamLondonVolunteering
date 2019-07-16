@@ -1,0 +1,35 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - user
+id: user.field_best_describes
+field_name: field_best_describes
+entity_type: user
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: 'Heterosexual or Straight'
+      label: Heterosexual/Straight
+    -
+      value: 'Gay or Lesbian'
+      label: 'Gay or Lesbian'
+    -
+      value: Bisexual
+      label: Bisexual
+    -
+      value: Other
+      label: Other
+    -
+      value: 'Prefer not to say'
+      label: 'Prefer not to say'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

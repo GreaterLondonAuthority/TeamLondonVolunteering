@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_lat_long
+    - node.type.opportunity
+  module:
+    - geolocation
+id: node.opportunity.field_lat_long
+field_name: field_lat_long
+entity_type: node
+bundle: opportunity
+label: 'Lat long'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geolocation

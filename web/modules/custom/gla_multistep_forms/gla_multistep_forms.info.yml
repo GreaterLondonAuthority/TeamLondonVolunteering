@@ -1,0 +1,5 @@
+name: 'Multistep forms'
+type: module
+description: 'Module to add multistep functionality to node forms'
+core: 8.x
+package: GLA

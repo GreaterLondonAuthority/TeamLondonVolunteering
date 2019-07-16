@@ -1,0 +1,267 @@
+---
+
+# Our custom variable to set the host machine path to the TeamLondon codebase.
+# Override this in local.config.yml if necessary.
+local_team_london_path: /var/www/TeamLondon
+vm_team_london_path: /var/www/TeamLondon
+
+vagrant_user: vagrant
+vagrant_synced_folder_default_type: nfs
+vagrant_gui: false
+
+# If you need to run multiple instances of Drupal VM, set a unique hostname,
+# machine name, and IP address for each instance.
+vagrant_hostname: teamlondon.gla
+vagrant_machine_name: teamlondon
+vagrant_ip: 192.168.1.10
+
+# A list of synced folders, with the keys 'local_path', 'destination', and
+# a 'type' of [nfs|rsync|smb] (leave empty for slow native shares). See
+# http://docs.drupalvm.com/en/latest/getting-started/syncing-folders/ for more.
+vagrant_synced_folders:
+  # The first synced folder will be used for the default Drupal installation, if
+  # any of the build_* settings are 'true'. By default the folder is set to
+  # the drupal-vm folder.
+  - local_path: "{{ local_team_london_path }}"
+    destination: "{{ vm_team_london_path }}"
+    type: nfs
+    create: true
+
+# Memory and CPU to use for this VM.
+vagrant_memory: 2048
+vagrant_cpus: 1
+
+# Ensure vagrant plugins are installed.
+vagrant_plugins:
+  - name: vagrant-vbguest
+  - name: vagrant-hostsupdater
+
+# Minimum required versions.
+drupalvm_vagrant_version_min: '1.8.6'
+drupalvm_ansible_version_min: '2.4'
+
+# The web server software to use. Can be either 'apache' or 'nginx'.
+drupalvm_webserver: nginx
+
+# The database system to use. Can be either 'mysql' or 'pgsql'.
+drupal_db_backend: mysql
+
+# Set this to 'false' if you are using a different site deployment strategy and
+# would like to configure 'vagrant_synced_folders' and 'apache_vhosts' manually.
+drupal_build_makefile: false
+drush_makefile_path: "{{ config_dir }}/drupal.make.yml"
+drush_make_options: "--no-gitinfofile"
+
+# Set 'drupal_build_makefile' to 'false' and this to 'true' if you are using a
+# composer based site deployment strategy.
+drupal_build_composer: true
+drupal_composer_path: false
+drupal_composer_install_dir: "{{ vm_team_london_path }}"
+drupal_composer_dependencies: []
+
+# Set this to 'true' and 'drupal_build_makefile', 'drupal_build_composer' to 'false'
+# if you are using Composer's create-project as a site deployment strategy.
+drupal_build_composer_project: false
+drupal_composer_project_package: "drupal-composer/drupal-project:8.x-dev"
+drupal_composer_project_options: "--prefer-dist --stability dev --no-interaction"
+
+# Set this to 'false' if you don't need to install drupal (using the drupal_*
+# settings below), but instead copy down a database (e.g. using drush sql-sync).
+drupal_install_site: true
+
+# Required Drupal settings.
+drupal_core_path: "{{ vm_team_london_path }}/web"
+drupal_core_owner: "{{ drupalvm_user }}"
+drupal_db_user: drupal
+drupal_db_password: drupal
+drupal_db_name: teamlondon
+drupal_db_host: localhost
+
+# Settings for installing a Drupal site if 'drupal_install_site:' is 'true'.
+drupal_major_version: 8
+drupal_domain: "{{ vagrant_hostname }}"
+drupal_site_name: "TeamLondon"
+drupal_install_profile: gla
+drupal_enable_modules: []
+drupal_account_name: admin
+drupal_account_pass: password
+
+# Additional arguments or options to pass to `drush site-install`.
+drupal_site_install_extra_args: []
+
+# Cron jobs are added to the vagrant user's crontab. Keys include name
+# (required), minute, hour, day, weekday, month, job (required), and state.
+drupalvm_cron_jobs: []
+
+# Drupal VM automatically creates a drush alias file in your ~/.drush folder if
+# this variable is 'true'.
+configure_drush_aliases: true
+
+# Helper variable to configure the PHP-FPM connection for each Apache
+# VirtualHost in the `apache_vhosts` list.
+apache_vhost_php_fpm_parameters: |
+    <FilesMatch \.php$>
+      SetHandler "proxy:fcgi://{{ php_fpm_listen }}"
+    </FilesMatch>
+
+# Apache VirtualHosts. Add one for each site you are running inside the VM. For
+# multisite deployments, you can point multiple servernames at one documentroot.
+# View the geerlingguy.apache Ansible Role README for more options.
+apache_vhosts:
+  - servername: "{{ drupal_domain }}"
+    serveralias: "www.{{ drupal_domain }}"
+    documentroot: "{{ drupal_core_path }}"
+    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
+
+  - servername: "adminer.{{ vagrant_hostname }}"
+    documentroot: "{{ adminer_install_dir }}"
+    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
+
+  - servername: "xhprof.{{ vagrant_hostname }}"
+    documentroot: "{{ php_xhprof_html_dir }}"
+    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
+
+  - servername: "pimpmylog.{{ vagrant_hostname }}"
+    documentroot: "{{ pimpmylog_install_dir }}"
+    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
+
+  - servername: "{{ vagrant_ip }}"
+    serveralias: "dashboard.{{ vagrant_hostname }}"
+    documentroot: "{{ dashboard_install_dir }}"
+    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
+
+apache_packages_state: latest
+apache_remove_default_vhost: true
+apache_mods_enabled:
+  - expires.load
+  - headers.load
+  - ssl.load
+  - rewrite.load
+  - proxy.load
+  - proxy_fcgi.load
+
+# Nginx hosts. Each site will get a server entry using the configuration defined
+# here. Set the 'is_php' property for document roots that contain PHP apps like
+# Drupal.
+nginx_hosts:
+  - server_name: "{{ drupal_domain }} www.{{ drupal_domain }}"
+    root: "{{ drupal_core_path }}"
+    is_php: true
+
+  - server_name: "adminer.{{ vagrant_hostname }}"
+    root: "{{ adminer_install_dir }}"
+    is_php: true
+
+  - server_name: "xhprof.{{ vagrant_hostname }}"
+    root: "{{ php_xhprof_html_dir }}"
+    is_php: true
+
+  - server_name: "pimpmylog.{{ vagrant_hostname }}"
+    root: "{{ pimpmylog_install_dir }}"
+    is_php: true
+
+  - server_name: "{{ vagrant_ip }} dashboard.{{ vagrant_hostname }}"
+    root: "{{ dashboard_install_dir }}"
+    is_php: true
+
+nginx_remove_default_vhost: true
+nginx_ppa_use: true
+nginx_vhost_template: "templates/nginx-vhost.conf.j2"
+
+# Comment out any extra utilities you don't want to install. If you don't want
+# to install *any* extras, set this value to an empty set, e.g. `[]`.
+installed_extras:
+  - adminer
+  - drupalconsole
+  - drush
+  - mailhog
+  - nodejs
+  - pimpmylog
+  - solr
+  - xdebug
+
+# PHP Configuration. Currently-supported versions: 5.6, 7.0, 7.1, 7.2.
+# See version-specific notes: http://docs.drupalvm.com/en/latest/configurations/php/
+php_version: "7.2"
+php_install_recommends: yes
+php_memory_limit: "1024M"
+php_display_errors: "On"
+php_display_startup_errors: "On"
+php_realpath_cache_size: "1024K"
+php_sendmail_path: "/opt/mailhog/mhsendmail"
+php_opcache_enabled_in_ini: true
+php_opcache_memory_consumption: "1024"
+php_opcache_max_accelerated_files: 4096
+php_max_input_vars: "4000"
+
+composer_path: /usr/bin/composer
+composer_home_path: "/home/{{ drupalvm_user }}/.composer"
+composer_home_owner: "{{ drupalvm_user }}"
+composer_home_group: "{{ drupalvm_user }}"
+composer_global_packages:
+  - { name: hirak/prestissimo, release: '^0.3' }
+
+# Run specified scripts before or after VM is provisioned. Use {{ playbook_dir }}
+# to reference the provisioning/ folder in Drupal VM or {{ config_dir }} to
+# reference the directory where your `config.yml` is.
+pre_provision_scripts: []
+post_provision_scripts:
+  - "{{ vm_team_london_path }}/scripts/vm/configure-solr.sh"
+  - "{{ vm_team_london_path }}/scripts/vm/vagrant-post-provision.sh {{ vm_team_london_path }}"
+
+# MySQL Configuration.
+mysql_root_password: root
+mysql_slow_query_log_enabled: true
+mysql_slow_query_time: 2
+mysql_wait_timeout: 300
+adminer_install_filename: index.php
+
+# Pimp my Log settings.
+pimpmylog_install_dir: /usr/share/php/pimpmylog
+pimpmylog_grant_all_privs: true
+
+# XDebug configuration. XDebug is disabled by default for better performance.
+#php_xdebug_version: 2.5.0
+php_xdebug_default_enable: 1
+php_xdebug_coverage_enable: 1
+php_xdebug_cli_disable: no
+php_xdebug_remote_enable: 1
+php_xdebug_remote_connect_back: 1
+php_xdebug_idekey: PHPSTORM
+php_xdebug_max_nesting_level: 256
+php_xdebug_remote_host: "{{ ansible_default_ipv4.gateway }}"
+php_xdebug_remote_autostart: 1
+
+# Solr Configuration (if enabled above).
+solr_version: "5.5.5"
+solr_xms: "64M"
+solr_xmx: "128M"
+
+# Other configuration.
+dashboard_install_dir: /var/www/dashboard
+known_hosts_path: ~/.ssh/known_hosts
+hostname_configure: true
+hostname_fqdn: "{{ vagrant_hostname }}"
+ssh_home: "{{ drupal_core_path }}"
+
+# PHP extensions.
+
+php_packages_extra:
+  - php-mbstring
+  - php7.3-bcmath
+  - php7.3-soap
+  - php7.3-curl
+  - php7.3-xml
+  - php7.3-gd
+  - php7.3-intl
+  - php7.3-xsl
+  - php7.3-mysql
+  - php7.2-bcmath
+  - php7.2-soap
+  - php7.2-curl
+  - php7.2-xml
+  - php7.2-gd
+  - php7.2-intl
+  - php7.2-xsl
+  - php7.2-mysql
+

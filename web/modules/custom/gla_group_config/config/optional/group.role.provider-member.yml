@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - group.type.provider
+id: provider-member
+label: Member
+weight: -100
+internal: true
+audience: member
+group_type: provider
+permissions_ui: true
+permissions:
+  0: 'create group_node:opportunity entity'
+  1: 'delete any group_node:opportunity entity'
+  2: 'delete own group_node:opportunity entity'
+  3: 'update any group_node:opportunity entity'
+  4: 'update own group_node:opportunity entity'
+  5: 'view group_node:opportunity entity'
+  6: 'view unpublished group_node:opportunity entity'
+  8: 'update any group_node:provider_profile entity'
+  9: 'update own group_node:provider_profile entity'
+  10: 'view group_node:provider_profile entity'
+  11: 'view unpublished group_node:provider_profile entity'
+  12: 'add users to provider'

@@ -1,0 +1,72 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_search_block
+    - paragraphs.paragraphs_type.search_block
+    - paragraphs.paragraphs_type.why_volunteer_and_search
+  module:
+    - entity_reference_revisions
+id: paragraph.why_volunteer_and_search.field_search_block
+field_name: field_search_block
+entity_type: paragraph
+bundle: why_volunteer_and_search
+label: 'Search Block'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      search_block: search_block
+    target_bundles_drag_drop:
+      why_volunteer_and_search:
+        weight: 16
+        enabled: false
+      discover_roles:
+        weight: 17
+        enabled: false
+      featured_role:
+        weight: 18
+        enabled: false
+      featured_roles:
+        weight: 19
+        enabled: false
+      image_and_cta:
+        weight: 20
+        enabled: false
+      image_text_and_cta_block:
+        weight: 21
+        enabled: false
+      image_text_with_cta:
+        weight: 22
+        enabled: false
+      image_with_blockquote:
+        weight: 23
+        enabled: false
+      image_with_text:
+        weight: 24
+        enabled: false
+      key_value:
+        weight: 25
+        enabled: false
+      link_blocks:
+        weight: 26
+        enabled: false
+      recently_posted_roles:
+        weight: 27
+        enabled: false
+      search_and_discover:
+        weight: 28
+        enabled: false
+      search_block:
+        enabled: true
+        weight: 29
+      wysiwyg_with_cta:
+        weight: 30
+        enabled: false
+field_type: entity_reference_revisions

@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.application_submission.field_attached_form_responses
+  module:
+    - gla_opportunity
+id: application_submission.application_submission.field_attached_form_responses
+field_name: field_attached_form_responses
+entity_type: application_submission
+bundle: application_submission
+label: 'Attached form responses'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

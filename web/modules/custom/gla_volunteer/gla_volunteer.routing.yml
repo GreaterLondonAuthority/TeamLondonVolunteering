@@ -1,0 +1,128 @@
+### Start page - redirects to equal opps if logged in.
+gla_volunteer.start:
+  path: '/volunteer-start'
+  defaults:
+    _controller: '\Drupal\gla_volunteer\Controller\GlaVolunteerController::start'
+    _title: 'Volunteer'
+  requirements:
+    _permission: 'access content'
+
+### Dashboard.
+gla_volunteer.dashboard:
+  path: '/volunteer/dashboard'
+  defaults:
+    _controller: '\Drupal\gla_volunteer\Controller\GlaVolunteerController::dashboard'
+    _title: 'Your volunteer dashboard'
+  requirements:
+    _permission: 'access content'
+
+### Account details - email, password etc.
+# Overview.
+gla_volunteer.edit_account_overview:
+  path: '/volunteer/{user}/account/overview'
+  defaults:
+     _controller: '\Drupal\gla_volunteer\Controller\GlaVolunteerController::editAccountOverview'
+     _title: 'Your account details'
+  requirements:
+    _entity_access: 'user.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'volunteer'
+  options:
+    parameters:
+      user:
+        type: 'entity:user'
+
+### Equal opportunities - gender, race etc.
+# Edit.
+gla_volunteer.equal_opportunities:
+  path: '/volunteer/{user}/equal-opportunities'
+  defaults:
+    _entity_form: 'user.equal_opportunities'
+    _title: 'Equal opportunities'
+  requirements:
+    user: '\d+'
+    _entity_access: 'user.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'volunteer'
+# Check answers.
+gla_volunteer.equal_opportunities_check:
+  path: '/volunteer/{user}/equal-opportunities/check'
+  defaults:
+     _controller: '\Drupal\gla_volunteer\Controller\GlaVolunteerController::equalOpportunitiesCheck'
+     _title: 'Check your answers before submitting'
+  requirements:
+    _entity_access: 'user.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'volunteer'
+  options:
+    parameters:
+      user:
+        type: 'entity:user'
+
+### Preferences - types of skills etc.
+# Intro.
+gla_volunteer.preferences_intro:
+  path: '/volunteer/{user}/preferences/intro'
+  defaults:
+     _controller: '\Drupal\gla_volunteer\Controller\GlaVolunteerController::preferencesIntro'
+     _title: 'Volunteer preferences'
+  requirements:
+    _entity_access: 'user.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'volunteer'
+  options:
+    parameters:
+      user:
+        type: 'entity:user'
+# Overview.
+gla_volunteer.preferences_overview:
+  path: '/volunteer/{user}/preferences/overview'
+  defaults:
+     _controller: '\Drupal\gla_volunteer\Controller\GlaVolunteerController::preferencesCheck'
+     _title: 'Volunteer preferences overview'
+  requirements:
+    _entity_access: 'user.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'volunteer'
+  options:
+    parameters:
+      user:
+        type: 'entity:user'
+# Edit.
+gla_volunteer.preferences:
+  path: '/volunteer/{user}/preferences'
+  defaults:
+    _entity_form: 'user.volunteer_interests'
+    _title: 'Preferences'
+  requirements:
+    user: '\d+'
+    _entity_access: 'user.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'volunteer'
+# Check answers.
+gla_volunteer.preferences_check:
+  path: '/volunteer/{user}/preferences/check'
+  defaults:
+     _controller: '\Drupal\gla_volunteer\Controller\GlaVolunteerController::preferencesCheck'
+     _title: 'Check your answers before submitting'
+  requirements:
+    _entity_access: 'user.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'volunteer'
+  options:
+    parameters:
+      user:
+        type: 'entity:user'
+# View submission.
+gla_volunteer.view_submission:
+  path: '/volunteer/dashboard/submission/{entity}/view'
+  defaults:
+     _controller: '\Drupal\gla_volunteer\Controller\GlaVolunteerController::viewSubmission'
+  requirements:
+    _volunteer_access_check: 'TRUE'
+    _user_is_logged_in: 'TRUE'
+    _role: 'volunteer'
+  options:
+    parameters:
+      entity:
+        type: 'entity:application_submission'

@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * Functions to support theming in the GLA Team London theme.
+ */
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function team_london_theme_suggestions_form_alter(array &$suggestions, array $variables) {
+  $suggestions[] = 'form__' . $variables['element']['#form_id'];
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function team_london_preprocess_menu_local_action(&$variables) {
+  $variables['link']['#options']['attributes']['class'] = ['button', 'button--alt'];
+}
+
+/**
+ * Implements template_preprocess_page().
+ */
+function team_london_preprocess_page(&$variables) {
+  if (isset($variables['node']) && $variables['node'] instanceof \Drupal\node\Entity\Node) {
+    $content_type = $variables['node']->getType();
+    $route = \Drupal::routeMatch()->getRouteName();
+    $canonical = $route == 'entity.node.canonical';
+    $variables['container_exclude'] = FALSE;
+    $variables['provider_page'] = FALSE;
+    if ($content_type == 'provider_profile' && $canonical) {
+      $variables['container_exclude'] = TRUE;
+      $variables['provider_page'] = TRUE;
+    }
+
+    $has_components = $variables['node']->hasField('field_component') && !$variables['node']->get('field_component')->isEmpty();
+    if ($content_type == 'landing_page' && $has_components == TRUE) {
+      $variables['container_exclude'] = TRUE;
+    }
+  }
+}

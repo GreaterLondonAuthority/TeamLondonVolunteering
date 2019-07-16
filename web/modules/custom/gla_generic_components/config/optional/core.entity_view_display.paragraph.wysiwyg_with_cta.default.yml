@@ -1,0 +1,44 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.wysiwyg_with_cta.field_cta
+    - field.field.paragraph.wysiwyg_with_cta.field_description
+    - field.field.paragraph.wysiwyg_with_cta.field_title
+    - paragraphs.paragraphs_type.wysiwyg_with_cta
+  module:
+    - link
+    - text
+id: paragraph.wysiwyg_with_cta.default
+targetEntityType: paragraph
+bundle: wysiwyg_with_cta
+mode: default
+content:
+  field_cta:
+    weight: 2
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    type: link
+    region: content
+  field_description:
+    weight: 1
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+    region: content
+  field_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

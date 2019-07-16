@@ -1,0 +1,42 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.search_and_discover.field_discover_block
+    - field.field.paragraph.search_and_discover.field_search_block
+    - paragraphs.paragraphs_type.search_and_discover
+  module:
+    - paragraphs
+id: paragraph.search_and_discover.default
+targetEntityType: paragraph
+bundle: search_and_discover
+mode: default
+content:
+  field_discover_block:
+    type: entity_reference_paragraphs
+    weight: 1
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: closed
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: discover_roles
+    third_party_settings: {  }
+    region: content
+  field_search_block:
+    type: entity_reference_paragraphs
+    weight: 0
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: closed
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: search_block
+    third_party_settings: {  }
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: account_steps_image_with_link
+label: 'Account Steps Image with link'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }

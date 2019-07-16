@@ -1,0 +1,373 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.provider_profile.body
+    - field.field.node.provider_profile.field_borough
+    - field.field.node.provider_profile.field_building_and_street
+    - field.field.node.provider_profile.field_building_and_street_2
+    - field.field.node.provider_profile.field_building_and_street_3
+    - field.field.node.provider_profile.field_lat_long
+    - field.field.node.provider_profile.field_organisation_deliver_value
+    - field.field.node.provider_profile.field_organisation_facebook
+    - field.field.node.provider_profile.field_organisation_image
+    - field.field.node.provider_profile.field_organisation_instagram
+    - field.field.node.provider_profile.field_organisation_logo
+    - field.field.node.provider_profile.field_organisation_newsletter
+    - field.field.node.provider_profile.field_organisation_tags
+    - field.field.node.provider_profile.field_organisation_twitter
+    - field.field.node.provider_profile.field_organisation_web_address
+    - field.field.node.provider_profile.field_organisation_who_benefits
+    - field.field.node.provider_profile.field_postcode
+    - field.field.node.provider_profile.field_provider_group
+    - field.field.node.provider_profile.field_reminder_email
+    - field.field.node.provider_profile.field_status
+    - field.field.node.provider_profile.field_town_or_city
+    - field.field.node.provider_profile.field_uk_telephone_number
+    - field.field.node.provider_profile.field_what_bullet_1
+    - field.field.node.provider_profile.field_what_bullet_2
+    - field.field.node.provider_profile.field_what_bullet_3
+    - field.field.node.provider_profile.field_what_bullet_4
+    - field.field.node.provider_profile.field_what_bullet_5
+    - field.field.node.provider_profile.field_what_bullet_6
+    - field.field.node.provider_profile.step_org_address
+    - field.field.node.provider_profile.step_org_fb
+    - field.field.node.provider_profile.step_org_how_deliver
+    - field.field.node.provider_profile.step_org_image
+    - field.field.node.provider_profile.step_org_insta
+    - field.field.node.provider_profile.step_org_logo
+    - field.field.node.provider_profile.step_org_name
+    - field.field.node.provider_profile.step_org_newsletter
+    - field.field.node.provider_profile.step_org_phone
+    - field.field.node.provider_profile.step_org_tags
+    - field.field.node.provider_profile.step_org_tw
+    - field.field.node.provider_profile.step_org_values
+    - field.field.node.provider_profile.step_org_web
+    - field.field.node.provider_profile.step_org_who_benefits
+    - node.type.provider_profile
+  module:
+    - geolocation
+    - gla_multistep_forms
+    - image
+    - telephone
+    - text
+    - user
+id: node.provider_profile.default
+targetEntityType: node
+bundle: provider_profile
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  content_moderation_control:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_borough:
+    weight: 40
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_building_and_street:
+    weight: 29
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_building_and_street_2:
+    weight: 30
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_building_and_street_3:
+    weight: 31
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_lat_long:
+    weight: 41
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: geolocation_latlng
+    region: content
+  field_organisation_deliver_value:
+    weight: 20
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_organisation_facebook:
+    weight: 11
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_organisation_image:
+    weight: 26
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
+  field_organisation_instagram:
+    weight: 17
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_organisation_logo:
+    weight: 13
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
+  field_organisation_newsletter:
+    weight: 28
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_organisation_tags:
+    weight: 24
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_organisation_twitter:
+    weight: 15
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_organisation_web_address:
+    weight: 9
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_organisation_who_benefits:
+    weight: 22
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_postcode:
+    weight: 33
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_provider_group:
+    weight: 3
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_town_or_city:
+    weight: 32
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_uk_telephone_number:
+    weight: 7
+    label: above
+    settings:
+      title: ''
+    third_party_settings: {  }
+    type: telephone_link
+    region: content
+  field_what_bullet_1:
+    weight: 34
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_2:
+    weight: 35
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_3:
+    weight: 36
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_4:
+    weight: 37
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_5:
+    weight: 38
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_what_bullet_6:
+    weight: 39
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  links:
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  step_org_address:
+    weight: 5
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_fb:
+    weight: 10
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_how_deliver:
+    weight: 19
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_image:
+    weight: 25
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_insta:
+    weight: 16
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_logo:
+    weight: 12
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_name:
+    weight: 4
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_newsletter:
+    weight: 27
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_phone:
+    weight: 6
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_tags:
+    weight: 23
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_tw:
+    weight: 14
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_values:
+    weight: 18
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_web:
+    weight: 8
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+  step_org_who_benefits:
+    weight: 21
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: multistep_separator_formatter
+    region: content
+hidden:
+  field_reminder_email: true
+  field_status: true
+  langcode: true

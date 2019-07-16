@@ -1,0 +1,40 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.group_file_entity_browser
+  module:
+    - views
+name: gla_provider_image_browser
+label: 'Image browser'
+display: modal
+display_configuration:
+  width: '650'
+  height: '500'
+  link_text: 'Upload or select image'
+  auto_open: false
+selection_display: no_display
+selection_display_configuration: {  }
+widget_selector: tabs
+widget_selector_configuration: {  }
+widgets:
+  fab0690c-36fa-469c-932a-60be221035aa:
+    settings:
+      upload_location: 'public://image-browser-upload/[current-user:uid]'
+      multiple: false
+      submit_text: Submit
+      extensions: 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp'
+    uuid: fab0690c-36fa-469c-932a-60be221035aa
+    weight: 1
+    label: 'Upload new image'
+    id: upload
+  854e64a7-d8b7-4c0a-b73d-7d9433757f39:
+    settings:
+      view: group_file_entity_browser
+      view_display: entity_browser_1
+      submit_text: Submit
+      auto_select: false
+    uuid: 854e64a7-d8b7-4c0a-b73d-7d9433757f39
+    weight: 2
+    label: 'Select existing image'
+    id: view

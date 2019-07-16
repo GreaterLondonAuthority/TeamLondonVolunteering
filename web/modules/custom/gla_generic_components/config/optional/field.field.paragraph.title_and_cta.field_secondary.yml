@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_secondary
+    - paragraphs.paragraphs_type.title_and_cta
+  module:
+    - link
+id: paragraph.title_and_cta.field_secondary
+field_name: field_secondary
+entity_type: paragraph
+bundle: title_and_cta
+label: 'Secondary Button'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  link_type: 17
+  title: 2
+field_type: link

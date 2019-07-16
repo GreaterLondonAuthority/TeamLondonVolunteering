@@ -1,0 +1,42 @@
+{
+  "name": "team_london",
+  "version": "1.0.0",
+  "description": "D8 sub-theme package list",
+  "main": "index.js",
+  "scripts": {
+    "start": "gulp initial",
+    "dev": "gulp dev",
+    "build": "gulp build",
+    "clean": "gulp clean"
+  },
+  "author": "Zoocha Ltd",
+  "devDependencies": {
+    "@babel/core": "^7.1.6",
+    "autoprefixer": "^9.3.1",
+    "babel-preset-env": "^1.7.0",
+    "browser-sync": "^2.26.3",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^3.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-prettier": "^2.6.2",
+    "eslint-plugin-react": "^7.11.1",
+    "gulp": "^4.0.0",
+    "gulp-babel": "^8.0.0-beta.2",
+    "gulp-clean": "^0.4.0",
+    "gulp-cli": "^2.0.1",
+    "gulp-eslint": "^5.0.0",
+    "gulp-imagemin": "^5.0.3",
+    "gulp-postcss": "^8.0.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-strip-css-comments": "^2.0.0",
+    "postcss-reporter": "^6.0.0",
+    "stylelint": "^9.8.0",
+    "stylelint-config-recommended-scss": "^3.2.0",
+    "stylelint-scss": "^3.4.0"
+  },
+  "dependencies": {
+    "prettier": "^1.16.4"
+  }
+}

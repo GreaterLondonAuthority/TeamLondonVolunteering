@@ -1,0 +1,68 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - user
+id: user.field_ethnic_background
+field_name: field_ethnic_background
+entity_type: user
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: White
+      label: White
+    -
+      value: 'White - English/Welsh/Scottish/Northern Irish/British'
+      label: 'White - English/Welsh/Scottish/Northern Irish/British'
+    -
+      value: 'White - Irish'
+      label: 'White - Irish'
+    -
+      value: 'White - Gypsy or Irish Traveller'
+      label: 'White - Gypsy or Irish Traveller'
+    -
+      value: 'Mixed/Multiple - White and Black Caribbean'
+      label: 'Mixed/Multiple - White and Black Caribbean'
+    -
+      value: 'Mixed/Multiple - White and Black African'
+      label: 'Mixed/Multiple - White and Black African'
+    -
+      value: 'Mixed/Multiple - White and Asian'
+      label: 'Mixed/Multiple - White and Asian'
+    -
+      value: 'Asian/Asian British - Indian'
+      label: 'Asian/Asian British - Indian'
+    -
+      value: 'Asian/Asian British - Pakistani'
+      label: 'Asian/Asian British - Pakistani'
+    -
+      value: 'Asian/Asian British - Bangladeshi'
+      label: 'Asian/Asian British - Bangladeshi'
+    -
+      value: 'Asian/Asian British - Chinese'
+      label: 'Asian/Asian British - Chinese'
+    -
+      value: 'Black/African/Caribbean/Black British - African'
+      label: 'Black/African/Caribbean/Black British - African'
+    -
+      value: 'Black/African/Caribbean/Black British - Caribbean'
+      label: 'Black/African/Caribbean/Black British - Caribbean'
+    -
+      value: Arab
+      label: Arab
+    -
+      value: other
+      label: 'Any other ethnic group, please describe:'
+    -
+      value: 'Prefer not to say'
+      label: 'Prefer not to say'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.days
+  module:
+    - facets
+    - system
+  theme:
+    - team_london
+id: days
+theme: team_london
+region: sidebar_left
+weight: -7
+provider: null
+plugin: 'facet_block:days'
+settings:
+  id: 'facet_block:days'
+  label: Day
+  provider: facets
+  label_display: '0'
+  block_id: days
+visibility:
+  request_path:
+    id: request_path
+    pages: /search-opportunities
+    negate: false
+    context_mapping: {  }

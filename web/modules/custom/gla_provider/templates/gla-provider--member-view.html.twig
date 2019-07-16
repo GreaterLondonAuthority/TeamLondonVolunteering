@@ -1,0 +1,22 @@
+<h1 class="heading--title heading--alt">{{ 'Check your details'|t }}</h1>
+<h6>{{ org_name }}</h6>
+
+<div>{{ password_reset }}</div>
+<div>{{ delete_member }}</div>
+
+<ul class="list-unstyled">
+  {% for section in sections %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h2 class="heading--small heading--text"><strong>{{ section.label }}</strong></h2>
+          <p>{{ section.value|nl2br }}</p>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          {{ section.link }}
+        </div>
+      </div>
+    </li>
+    <div class="separator"></div>
+  {% endfor %}
+</ul>

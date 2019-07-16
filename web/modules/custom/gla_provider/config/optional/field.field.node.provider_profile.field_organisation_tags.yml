@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_organisation_tags
+    - node.type.provider_profile
+    - taxonomy.vocabulary.causes
+id: node.provider_profile.field_organisation_tags
+field_name: field_organisation_tags
+entity_type: node
+bundle: provider_profile
+label: 'What is your main focus?'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      causes: causes
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

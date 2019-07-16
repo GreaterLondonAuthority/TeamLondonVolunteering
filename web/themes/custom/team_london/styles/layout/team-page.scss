@@ -1,0 +1,203 @@
+/**
+ * @file
+ *
+ * Opportunity page and Provider profile styles.
+ *
+**/
+
+@import "../variables/colours";
+@import "../variables/utilities";
+@import "../variables/typography";
+
+// Design inconsistency here where the list items are set back for this node :/ .
+.team_page__list ul.team_page__list-items {
+  margin-left: 0;
+
+  li {
+    padding-left: 2rem;
+  }
+}
+
+.team_page__tags-container {
+  &::before {
+    content: '';
+    background: url('../../../#{$images}/icons/icon-tag.svg') no-repeat center;
+    width: 1.7rem;
+    height: 1.7rem;
+    background-size: 1.7rem;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+  }
+  a {
+    color: $mayoral;
+    text-decoration: underline;
+    font-weight: normal;
+  }
+}
+
+.team_page__org-logo {
+  padding: 0;
+}
+
+
+// Opportunity page
+.page-node-type-opportunity .content-block--share {
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.opportunity__table-sessions {
+  border: none;
+  margin: 1.5rem 0;
+  font-size: $font-size-small;
+
+  td {
+    text-align: center;
+    padding: 0;
+    min-width: 2.2rem;
+  }
+
+  tr th {
+    background: $white;
+    text-align: center;
+    font-size: $font-size-small;
+  }
+
+  tbody,
+  tr,
+  th,
+  tr td:first-child {
+    border: none;
+    font-weight: bold;
+    padding: 0;
+  }
+
+  tr td:first-child {
+    padding: 0;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .opportunity__table-day {
+    background-color: $mayoral;
+    border-radius: 50%;
+    width: 0.8rem;
+    height: 0.8rem;
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+.opportunity__organisation-logo {
+  overflow: hidden;
+}
+
+.opportunity__additional-info .opportunity__skills ul {
+  margin: 0;
+
+  li {
+    padding-left: 2rem;
+  }
+}
+
+// Provider page
+.provider-page {
+
+  .content-block--share {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .node__content > .content-block:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.volunteer-role {
+  .heading {
+    margin-top: 0;
+  }
+}
+
+.opportunity__image img {
+  max-width: 100%;
+  height: auto;
+}
+
+.volunteer-role__meta-item:not(:last-child)::after {
+  content: '|';
+  display: inline-block;
+  margin: 0 $gutter-spacing / 2;
+}
+
+.provider__volunteer-roles {
+  position: relative;
+  .more-link {
+    position: absolute;
+    top: 0.7rem;
+    right: 0;
+    text-decoration: underline;
+  }
+}
+
+.content-block--provider-location {
+  margin-bottom: 0;
+  padding-bottom: 0.1rem;
+
+  .heading {
+    margin-top: 0;
+  }
+}
+
+// Opportunity page Media queries
+@media (min-width: $screen-tablet) {
+  .opportunity__table-sessions {
+    width: 40%;
+    tr th {
+      font-size: $font-size-h3;
+    }
+  }
+  .team_page__org-logo {
+    overflow: hidden;
+    position: relative;
+    img {
+      height: 100%;
+      width: auto;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+  .team_page__main-image {
+    width: 700px;
+  }
+  .provider__volunteer-roles .content-block > div {
+    overflow: hidden;
+    max-height: 15rem;
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+}
+
+@media (min-width: $screen-mobile) {
+  .opportunity__table-sessions {
+    font-size: 1.4rem;
+
+    td, th {
+      padding: 1.7rem;
+      height: 5.7rem;
+      min-width: 5.7rem;
+    }
+
+    tr td:first-child {
+      padding-right: 1.5rem;
+    }
+
+    .opportunity__table-day {
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+  }
+}

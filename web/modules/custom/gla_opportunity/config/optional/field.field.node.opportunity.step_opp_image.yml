@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_opp_image
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_opp_image
+field_name: step_opp_image
+entity_type: node
+bundle: opportunity
+label: 'Add an image to your advert (optional)'
+description: "<p>Upload an image to showcase the role or your organisation.</p>\r\n<p>Notes:<br>This will help to increase engagement with your advert.</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

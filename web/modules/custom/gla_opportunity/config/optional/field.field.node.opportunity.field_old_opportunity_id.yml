@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_old_opportunity_id
+    - node.type.opportunity
+id: node.opportunity.field_old_opportunity_id
+field_name: field_old_opportunity_id
+entity_type: node
+bundle: opportunity
+label: 'Old Opportunity ID'
+description: 'Used for mapping migration files.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

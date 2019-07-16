@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.individual_cause
+  module:
+    - facets
+  theme:
+    - team_london
+id: individualcause
+theme: team_london
+region: sidebar_left
+weight: -5
+provider: null
+plugin: 'facet_block:individual_cause'
+settings:
+  id: 'facet_block:individual_cause'
+  label: 'Individual cause'
+  provider: facets
+  label_display: '0'
+  block_id: individualcause
+visibility: {  }

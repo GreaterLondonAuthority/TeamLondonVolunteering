@@ -1,0 +1,74 @@
+# Update the DAYS fields on the Opportunity nodes
+
+# Using ENTITY_LOOKUP for NID means that IF we ROLLBACK the original entity will be completely deleted.
+# So we can't roll back this migration without removing opportunities, so DO NO ROLLBACK.
+# If we need to rerun the days migration we just use the --update drush option.
+# drush mim gla_opportunities_days_times --update
+
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - migrate_plus
+      - migrate_source_csv
+id: gla_opportunities_days_times
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags: null
+migration_group: gla
+label: 'GLA Opportunities Days of Week fields'
+source:
+  plugin: csv
+  path: 'modules/custom/gla_migrate/data/opportunities_days_times.csv'
+  header_row_count: 1
+  keys:
+    - id
+process:
+  # We need to get the NID of the originally imported provider profile node
+  # so that the node can be updated rather than try to create it new.
+  nid:
+    - plugin: entity_lookup
+      source: opportunity_id
+      value_key: field_old_opportunity_id
+      bundle: opportunity
+      entity_type: node
+    - plugin: skip_on_empty
+      method: row
+  field_monday:
+    - plugin: days_time
+      source: day_guid
+  field_tuesday:
+    - plugin: days_time
+      source: day_guid
+  field_wednesday:
+    - plugin: days_time
+      source: day_guid
+  field_thursday:
+    - plugin: days_time
+      source: day_guid
+  field_friday:
+    - plugin: days_time
+      source: day_guid
+  field_saturday:
+    - plugin: days_time
+      source: day_guid
+  field_sunday:
+    - plugin: days_time
+      source: day_guid
+destination:
+  plugin: 'entity:node'
+  default_bundle: 'opportunity'
+  overwrite_properties:
+    - field_monday
+    - field_tuesday
+    - field_wednesday
+    - field_thursday
+    - field_friday
+    - field_saturday
+    - field_sunday
+
+#migration_dependencies:
+#  required:
+#    - gla_opportunities

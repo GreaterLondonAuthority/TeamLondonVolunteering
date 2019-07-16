@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.application_submission.field_tell_us_why
+  module:
+    - gla_opportunity
+id: application_submission.application_submission.field_tell_us_why
+field_name: field_tell_us_why
+entity_type: application_submission
+bundle: application_submission
+label: 'Tell us why you want to volunteer for this opportunity'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

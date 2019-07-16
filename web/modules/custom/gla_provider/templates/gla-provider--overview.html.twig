@@ -1,0 +1,53 @@
+
+<h2 class="heading--text">{{ organisation }}</h2>
+
+{{ add_content }}
+<div class="separator"></div>
+
+{% macro roles(roles_status, message) %}
+  {% if roles_status.0 %}
+    <table class="responsive-table">
+      <thead>
+        <tr role="row">
+          <th>{{ 'Role'|t }}</th>
+          <th>{{ 'When'|t }}</th>
+        </tr>
+      </thead>
+      {% for role in roles_status %}
+        {% if role.link is not empty %}
+          <tr role="row">
+            <td role="gridcell"><span class="table-heading" aria-hidden="true">{{ 'Role'|t }}</span>{{ role.link }}</td>
+            <td role="gridcell"><span class="table-heading" aria-hidden="true">{{ 'When'|t }}</span>{{ role.when }}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </table>
+  {% else %}
+    {{ message }}
+    <div class="separator"></div>
+  {% endif %}
+{% endmacro %}
+
+<h3 class="heading--alt">{{ 'Roles you\'ve started'|t }}</h3>
+<strong>{{ _self.roles(roles.draft.roles, 'You have no started roles.'|t) }}</strong>
+
+<h3 class="heading--alt">{{ 'Roles you\'ve submitted'|t }}</h3>
+<strong>{{ _self.roles(roles.ready_for_review.roles, 'You have no roles ready for review.'|t) }}</strong>
+
+<h3 class="heading--alt">{{ 'Roles with Feedback'|t }}</h3>
+<strong>{{ _self.roles(roles.feedback.roles, 'You have no roles with feedback.'|t) }}</strong>
+
+<h3 class="heading--alt">{{ 'Unpublished Roles'|t }}</h3>
+<strong>{{ _self.roles(roles.unpublished.roles, 'You have no unpublished roles.'|t) }}</strong>
+
+<h3 class="heading--alt">{{ 'Published Roles'|t }}</h3>
+<strong>{{ _self.roles(roles.published.roles, 'You have no published roles.'|t) }}</strong>
+
+<h3 class="heading--alt">{{ 'Approved roles yet to be advertised'|t }}</h3>
+<strong>{{ _self.roles(roles.approved.roles, 'You have no approved roles.'|t) }}</strong>
+
+<h3 class="heading--alt">{{ 'Expired Roles'|t }}</h3>
+<strong>{{ _self.roles(roles.expired.roles, 'You have no expired roles.'|t) }}</strong>
+
+<h3 class="heading--alt">{{ 'Archived Roles'|t }}</h3>
+<strong>{{ _self.roles(roles.archived.roles, 'You have no archived roles.'|t) }}</strong>

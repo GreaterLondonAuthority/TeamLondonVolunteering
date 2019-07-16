@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - gla_main_menu
+  theme:
+    - team_london
+id: glafootermenu
+theme: team_london
+region: footer
+weight: -4
+provider: null
+plugin: gla_menu_footer_menu
+settings:
+  id: gla_menu_footer_menu
+  label: 'GLA Footer Menu'
+  provider: gla_main_menu
+  label_display: '0'
+visibility: {  }

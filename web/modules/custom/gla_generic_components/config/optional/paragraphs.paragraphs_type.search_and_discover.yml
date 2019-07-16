@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: search_and_discover
+label: 'Search and Discover'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }

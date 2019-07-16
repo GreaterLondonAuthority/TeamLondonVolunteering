@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.discover_roles.field_roles
+    - field.field.paragraph.discover_roles.field_title
+    - paragraphs.paragraphs_type.discover_roles
+id: paragraph.discover_roles.default
+targetEntityType: paragraph
+bundle: discover_roles
+mode: default
+content:
+  field_roles:
+    weight: 1
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

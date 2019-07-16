@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - group.type.provider
+  enforced:
+    config:
+      - user.role.administrator
+id: provider-a416e6833
+label: Administrator
+weight: 0
+internal: true
+audience: outsider
+group_type: provider
+permissions_ui: false
+permissions: {  }

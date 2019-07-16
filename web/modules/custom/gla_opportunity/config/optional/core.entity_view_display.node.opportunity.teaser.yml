@@ -1,0 +1,234 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.opportunity.body
+    - field.field.node.opportunity.field_additional_bullet_1
+    - field.field.node.opportunity.field_additional_bullet_2
+    - field.field.node.opportunity.field_additional_bullet_3
+    - field.field.node.opportunity.field_bg_checks_required
+    - field.field.node.opportunity.field_borough
+    - field.field.node.opportunity.field_building_and_street
+    - field.field.node.opportunity.field_building_and_street_2
+    - field.field.node.opportunity.field_building_and_street_3
+    - field.field.node.opportunity.field_bullet_1
+    - field.field.node.opportunity.field_bullet_2
+    - field.field.node.opportunity.field_causes_supported
+    - field.field.node.opportunity.field_cover_expenses
+    - field.field.node.opportunity.field_cover_expenses_specific
+    - field.field.node.opportunity.field_dates_needed
+    - field.field.node.opportunity.field_days_list
+    - field.field.node.opportunity.field_end_of_ad
+    - field.field.node.opportunity.field_end_of_ad_specific
+    - field.field.node.opportunity.field_friday
+    - field.field.node.opportunity.field_image
+    - field.field.node.opportunity.field_include_qu1
+    - field.field.node.opportunity.field_include_qu2
+    - field.field.node.opportunity.field_lat_long
+    - field.field.node.opportunity.field_minimum_age
+    - field.field.node.opportunity.field_minimum_age_other
+    - field.field.node.opportunity.field_monday
+    - field.field.node.opportunity.field_one_off_date
+    - field.field.node.opportunity.field_ongoing_end_date
+    - field.field.node.opportunity.field_ongoing_start_date
+    - field.field.node.opportunity.field_postcode
+    - field.field.node.opportunity.field_saturday
+    - field.field.node.opportunity.field_start_of_ad
+    - field.field.node.opportunity.field_start_of_ad_specific
+    - field.field.node.opportunity.field_sunday
+    - field.field.node.opportunity.field_thursday
+    - field.field.node.opportunity.field_times_list
+    - field.field.node.opportunity.field_town_or_city
+    - field.field.node.opportunity.field_tuesday
+    - field.field.node.opportunity.field_type_options
+    - field.field.node.opportunity.field_type_options_other
+    - field.field.node.opportunity.field_type_options_type
+    - field.field.node.opportunity.field_wednesday
+    - field.field.node.opportunity.field_what_bullet_1
+    - field.field.node.opportunity.field_what_bullet_2
+    - field.field.node.opportunity.field_what_bullet_3
+    - field.field.node.opportunity.field_what_bullet_4
+    - field.field.node.opportunity.field_what_bullet_5
+    - field.field.node.opportunity.field_what_bullet_6
+    - field.field.node.opportunity.field_what_change_bullet_1
+    - field.field.node.opportunity.field_what_change_bullet_2
+    - field.field.node.opportunity.field_what_change_bullet_3
+    - field.field.node.opportunity.field_what_change_bullet_4
+    - field.field.node.opportunity.field_what_change_bullet_5
+    - field.field.node.opportunity.field_what_change_bullet_6
+    - field.field.node.opportunity.field_what_skills_gain
+    - field.field.node.opportunity.field_what_skills_useful
+    - field.field.node.opportunity.field_what_skills_useful_other
+    - field.field.node.opportunity.field_what_training_bullet_1
+    - field.field.node.opportunity.field_what_training_bullet_2
+    - field.field.node.opportunity.field_what_training_bullet_3
+    - field.field.node.opportunity.step_additional_qu1
+    - field.field.node.opportunity.step_additional_qu2
+    - field.field.node.opportunity.step_advertising_dates
+    - field.field.node.opportunity.step_anything_additional
+    - field.field.node.opportunity.step_background_checks
+    - field.field.node.opportunity.step_causes
+    - field.field.node.opportunity.step_dates_vol_needed
+    - field.field.node.opportunity.step_days_vol_needed
+    - field.field.node.opportunity.step_expenses
+    - field.field.node.opportunity.step_min_age
+    - field.field.node.opportunity.step_opp_image
+    - field.field.node.opportunity.step_skills_gain
+    - field.field.node.opportunity.step_skills_useful
+    - field.field.node.opportunity.step_title_of_role
+    - field.field.node.opportunity.step_type
+    - field.field.node.opportunity.step_what_change
+    - field.field.node.opportunity.step_what_commitment
+    - field.field.node.opportunity.step_what_doing
+    - field.field.node.opportunity.step_what_training
+    - field.field.node.opportunity.step_where_based
+    - image.style.thumbnail_large
+    - node.type.opportunity
+  module:
+    - image
+    - options
+    - user
+id: node.opportunity.teaser
+targetEntityType: node
+bundle: opportunity
+mode: teaser
+content:
+  content_moderation_control:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_borough:
+    type: entity_reference_label
+    weight: 3
+    region: content
+    label: hidden
+    settings:
+      link: false
+    third_party_settings: {  }
+  field_image:
+    type: image
+    weight: 1
+    region: content
+    label: hidden
+    settings:
+      image_style: thumbnail_large
+      image_link: ''
+    third_party_settings: {  }
+  field_one_off_date:
+    type: datetime_default
+    weight: 5
+    region: content
+    label: hidden
+    settings:
+      timezone_override: ''
+      format_type: short_date
+    third_party_settings: {  }
+  field_ongoing_start_date:
+    type: datetime_custom
+    weight: 17
+    region: content
+    label: above
+    settings:
+      date_format: 'Y-m-d\TH:i:s'
+      timezone_override: ''
+    third_party_settings: {  }
+  field_type_options_other:
+    type: string
+    weight: 4
+    region: content
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  field_type_options_type:
+    type: list_default
+    weight: 6
+    region: content
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+  field_what_bullet_1:
+    type: basic_string
+    weight: 2
+    region: content
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  body: true
+  field_additional_bullet_1: true
+  field_additional_bullet_2: true
+  field_additional_bullet_3: true
+  field_bg_checks_required: true
+  field_building_and_street: true
+  field_building_and_street_2: true
+  field_building_and_street_3: true
+  field_bullet_1: true
+  field_bullet_2: true
+  field_causes_supported: true
+  field_cover_expenses: true
+  field_cover_expenses_specific: true
+  field_dates_needed: true
+  field_days_list: true
+  field_end_of_ad: true
+  field_end_of_ad_specific: true
+  field_friday: true
+  field_include_qu1: true
+  field_include_qu2: true
+  field_lat_long: true
+  field_minimum_age: true
+  field_minimum_age_other: true
+  field_monday: true
+  field_ongoing_end_date: true
+  field_postcode: true
+  field_saturday: true
+  field_start_of_ad: true
+  field_start_of_ad_specific: true
+  field_sunday: true
+  field_thursday: true
+  field_times_list: true
+  field_town_or_city: true
+  field_tuesday: true
+  field_type_options: true
+  field_wednesday: true
+  field_what_bullet_2: true
+  field_what_bullet_3: true
+  field_what_bullet_4: true
+  field_what_bullet_5: true
+  field_what_bullet_6: true
+  field_what_change_bullet_1: true
+  field_what_change_bullet_2: true
+  field_what_change_bullet_3: true
+  field_what_change_bullet_4: true
+  field_what_change_bullet_5: true
+  field_what_change_bullet_6: true
+  field_what_skills_gain: true
+  field_what_skills_useful: true
+  field_what_skills_useful_other: true
+  field_what_training_bullet_1: true
+  field_what_training_bullet_2: true
+  field_what_training_bullet_3: true
+  langcode: true
+  links: true
+  step_additional_qu1: true
+  step_additional_qu2: true
+  step_advertising_dates: true
+  step_anything_additional: true
+  step_background_checks: true
+  step_causes: true
+  step_dates_vol_needed: true
+  step_days_vol_needed: true
+  step_expenses: true
+  step_min_age: true
+  step_opp_image: true
+  step_skills_gain: true
+  step_skills_useful: true
+  step_title_of_role: true
+  step_type: true
+  step_what_change: true
+  step_what_commitment: true
+  step_what_doing: true
+  step_what_training: true
+  step_where_based: true

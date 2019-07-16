@@ -1,0 +1,52 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.title_and_cta.field_cta
+    - field.field.paragraph.title_and_cta.field_secondary
+    - field.field.paragraph.title_and_cta.field_subtext
+    - field.field.paragraph.title_and_cta.field_title
+    - paragraphs.paragraphs_type.title_and_cta
+  module:
+    - link
+id: paragraph.title_and_cta.default
+targetEntityType: paragraph
+bundle: title_and_cta
+mode: default
+content:
+  field_cta:
+    weight: 1
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+    type: link_default
+    region: content
+  field_secondary:
+    weight: 3
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+    type: link_default
+    region: content
+  field_subtext:
+    weight: 2
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

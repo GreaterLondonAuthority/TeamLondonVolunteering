@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_causes
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_causes
+field_name: step_causes
+entity_type: node
+bundle: opportunity
+label: 'What cause(s) does the role support?'
+description: "<p>Select the categories below which best describe the focus of this role.</p>\r\n<p>Notes:<br>This will help potential volunteers to search for a role based on their interests.<br>Only select the categories which are relevant for this role.</p>"
+required: true
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

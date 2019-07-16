@@ -1,0 +1,42 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_search_block
+    - paragraphs.paragraphs_type.search_and_discover
+    - paragraphs.paragraphs_type.search_block
+  module:
+    - entity_reference_revisions
+id: paragraph.search_and_discover.field_search_block
+field_name: field_search_block
+entity_type: paragraph
+bundle: search_and_discover
+label: 'Search Block'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      search_block: search_block
+    target_bundles_drag_drop:
+      search_and_discover:
+        weight: 6
+        enabled: false
+      discover_roles:
+        weight: 7
+        enabled: false
+      image_with_text:
+        weight: 8
+        enabled: false
+      key_value:
+        weight: 9
+        enabled: false
+      search_block:
+        enabled: true
+        weight: 10
+field_type: entity_reference_revisions

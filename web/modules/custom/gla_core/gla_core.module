@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function gla_core_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'form_alter' && isset($implementations['multiple_registration'])) {
+    // Make sure these form_alter implementations run after multiple_registration.
+    // Listed here in the order we want them run.
+    $custom_implementations = [
+      'gla_user',
+      'gla_provider',
+      'gla_multistep_forms',
+    ];
+
+    foreach ($custom_implementations as $module_name) {
+      if (isset($implementations[$module_name])) {
+        $group = $implementations[$module_name];
+        unset($implementations[$module_name]);
+        $implementations[$module_name] = $group;
+      }
+    }
+  }
+  elseif ($hook == 'element_info_alter') {
+    // Make our gla_multistep_forms element_info implementation run last.
+    $module_name = 'gla_multistep_forms';
+    if (isset($implementations[$module_name])) {
+      $group = $implementations[$module_name];
+      unset($implementations[$module_name]);
+      $implementations[$module_name] = $group;
+    }
+  }
+}

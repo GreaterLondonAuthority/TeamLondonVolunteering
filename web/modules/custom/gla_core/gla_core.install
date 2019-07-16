@@ -1,0 +1,567 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function gla_core_install() {
+
+  set_time_limit(0);
+
+  // Core modules.
+  \Drupal::service('module_installer')->install([
+    'workflows',
+    'content_moderation',
+    'telephone',
+  ]);
+
+  // Contrib modules.
+  \Drupal::service('module_installer')->install([
+    'group',
+    'gnode',
+    'multiple_registration',
+    'email_registration',
+    'paragraphs',
+    'entity_reference_revisions',
+    'address',
+    'term_reference_tree',
+    'scheduler',
+    'scheduler_content_moderation_integration',
+    'facets',
+    'search_api',
+    'search_api_solr',
+    'search_api_location',
+    'search_api_location_views',
+    'geocoder',
+    'search_api_location_geocoder',
+    'geolocation',
+    'rest',
+    'block_field',
+    'mailsystem',
+    'htmlmail',
+    'views_data_export',
+    'metatag',
+    'social_media',
+    'token',
+    'views_autocomplete_filters',
+    'pathologic',
+    'ckwordcount',
+    'responsive_image',
+    'image_widget_crop',
+    'administerusersbyrole',
+    'entity_browser',
+    'file_browser',
+    'webform',
+    'webform_ui',
+    'pathauto',
+  ]);
+
+  // Additional contrib modules we've enabled since.
+  gla_core_update_8004();
+
+  // Custom features.
+  // All features config is set as 'optional' so that features' dependencies on
+  // each other don't interrupt the install.
+  // The order does matter for some though - for example the gnode config in
+  // gla_group_config depends on the opportunity content type already existing
+  // from gla_opportunity but there's no dependency defined in the config so the
+  // workaround with 'optional' config doesn't work in this case.
+  // @see GlaFeaturesAssignmentOptionalType
+  $custom_features_modules = [
+    'gla_user',
+    'gla_page',
+    'gla_landing_page',
+    'gla_opportunity',
+    'gla_provider',
+    'gla_site',
+    'gla_group_config',
+    'gla_multistep_forms',
+    'gla_volunteer',
+    'gla_search',
+    'gla_generic_components',
+    'gla_image_config',
+    'gla_newsletter',
+  ];
+  \Drupal::service('module_installer')->install($custom_features_modules);
+
+  // Install any custom modules.
+  $custom_modules = [
+    'gla_migrate',
+  ];
+
+  \Drupal::service('module_installer')->install($custom_modules);
+
+  // Enable team_london sub-theme.
+  gla_core_update_8012();
+
+  // Then revert all features to import the optional config.
+  gla_core_revert_features($custom_features_modules);
+
+  // Set up multiple_registration aliases.
+  gla_core_multiple_reg_init();
+
+  // Tidy up roles.
+  gla_core_update_8001();
+
+  // Init blocks.
+  gla_core_block_init();
+}
+
+/**
+ * Revert all features to import the optional config.
+ */
+function gla_core_revert_features($custom_features_modules) {
+  $custom_features_modules[] = 'gla_core';
+  \Drupal::service('features.manager')->import($custom_features_modules);
+
+  // Now check through any that are overridden and revert again as they may have
+  // had unmet dependencies before.
+
+  /** @var \Drupal\features\FeaturesManagerInterface $manager */
+  /** @var \Drupal\features\FeaturesAssigner $assigner */
+  $manager = \Drupal::service('features.manager');
+  $assigner = \Drupal::service('features_assigner');
+  $assigner->applyBundle('gla');
+  $packages = $manager->getPackages();
+
+  $repeats = 0;
+  $overridden = TRUE;
+  while ($overridden && $repeats < 3) {
+    $overridden = [];
+    foreach ($custom_features_modules as $feature_name) {
+      if (isset($packages[$feature_name])) {
+        $package = $packages[$feature_name];
+        $overrides = $manager->detectOverrides($package, TRUE);
+        $missing = $manager->detectMissing($package);
+        if ((!empty($missing) || !empty($overrides)) && ($package->getStatus() == \Drupal\features\FeaturesManagerInterface::STATUS_INSTALLED)) {
+          $overridden[] = $package->getMachineName();
+        }
+      }
+    }
+
+    // If anything is still overridden, import it.
+    if (!empty($overridden)) {
+      $manager->import($overridden);
+    }
+
+    // Sometimes features will appear overridden when the config can't be
+    // imported so only run this a couple times.
+    $repeats++;
+  }
+}
+
+/**
+ * Set up multiple_registration aliases
+ */
+function gla_core_multiple_reg_init() {
+  // Replicate the alias creation in \Drupal\multiple_registration\Form\CreateRegistrationPageForm::submitForm()
+  // as this isn't done by just reverting the feature.
+  $multiple_registration_form_config = \Drupal::config('multiple_registration.create_registration_page_form_config')->get();
+  $multiple_registration_service = \Drupal::service('multiple_registration.controller_service');
+  foreach ($multiple_registration_form_config as $key => $value) {
+    if (strpos($key, 'multiple_registration_path_') !== FALSE) {
+      $rid = str_replace('multiple_registration_path_', '', $key);
+      $data[$rid]['alias'] = $value;
+    }
+    elseif (strpos($key, 'multiple_registration_url_') !== FALSE) {
+      $rid = str_replace('multiple_registration_url_', '', $key);
+      $data[$rid]['source'] = $value;
+    }
+    else {
+      continue;
+    }
+  }
+
+  foreach ($data as $rid => $values) {
+    $multiple_registration_service->addRegisterPageAlias($values['source'], '/' . $values['alias']);
+  }
+}
+
+/**
+ * Implements hook_update().
+ * Feature export of modified roles cannot delete roles in the UI.
+ * Unnecessary roles need to be removed through update hook.
+ */
+function gla_core_update_8001() {
+
+  // Load all roles present.
+  $roles = user_role_names(TRUE);
+
+  // List of roles that couldn't be removed through features.
+  $unwanted_roles = array(
+    'Profile Complete',
+    'Content Editor',
+    'Content Coordinator',
+    'Content Administrator',
+    'Awaiting Verification',
+  );
+
+  // Check matches between roles list and unwanted roles.
+  $extra_roles = array_intersect($roles, $unwanted_roles);
+
+  // Loop through any matches.
+  if (!empty($extra_roles)) {
+    foreach ($extra_roles as $extra) {
+      // Get machine name for role.
+      $machine_name = array_search($extra, $roles);
+      // Remove the role.
+      $role = \Drupal\user\Entity\Role::load($machine_name);
+      $role->delete($machine_name);
+    }
+  }
+}
+
+/**
+ * Enable gla_volunteer module.
+ */
+function gla_core_update_8002() {
+  \Drupal::service('module_installer')->install([
+    'gla_volunteer',
+  ]);
+}
+
+/**
+ * Enable address module.
+ */
+function gla_core_update_8003() {
+  \Drupal::service('module_installer')->install([
+    'address',
+  ]);
+}
+
+/**
+ * Enable password_policy module and sub modules.
+ */
+function gla_core_update_8004() {
+  \Drupal::service('module_installer')->install([
+    'password_policy',
+    'password_policy_character_types',
+    'password_policy_characters',
+    'password_policy_consecutive',
+    'password_policy_history',
+    'password_policy_length',
+    'password_policy_username',
+  ]);
+}
+
+/**
+ * Enable gla_multistep_forms module.
+ */
+function gla_core_update_8005() {
+  \Drupal::service('module_installer')->install([
+    'gla_multistep_forms',
+  ]);
+}
+
+/**
+ * Enable term_reference_tree module.
+ */
+function gla_core_update_8006() {
+  \Drupal::service('module_installer')->install([
+    'term_reference_tree',
+  ]);
+}
+
+/**
+ * Enable scheduler_content_moderation_integration module.
+ */
+function gla_core_update_8007() {
+  \Drupal::service('module_installer')->install([
+    'scheduler',
+    'scheduler_content_moderation_integration',
+  ]);
+}
+
+/**
+ * Enable gla_search module.
+ */
+function gla_core_update_8008() {
+  \Drupal::service('module_installer')->install([
+    'facets',
+    'search_api',
+    'search_api_solr',
+    'gla_search',
+  ]);
+}
+
+/**
+ * Enable search_api_location module.
+ */
+function gla_core_update_8009() {
+  \Drupal::service('module_installer')->install([
+    'search_api_location',
+    'search_api_location_views',
+  ]);
+}
+
+/**
+ * Enable geocoder and search_api_location_geocoder modules.
+ */
+function gla_core_update_8010() {
+  \Drupal::service('module_installer')->install([
+    'geocoder',
+    'search_api_location_geocoder',
+    'geolocation',
+  ]);
+}
+
+/**
+ * Enable rest modules.
+ */
+function gla_core_update_8011() {
+  \Drupal::service('module_installer')->install([
+    'rest',
+  ]);
+}
+
+/**
+ * Enable team_london sub-theme.
+ */
+function gla_core_update_8012() {
+  \Drupal::service('theme_installer')->install(['team_london']);
+  \Drupal::service('config.factory')->getEditable('system.theme')
+    ->set('default', 'team_london')
+    ->save();
+}
+
+/**
+ * Enable Block field and generic_components modules.
+ */
+function gla_core_update_8013() {
+  \Drupal::service('module_installer')->install([
+    'block_field',
+    'gla_generic_components',
+  ]);
+}
+
+/**
+ * Enable modules that allow for html markup in emails.
+ */
+function gla_core_update_8014() {
+  \Drupal::service('module_installer')->install([
+    'mailsystem',
+    'htmlmail',
+  ]);
+}
+
+/**
+ * Enable metatag, social_media and token modules.
+ */
+function gla_core_update_8015() {
+  \Drupal::service('module_installer')->install([
+    'metatag',
+    'social_media',
+    'token',
+  ]);
+}
+
+/**
+ * Place the copyright block into the footer.
+ */
+function gla_core_update_8016() {
+  gla_core_block_init();
+}
+
+/**
+ * Place the copyright block into the footer and tidy up blocks we don't want.
+ */
+function gla_core_block_init() {
+  // Remove default blocks that we don't want.
+  $blocks_to_remove = [
+    'team_london_search',
+    'team_london_powered',
+    'team_london_main_menu',
+    'team_london_footer',
+    'team_london_branding',
+    'team_london_tools',
+    'team_london_account_menu',
+  ];
+
+  foreach ($blocks_to_remove as $block_id) {
+    $block = \Drupal\block\Entity\Block::load($block_id);
+    if ($block) {
+      $block->delete();
+    }
+  }
+
+  // Place the copyright block into the footer.
+  // This is not captured in features as the content will be changed by GLA.
+  $block_entity_manager = \Drupal::service('entity.manager')->getStorage('block');
+  $block = $block_entity_manager->create(
+    [
+      'id' => 'team_london_glacopyrightinfo',
+      'plugin' => 'copyright_info_block',
+      'theme' => 'team_london',
+    ]
+  );
+  $block->setRegion('footer');
+  $block->setWeight(10);
+  $block->save();
+}
+
+/**
+ * Enable data exporting tool.
+ */
+function gla_core_update_8017() {
+  \Drupal::service('module_installer')->install([
+    'views_data_export',
+  ]);
+}
+
+/**
+ * Enable views_autocomplete_filters module.
+ */
+function gla_core_update_8018() {
+  \Drupal::service('module_installer')->install([
+    'views_autocomplete_filters',
+  ]);
+}
+
+/**
+ * Enable team_london sub-theme.
+ */
+function gla_core_update_8019() {
+  \Drupal::service('theme_installer')->install(['team_london']);
+  \Drupal::service('config.factory')->getEditable('system.theme')
+    ->set('default', 'team_london')
+    ->save();
+}
+
+/**
+ * Enable Block field and generic_components modules.
+ */
+function gla_core_update_8020() {
+  \Drupal::service('module_installer')->install([
+    'block_field',
+    'gla_generic_components',
+  ]);
+}
+
+/**
+ * Enable pcb.
+ *
+ * Note: We don't also need this in the hook_install() implementation as it's
+ * part of the profile install.
+ */
+function gla_core_update_8021() {
+  \Drupal::service('module_installer')->install([
+    'pcb',
+  ]);
+}
+
+/**
+ * Enable pathologic module.
+ */
+function gla_core_update_8022() {
+  \Drupal::service('module_installer')->install([
+    'pathologic',
+  ]);
+}
+
+/**
+ * Enable ckwordcount module.
+ */
+function gla_core_update_8023() {
+  \Drupal::service('module_installer')->install([
+    'ckwordcount',
+  ]);
+}
+
+/**
+ * Enable gla_migrate module.
+ */
+function gla_core_update_8024() {
+  if (\Drupal::service('module_handler')->moduleExists('gla_migrate')) {
+    \Drupal::service('module_installer')->install([
+      'gla_migrate',
+    ]);
+  }
+}
+
+/**
+ * Delete exposedformprofile_search_location_search_distance block.
+ */
+function gla_core_update_8025() {
+  $block = \Drupal\block\Entity\Block::load('exposedformprofile_search_location_search_distance');
+  if ($block) {
+    $block->delete();
+  }
+}
+
+/**
+ * Enable administerusersbyrole module.
+ */
+function gla_core_update_8026() {
+  \Drupal::service('module_installer')->install([
+    'administerusersbyrole',
+  ]);
+}
+
+/**
+ * Fixes broken usernames.
+ *
+ * From https://www.drupal.org/project/email_registration/issues/3024558#comment-12955791.
+ */
+function gla_core_update_8027() {
+  $ids = Drupal::entityQuery('user')
+    ->condition('name', 'email_registration_%', 'LIKE')
+    ->execute();
+  $users = \Drupal\user\Entity\User::loadMultiple($ids);
+  foreach ($users as $account) {
+    $new_name = preg_replace('/@.*$/', '', $account->getEmail());
+    // Clean up the username.
+    $new_name = email_registration_cleanup_username($new_name);
+    $new_name = email_registration_unique_username($new_name, $account->id());
+    $account->setUsername($new_name);
+    $account->save();
+  }
+}
+
+/**
+ * Enable image related modules.
+ */
+function gla_core_update_8028() {
+  \Drupal::service('module_installer')->install([
+    'responsive_image',
+    'image_widget_crop',
+    'gla_image_config',
+  ]);
+}
+
+/**
+ * Enable entity_browser module.
+ * Enable file_browser module.
+ */
+function gla_core_update_8029() {
+  \Drupal::service('module_installer')->install([
+    'entity_browser',
+    'file_browser',
+  ]);
+}
+
+/**
+ * Enable webform module.
+ */
+function gla_core_update_8030() {
+  \Drupal::service('module_installer')->install([
+    'webform',
+    'webform_ui',
+  ]);
+}
+
+/**
+ * Enable gla_newsletter module.
+ */
+function gla_core_update_8031() {
+  \Drupal::service('module_installer')->install([
+    'gla_newsletter',
+  ]);
+}
+
+/**
+ * Enable pathauto module to set up url alias patterns.
+ */
+function gla_core_update_8032() {
+  \Drupal::service('module_installer')->install([
+    'pathauto',
+  ]);
+}

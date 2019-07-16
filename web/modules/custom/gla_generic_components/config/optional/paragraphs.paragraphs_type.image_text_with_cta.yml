@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: image_text_with_cta
+label: 'Image, Text with CTA'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }

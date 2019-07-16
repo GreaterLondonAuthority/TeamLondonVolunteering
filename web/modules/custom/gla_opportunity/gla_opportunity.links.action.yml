@@ -1,0 +1,10 @@
+entity.application_form_element.add_form:
+  route_name: entity.application_form_element.add_form
+  title: 'Add Application form element'
+  appears_on:
+    - entity.application_form_element.collection
+entity.application_submission.add_form:
+  route_name: entity.application_submission.add_form
+  title: 'Add Application submission'
+  appears_on:
+    - entity.application_submission.collection

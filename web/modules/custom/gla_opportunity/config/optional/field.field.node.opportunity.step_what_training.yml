@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_what_training
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_what_training
+field_name: step_what_training
+entity_type: node
+bundle: opportunity
+label: 'What training will be available for the volunteer? (optional)'
+description: "<p>Describe any training which will be offered to the volunteer.</p>\r\n<p>Notes:<br>This will help volunteers understand how you will equip them to do the role.</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

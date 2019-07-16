@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_org_values
+    - node.type.provider_profile
+  module:
+    - gla_multistep_forms
+id: node.provider_profile.step_org_values
+field_name: step_org_values
+entity_type: node
+bundle: provider_profile
+label: 'What are your organisation''s aims?'
+description: "<p>Using bullet points, give a short description of what your organisation is set up to achieve: your mission and aims.</p>\r\n\r\n<p>150 words maximum, minimum 3 bullet points.</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

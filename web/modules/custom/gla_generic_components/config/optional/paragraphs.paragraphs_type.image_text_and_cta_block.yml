@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: image_text_and_cta_block
+label: 'Image, text and CTA Block'
+icon_uuid: null
+description: 'Contains the Image, text and CTA component.'
+behavior_plugins: {  }

@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.link_blocks.field_component
+    - field.field.paragraph.link_blocks.field_title
+    - paragraphs.paragraphs_type.link_blocks
+  module:
+    - entity_reference_revisions
+id: paragraph.link_blocks.default
+targetEntityType: paragraph
+bundle: link_blocks
+mode: default
+content:
+  field_component:
+    weight: 1
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    type: entity_reference_revisions_entity_view
+    region: content
+  field_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

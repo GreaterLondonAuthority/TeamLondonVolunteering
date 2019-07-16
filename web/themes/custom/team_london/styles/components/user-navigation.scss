@@ -1,0 +1,78 @@
+/**
+ * @file
+ *
+ * Team London user navigation styles.
+ *
+**/
+
+@import "../variables/utilities";
+
+.user-navigation {
+  height: 12.5rem;
+
+  p {
+    display: inline-block;
+    margin: 0.5rem 0 0.6rem;
+    float: left;
+    clear: left;
+  }
+  .user-navigation__link {
+    a {
+      padding: 0.8rem 1.3rem;
+      padding-right: 3.3rem;
+      border-radius: 0.5rem;
+    }
+  }
+  .list-unstyled {
+    float: left;
+    clear: left;
+    margin: 0.4rem 0;
+    > li {
+      padding-left: 0;
+    }
+  }
+  .heading {
+    margin: 0;
+    padding: 0.6rem 0 0;
+    float: left;
+    color: $white;
+    font-weight: 400;
+  }
+
+  // Beta indicator.
+  .beta-tab {
+    margin: 0.8rem 0.7rem 0 0.7rem;
+    display: inline-block;
+    padding: 0.2rem 1rem;
+    font-weight: bold;
+    border-radius: 0.4rem;
+  }
+}
+
+@media (min-width: 644px) {
+  .user-navigation {
+    .heading {
+      padding-top: 1.9rem;
+    }
+    .beta-tab {
+      margin: 2.1rem 0.7rem 0;
+    }
+    .list-unstyled {
+      margin: 0.7rem 0;
+    }
+  }
+}
+
+@media (min-width: $screen-full) {
+  .user-navigation {
+    height: 6.5rem;
+    p {
+      float: none;
+    }
+    .list-unstyled {
+      margin: 2.2rem 0;
+      float: right;
+      clear: none;
+    }
+  }
+}

@@ -1,0 +1,42 @@
+<h2 class="heading--small heading--text"><strong>{{ name }}</strong></h2>
+<div class="separator"></div>
+
+<h2 class="heading--small heading--alt">{{ 'To do list'|t }}</h2>
+{{ to_do_view }}
+<div class="separator"></div>
+
+<h2 class="heading--small heading--alt">{{ 'Updates'|t }}</h2>
+{{ updates_view }}
+<div class="separator"></div>
+
+<h2 class="heading--small heading--alt">{{ 'Links'|t }}</h2>
+<div class="row dashboard-links">
+  <div class="col-sm-12 col-md-3">
+    <h4 class="heading">{{ 'Volunteer roles:'|t }}</h4>
+    {% for section in links.volunteer_roles %}
+      <div>{{ section.link }}</div>
+      <div>{{ section.description }}</div>
+    {% endfor %}
+  </div>
+  <div class="col-sm-12 col-md-3">
+    <h4 class="heading">{{ 'Volunteer interest:'|t }}</h4>
+    {% for section in links.volunteer_interest %}
+      <div>{{ section.link }}</div>
+      <div>{{ section.description }}</div>
+    {% endfor %}
+  </div>
+  <div class="col-sm-12 col-md-3">
+    <h4 class="heading">{{ 'Your organisation:'|t }}</h4>
+    {% for section in links.your_organisation %}
+      <div>{{ section.link }}</div>
+      <div>{{ section.description }}</div>
+    {% endfor %}
+  </div>
+  <div class="col-sm-12 col-md-3">
+    <h4 class="heading">{{ 'Account settings:'|t }}</h4>
+    {% for section in links.account_settings %}
+      <div>{{ section.link }}</div>
+      <div>{{ section.description }}</div>
+    {% endfor %}
+  </div>
+</div>

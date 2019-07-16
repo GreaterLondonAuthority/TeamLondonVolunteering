@@ -1,0 +1,334 @@
+<?php
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
+use Drupal\image\Entity\ImageStyle;
+
+/**
+ * Implements hook_form_alter().
+ *
+ * This works on the exposed search form - hiding the filters not needed and changing text where necessary.
+ * See: https://london.atlassian.net/browse/TEAM-146
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param $form_id
+ */
+function gla_generic_components_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $route = \Drupal::routeMatch()->getRouteName();
+  if ($form['#id'] == 'views-exposed-form-profile-search-page-1' && $route !== 'view.profile_search.page_1') {
+    $form['#info']['filter-search_api_fulltext']['label'] = t('Interest, cause or organisation');
+    $form['#info']['filter-latlng']['label'] = t('Distance From Location');
+    $form['latlng']['value']['#title'] = t('Location <span>(London borough or postcode)</span>');
+    $form['latlng']['distance']['from']['#title'] = t('Distance from location');
+    $form['latlng']['distance']['#weight'] = 10;
+    $form['actions']['submit']['#value'] = t('Search');
+    $form['actions']['submit']['#attributes']['class'][] = 'button--alt';
+    $form['actions']['submit']['#attributes']['class'][] = 'component__cta';
+    $form['actions']['submit']['#prefix'] = '<div class="separator"></div>';
+    unset($form['latlng']['value']['#field_prefix']);
+    hide($form['sort_by']);
+    hide($form['sort_order']);
+  }
+}
+
+/**
+ * Implements hook_preprocess_paragraph()
+ *
+ * Adds a list of links to the search page with filters of that tax filled in.
+ * See: https://london.atlassian.net/browse/TEAM-146
+ *
+ * @param $variables
+ */
+function gla_generic_components_preprocess_paragraph__discover_roles(&$variables) {
+
+  // Get the taxonomy_terms input and add the term, tagged nodes and url.
+  if (isset($variables['elements']['field_roles']['#items'])) {
+    $roles = $variables['elements']['field_roles']['#items']->getValue();
+    if (!empty($roles)) {
+      foreach ($roles as $index => $role) {
+        $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($role['target_id']);
+        $tagged_nodes = \Drupal::entityQuery('node')
+          ->condition('field_causes_supported', $role['target_id'])
+          ->condition('status', '1')
+          ->count()
+          ->execute();
+        $url = \Drupal\Core\Url::fromRoute('view.profile_search.page_1', [], [
+          'query' => [
+            'f' => [
+              'causes:' . $role['target_id'],
+            ],
+          ],
+        ]);
+        // Creating array of links and count of nodes with this tag.
+        $variables['links_to_causes'][] = [
+          'label' => $term->label(),
+          'url' => $url,
+          'count' => $tagged_nodes,
+        ];
+      }
+    }
+  }
+  else {
+    // Nothing set so nothing to do here.
+    $variables['links_to_causes'] = [];
+  }
+
+}
+
+/**
+ * Implements hook_preprocess_paragraph().
+ *
+ * Gets the 6 most recently posted opportunity nodes and
+ *
+ * @param $variables
+ */
+function gla_generic_components_preprocess_paragraph__recently_posted_roles(&$variables) {
+
+  $opportunities = [];
+  $entity_manager = \Drupal::entityTypeManager();
+
+  $recently_posted = gla_generic_components_build_query(NULL, NULL, NULL, NULL, 6);
+  foreach ($recently_posted as $index => $recent) {
+    $node = $entity_manager->getStorage('node')->load($recent);
+    $opportunities[] = gla_generic_components_build_opportunities($node, $entity_manager);
+    $variables['#cache']['tags'][] = 'node:' . $node->id();
+  }
+
+  $variables['#cache']['tags'][] = 'gla_recently_posted_roles';
+  $variables['opportunities'] = $opportunities;
+}
+
+/**
+ * Implements hook_preprocess_paragraph()
+ *
+ * Combination of tax references and node references. User can input either a node or tax ref that then builds the
+ * corresponding nodes attached to them.
+ * See: https://london.atlassian.net/browse/TEAM-146
+ *
+ * @param $variables
+ */
+function gla_generic_components_preprocess_paragraph__featured_roles(&$variables) {
+
+  $entity_manager = \Drupal::entityTypeManager();
+  $opportunities = [];
+
+  // Check if user has input their own nodes and add to front of array if is the case.
+  for ($i = 0; $i < 6; $i++) {
+    if (isset($variables['content']['field_featured_roles'][$i])) {
+      $child_paragraph = $variables['content']['field_featured_roles'][$i]['#paragraph'];
+      if (!$child_paragraph->get('field_opportunity')->isEmpty()) {
+        $opportunity_id = $child_paragraph->get('field_opportunity')->target_id;
+        /** @var \Drupal\node\Entity\Node $opportunity */
+        $opportunity = $entity_manager->getStorage('node')->load($opportunity_id);
+        if ($opportunity && $opportunity->isPublished()) {
+          $opportunities[] = gla_generic_components_build_opportunities($opportunity, $entity_manager);
+          $variables['#cache']['tags'][] = 'node:' . $opportunity->id();
+        }
+      }
+      elseif (!$child_paragraph->get('field_tag')->isEmpty()) {
+        $tag_id = $child_paragraph->get('field_tag')->target_id;
+
+        // Get the most recent opportunity.
+        $most_recent_opportunity = gla_generic_components_build_query('field_image','field_causes_supported', $tag_id, '=');
+        if (empty($most_recent_opportunity)) {
+          $most_recent_opportunity = gla_generic_components_build_query('field_image');
+        }
+
+        // Check we have a node now as there could be tags with no nodes associated.
+        if (!empty($most_recent_opportunity)) {
+          $node = $entity_manager->getStorage('node')->load(reset($most_recent_opportunity));
+          $opportunities[] = gla_generic_components_build_opportunities($node, $entity_manager);
+          $variables['#cache']['tags'][] = 'node:' . $node->id();
+        }
+      }
+    }
+  }
+
+  $variables['opportunities'] = $opportunities;
+  $variables['#attached']['library'][] = 'team_london/featured_component';
+}
+
+/**
+ * Helper function to build queries. Returns the most recent opportunity node by default and takes in params to add conditions if
+ * needed.
+ *
+ * @param null $field
+ * @param null $value
+ * @param null $operator
+ * @return array|int
+ */
+function gla_generic_components_build_query($exist_field = NULL, $field = NULL, $value = NULL, $operator = NULL, $amount = 1) {
+  $base_query = \Drupal::entityQuery('node')
+    ->condition('status', '1')
+    ->condition('type', 'opportunity')
+    ->sort('changed', 'DESC')
+    ->pager($amount);
+  if (!is_null($field)) {
+    $base_query->condition($field, $value, $operator);
+  }
+  if (!is_null($exist_field)) {
+    $base_query->exists($exist_field);
+  }
+  return $base_query->execute();
+}
+
+/**
+ * Helper function to get parts of provider. Builds a node with title and tag so that it can be rendered properly.
+ * See Designs: https://london.atlassian.net/browse/TEAM-146
+ *
+ * @param $node
+ * @param $entity_manager
+ * @return array
+ */
+function gla_generic_components_build_opportunities($node, $entity_manager) {
+  /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+  $provider_processor = \Drupal::service('gla_provider.processor');
+  $provider = $provider_processor->getProviderProfileFromEntity($node);
+  if ($node->hasField('field_image') && !$node->get('field_image')->isEmpty()) {
+    $file_id = $node->get('field_image')->target_id;
+    $file = $entity_manager->getStorage('file')->load($file_id);
+    $file_path = $file->getFileUri();
+    $file_url_desktop = ImageStyle::load('content_image_extra_small')->buildUrl($file_path);
+    $file_url = ImageStyle::load('content_thumbnail_extra_small')->buildUrl($file_path);
+  }
+  // Add the provider stuff if it is set.
+  if ($provider) {
+    $provider_title = $provider->getTitle();
+    if ($provider->hasField('field_organisation_tags')) {
+      if (isset($provider->get('field_organisation_tags')->target_id) && $provider->get('field_organisation_tags')->target_id) {
+        $tag = $entity_manager->getStorage('taxonomy_term')->load($provider->get('field_organisation_tags')->target_id);
+      }
+    }
+  }
+  return [
+    'node' => $node,
+    'node_borough' => $node->get('field_town_or_city')->value,
+    'node_title' => $node->getTitle(),
+    'node_url' => Url::fromRoute('entity.node.canonical', ['node' => $node->id()])->toString(),
+    'provider_title' => isset($provider_title) ? $provider_title : '',
+    'tag' => isset($tag) ? $tag->getName() : '',
+    'image_url_desktop' => isset($file_url_desktop) ? $file_url_desktop : NULL,
+    'image_url' => isset($file_url) ? $file_url : NULL,
+  ];
+}
+
+
+/*
+* Implements hook_preprocess_paragraph__paragraph_type().
+*/
+function gla_generic_components_preprocess_paragraph__testimonial(&$variables) {
+  $paragraph = $variables['paragraph'];
+  $parent_paragraph_display = $paragraph->getParentEntity()->get('field_display')->value;
+  $variables['parent_display'] = $parent_paragraph_display;
+
+  // We need to set different image styles for the different displays.
+  if ($paragraph->hasField('field_image') && !$paragraph->get('field_image')->isEmpty()) {
+    $image_id = $paragraph->get('field_image')->target_id;
+    $image = \Drupal\file\Entity\File::load($image_id);
+    $image_path = $image->getFileUri();
+    $image_alt = $paragraph->get('field_image')->alt;
+    $image_url = '';
+    $image_url_desktop = '';
+    if ($parent_paragraph_display == 'list') {
+      $image_url = ImageStyle::load('content_thumbnail_extra_small')->buildUrl($image_path);
+    }
+    else {
+      $image_url = ImageStyle::load('content_image_extra_small')->buildUrl($image_path);
+      $image_url_desktop = ImageStyle::load('content_thumbnail_extra_small')->buildUrl($image_path);
+    }
+  }
+  $variables['image_url'] = $image_url;
+  $variables['image_url_desktop'] = $image_url_desktop;
+  $variables['image_alt'] = $image_alt;
+}
+
+/*
+* Implements hook_preprocess_paragraph__paragraph_type().
+*/
+function gla_generic_components_preprocess_paragraph__hear_from(&$variables) {
+  $paragraph = $variables['paragraph'];
+  $variables['is_list'] = FALSE;
+  if ($paragraph->get('field_display')->value == 'list') {
+    $variables['is_list'] = TRUE;
+  }
+
+  $variables['#attached']['library'][] = 'team_london/featured_component';
+}
+
+/*
+* Implements hook_preprocess_paragraph__paragraph_type().
+*/
+function gla_generic_components_preprocess_paragraph__account_steps_image_with_link(&$variables) {
+  $variables['#attached']['library'][] = 'team_london/icon_cta_component';
+}
+
+/*
+* Implements hook_preprocess_paragraph__paragraph_type().
+*/
+function gla_generic_components_preprocess_paragraph__image_text_and_cta_block(&$variables) {
+  $paragraph = $variables['paragraph'];
+  $variables['single'] = FALSE;
+  if ($paragraph->get('field_component')->count() == 1) {
+    $variables['single'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function gla_generic_components_theme_suggestions_paragraph_alter(&$suggestions, $variables) {
+  $paragraph = $variables['elements']['#paragraph'];
+  $type = $paragraph->getType();
+  if ($type == 'image_text_with_cta') {
+    $count = $paragraph->getParentEntity()->get('field_component')->count();
+    if ($count == 1) {
+      $suggestions[] = 'paragraph__image_with_text';
+    }
+  }
+}
+
+/*
+* Implements hook_preprocess_paragraph__paragraph_type().
+*/
+function gla_generic_components_preprocess_paragraph__search_block(&$variables) {
+  $variables['#attached']['library'][] = 'team_london/search_col_component';
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function gla_generic_components_node_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  // Clear the 'gla_recently_posted_roles' tags when a new role is published.
+  if (!isset($entity->original)) {
+    return;
+  }
+
+  $type = $entity->bundle();
+  $types = ['opportunity'];
+  if (!in_array($type, $types)) {
+    return;
+  }
+
+  $new_state = $entity->get('moderation_state')->value;
+  $old_state = $entity->original->get('moderation_state')->value;
+  if ($new_state == $old_state) {
+    // No change, do nothing.
+    $clear_cache = FALSE;
+  }
+  elseif ($new_state == 'published') {
+    // Being published, clear the cache.
+    $clear_cache = TRUE;
+  }
+  elseif ($old_state == 'published') {
+    // Being unpublished, clear the cache.
+    $clear_cache = TRUE;
+  }
+  else {
+    $clear_cache = FALSE;
+  }
+
+  if ($clear_cache) {
+    \Drupal\Core\Cache\Cache::invalidateTags(['gla_recently_posted_roles']);
+  }
+}

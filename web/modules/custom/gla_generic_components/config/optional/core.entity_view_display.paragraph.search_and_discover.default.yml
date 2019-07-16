@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.search_and_discover.field_discover_block
+    - field.field.paragraph.search_and_discover.field_search_block
+    - paragraphs.paragraphs_type.search_and_discover
+  module:
+    - entity_reference_revisions
+id: paragraph.search_and_discover.default
+targetEntityType: paragraph
+bundle: search_and_discover
+mode: default
+content:
+  field_discover_block:
+    type: entity_reference_revisions_entity_view
+    weight: 1
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    region: content
+  field_search_block:
+    type: entity_reference_revisions_entity_view
+    weight: 0
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    region: content
+hidden: {  }

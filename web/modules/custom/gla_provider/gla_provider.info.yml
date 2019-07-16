@@ -1,0 +1,15 @@
+name: Provider
+description: 'Provides Provider profile content type and related configuration. '
+type: module
+core: 8.x
+package: GLA
+dependencies:
+  - content_moderation
+  - field
+  - gla_group_config
+  - group
+  - menu_ui
+  - node
+  - path
+  - text
+  - user

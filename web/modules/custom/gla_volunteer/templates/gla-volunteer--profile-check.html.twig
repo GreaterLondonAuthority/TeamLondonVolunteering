@@ -1,0 +1,26 @@
+<ul class="list-unstyled">
+  {% for step in steps %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h2 class="heading--small heading--text"><strong>{{ step.label|raw }}</strong></h2>
+          {% if step.value is iterable %}
+            <ul>
+              {% for item in step.value %}
+                <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>{{ step.value }}</p>
+          {% endif %}
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          {{ step.link }}
+        </div>
+      </div>
+    </li>
+    <div class="separator"></div>
+  {% endfor %}
+</ul>
+
+{{ continue }}

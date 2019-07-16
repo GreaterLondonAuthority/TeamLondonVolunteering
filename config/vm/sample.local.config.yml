@@ -1,0 +1,5 @@
+# For any local changes to config.yml, copy this file to local.config.yml and add the settings.
+# e.g.
+#local_team_london_path: /path/to/team-london
+#drupalvm_webserver: apache
+

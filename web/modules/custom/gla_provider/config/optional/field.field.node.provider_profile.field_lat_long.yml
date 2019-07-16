@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_lat_long
+    - node.type.provider_profile
+  module:
+    - geolocation
+id: node.provider_profile.field_lat_long
+field_name: field_lat_long
+entity_type: node
+bundle: provider_profile
+label: 'Lat long'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geolocation

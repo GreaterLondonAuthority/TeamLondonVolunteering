@@ -1,0 +1,18 @@
+modules:
+  gla_opportunity:
+    none:
+      formatter: htmlmail
+      sender: htmlmail
+  gla_provider:
+    none:
+      formatter: htmlmail
+      sender: htmlmail
+  gla_user: {  }
+  user:
+    none:
+      formatter: htmlmail
+      sender: htmlmail
+defaults:
+  formatter: htmlmail
+  sender: htmlmail
+theme: current

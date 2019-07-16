@@ -1,0 +1,8 @@
+<div class="htmlmail-body">
+    <p>{{ message.addressee }}</p>
+    <p>Thank you for creating {{ message.top }} account with Team London.</p>
+    <p>Click the link below to confirm your email address and continue creating your account:</p>
+    <a href="{{ message.one_time_login }}/login">{{ message.one_time_login }}/login</a>
+    <p><strong>{{ message.middle }}</strong></p>
+    <p>{{ message.bottom|nl2br }}</p>
+</div>

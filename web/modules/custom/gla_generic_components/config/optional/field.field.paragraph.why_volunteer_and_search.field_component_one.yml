@@ -1,0 +1,84 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_component_one
+    - paragraphs.paragraphs_type.why_volunteer_and_search
+    - paragraphs.paragraphs_type.wysiwyg_with_cta
+  module:
+    - entity_reference_revisions
+id: paragraph.why_volunteer_and_search.field_component_one
+field_name: field_component_one
+entity_type: paragraph
+bundle: why_volunteer_and_search
+label: 'Component One'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      wysiwyg_with_cta: wysiwyg_with_cta
+    target_bundles_drag_drop:
+      sign_up_volunteer:
+        weight: 20
+        enabled: false
+      account_steps_image_with_link:
+        weight: 21
+        enabled: false
+      discover_roles:
+        weight: 22
+        enabled: false
+      featured_role:
+        weight: 23
+        enabled: false
+      featured_roles:
+        weight: 24
+        enabled: false
+      hear_from:
+        weight: 25
+        enabled: false
+      image_and_cta:
+        weight: 26
+        enabled: false
+      image_text_and_cta_block:
+        weight: 27
+        enabled: false
+      image_text_with_cta:
+        weight: 28
+        enabled: false
+      image_with_blockquote:
+        weight: 29
+        enabled: false
+      image_with_text:
+        weight: 30
+        enabled: false
+      key_value:
+        weight: 31
+        enabled: false
+      link_blocks:
+        weight: 32
+        enabled: false
+      recently_posted_roles:
+        weight: 33
+        enabled: false
+      search_and_discover:
+        weight: 34
+        enabled: false
+      search_block:
+        weight: 35
+        enabled: false
+      testimonial:
+        weight: 36
+        enabled: false
+      why_volunteer_and_search:
+        weight: 37
+        enabled: false
+      wysiwyg_with_cta:
+        enabled: true
+        weight: 38
+field_type: entity_reference_revisions

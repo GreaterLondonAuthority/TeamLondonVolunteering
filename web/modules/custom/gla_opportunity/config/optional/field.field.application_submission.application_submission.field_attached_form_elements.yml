@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.application_submission.field_attached_form_elements
+  module:
+    - gla_opportunity
+id: application_submission.application_submission.field_attached_form_elements
+field_name: field_attached_form_elements
+entity_type: application_submission
+bundle: application_submission
+label: 'Attached form elements'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:application_form_element'
+  handler_settings:
+    target_bundles: null
+    sort:
+      field: _none
+    auto_create: false
+field_type: entity_reference

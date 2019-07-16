@@ -1,0 +1,29 @@
+{{ 'Types of opportunities'|t }}
+{% for field in fields.types %}
+  <div>{{ field.link }}</div>
+  <div>{{ field.value }}</div>
+{% endfor %}
+
+
+{{ 'Skills to offer'|t }}
+{% for field in fields.skills_offer %}
+  <div>{{ field.link }}</div>
+  <div>{{ field.value }}</div>
+{% endfor %}
+
+
+{{ 'Skills to gain'|t }}
+{% for field in fields.skills_gain %}
+  <div>{{ field.link }}</div>
+  <div>{{ field.value }}</div>
+{% endfor %}
+
+
+{{ 'Location preferences'|t }}
+{% for field in fields.loc_pref %}
+  <div>{{ field.link }}</div>
+  <div>{{ field.value }}</div>
+{% endfor %}
+
+
+{{ continue }}

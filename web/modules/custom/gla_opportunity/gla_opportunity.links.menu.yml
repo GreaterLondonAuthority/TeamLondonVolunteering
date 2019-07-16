@@ -1,0 +1,34 @@
+
+# Application form element menu items definition
+entity.application_form_element.collection:
+  title: 'Application form element list'
+  route_name: entity.application_form_element.collection
+  description: 'List Application form element entities'
+  parent: system.admin_structure
+  weight: 100
+
+application_form_element.admin.structure.settings:
+  title: 'Application form element settings'
+  description: 'Configure Application form element entities'
+  route_name: application_form_element.settings
+  parent: system.admin_structure
+
+# Application submission menu items definition
+entity.application_submission.collection:
+  title: 'Application submission list'
+  route_name: entity.application_submission.collection
+  description: 'List Application submission entities'
+  parent: system.admin_structure
+  weight: 100
+
+application_submission.admin.structure.settings:
+  title: 'Application submission settings'
+  description: 'Configure Application submission entities'
+  route_name: application_submission.settings
+  parent: system.admin_structure
+
+gla_opportunity.help_text_settings:
+  title: 'Opportunities Help Text'
+  description: 'Configure Opportunities help text'
+  parent: system.admin_config_content
+  route_name: gla_opportunity.help_text_settings

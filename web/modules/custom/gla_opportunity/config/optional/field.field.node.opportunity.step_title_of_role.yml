@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_title_of_role
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_title_of_role
+field_name: step_title_of_role
+entity_type: node
+bundle: opportunity
+label: 'What is the title of this volunteering role?'
+description: '<p>This role title will be displayed to potential volunteers.<p>'
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

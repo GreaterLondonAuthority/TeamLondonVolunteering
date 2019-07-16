@@ -1,0 +1,55 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.image_text_with_cta.field_cta
+    - field.field.paragraph.image_text_with_cta.field_description
+    - field.field.paragraph.image_text_with_cta.field_image
+    - field.field.paragraph.image_text_with_cta.field_title
+    - image.style.content_thumbnail_extra_small
+    - paragraphs.paragraphs_type.image_text_with_cta
+  module:
+    - image
+    - link
+    - text
+id: paragraph.image_text_with_cta.default
+targetEntityType: paragraph
+bundle: image_text_with_cta
+mode: default
+content:
+  field_cta:
+    weight: 3
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+    type: link_default
+    region: content
+  field_description:
+    weight: 2
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textarea
+    region: content
+  field_image:
+    weight: 1
+    settings:
+      progress_indicator: throbber
+      preview_image_style: content_thumbnail_extra_small
+    third_party_settings: {  }
+    type: image_image
+    region: content
+  field_title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

@@ -1,0 +1,13 @@
+name: 'Group config'
+type: module
+core: 8.x
+package: GLA
+dependencies:
+  - field
+  - gla_opportunity
+  - gla_provider
+  - gnode
+  - group
+  - node
+  - path
+  - user

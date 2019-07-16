@@ -1,0 +1,112 @@
+### Opportunity creation.
+# Create new opportunity.
+gla_opportunity.new:
+  path: '/opportunity/new'
+  defaults:
+    _controller: '\Drupal\gla_opportunity\Controller\GlaOpportunityController::createNewOpp'
+    _title: 'New volunteering opportunity'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+# Overview.
+gla_opportunity.opportunity_overview:
+  path: '/opportunity/{node}/overview'
+  defaults:
+     _controller: '\Drupal\gla_opportunity\Controller\GlaOpportunityController::initialOverview'
+     _title: 'Create a new volunteering role'
+  requirements:
+    _entity_access: 'node.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+# Check answers.
+gla_opportunity.opportunity_check:
+  path: '/opportunity/{node}/check'
+  defaults:
+    _controller: '\Drupal\gla_opportunity\Controller\GlaOpportunityController::opportunityCheck'
+    _title: 'Check your answers before submitting'
+  requirements:
+    _entity_access: 'node.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+# Answers saved.
+gla_opportunity.saved:
+  path: '/opportunity/{node}/saved'
+  defaults:
+    _controller: '\Drupal\gla_opportunity\Controller\GlaOpportunityController::saved'
+    _title: 'Your volunteering role has been saved'
+  requirements:
+    _entity_access: 'node.update'
+    _user_is_logged_in: 'TRUE'
+    _role: 'provider'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+        load_latest_revision: TRUE
+### Application forms.
+# Overview.
+gla_opportunity.apply_overview:
+  path: '/apply/{node}/overview'
+  defaults:
+     _controller: '\Drupal\gla_opportunity\Controller\GlaOpportunityApplicationController::applicationOverview'
+     _title_callback: '\Drupal\gla_opportunity\Controller\GlaOpportunityApplicationController::applicationOverviewTitle'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+# Apply.
+gla_opportunity.apply:
+  path: '/apply/{node}'
+  defaults:
+    _controller: '\Drupal\gla_opportunity\Controller\GlaOpportunityApplicationController::applicationFormView'
+    _title: 'Register your interest'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+# Check answers.
+gla_opportunity.apply_check:
+  path: '/apply/{node}/check'
+  defaults:
+     _controller: '\Drupal\gla_opportunity\Controller\GlaOpportunityApplicationController::applicationCheck'
+     _title: 'Register your interest'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+# Success.
+gla_opportunity.apply_success:
+  path: '/apply/{node}/success'
+  defaults:
+     _controller: '\Drupal\gla_opportunity\Controller\GlaOpportunityApplicationController::applicationSuccess'
+     _title: 'You have successfully registered your interest'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+
+gla_opportunity.help_text_settings:
+  path: '/admin/config/opportunities-help-text'
+  defaults:
+    _form: '\Drupal\gla_opportunity\Form\OpportunitiesHelpTextForm'
+    _title: 'Opportunities Help Text'
+  requirements:
+    _permission: 'access administration pages'

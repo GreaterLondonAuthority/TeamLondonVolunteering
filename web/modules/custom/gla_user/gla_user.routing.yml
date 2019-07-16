@@ -1,0 +1,35 @@
+# Check email confirmation page.
+gla_user.check_email:
+  path: '/registration/confirm/{email}'
+  defaults:
+    _controller: '\Drupal\gla_user\Controller\GlaUserController::emailConfirm'
+    _title: 'Check your email'
+  requirements:
+    _permission: 'access content'
+# Delete my account page - two instances as dynamic parameter at the beginning of the route isn't working.
+gla_user.delete_account_volunteer:
+  path: '/volunteer/dashboard/delete-account/{user}'
+  defaults:
+    _form: '\Drupal\gla_user\Form\UserManagementDeleteForm'
+    role: volunteer
+    _title: 'Delete my account'
+  requirements:
+    _role: 'volunteer'
+    _entity_access: 'user.update'
+  options:
+    parameters:
+      user:
+        type: 'entity:user'
+gla_user.delete_account_provider:
+  path: '/provider/dashboard/delete-account/{user}'
+  defaults:
+    _form: '\Drupal\gla_user\Form\UserManagementDeleteForm'
+    role: provider
+    _title: 'Delete my account'
+  requirements:
+    _role: 'provider'
+    _entity_access: 'user.update'
+  options:
+    parameters:
+      user:
+        type: 'entity:user'

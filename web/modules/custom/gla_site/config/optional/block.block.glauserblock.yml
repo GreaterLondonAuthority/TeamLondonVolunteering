@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - gla_site
+  theme:
+    - team_london
+id: glauserblock
+theme: team_london
+region: header
+weight: -10
+provider: null
+plugin: gla_site_user_block
+settings:
+  id: gla_site_user_block
+  label: 'GLA User Block'
+  provider: gla_site
+  label_display: '0'
+visibility: {  }

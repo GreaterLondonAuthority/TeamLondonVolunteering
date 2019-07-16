@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Promoted Opportunities'
+vid: promoted_opportunities
+description: ''
+hierarchy: 0
+weight: 0

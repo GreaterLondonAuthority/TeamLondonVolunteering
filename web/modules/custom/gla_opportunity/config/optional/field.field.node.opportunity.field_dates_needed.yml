@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_dates_needed
+    - node.type.opportunity
+  module:
+    - options
+id: node.opportunity.field_dates_needed
+field_name: field_dates_needed
+entity_type: node
+bundle: opportunity
+label: 'Give the dates when you need the volunteer to be available for this role.'
+description: '<p>Notes:<br>Select "one off date" for a single day event or activity.</p>'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

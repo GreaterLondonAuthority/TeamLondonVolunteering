@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.type_of_role
+  module:
+    - facets
+    - system
+  theme:
+    - team_london
+id: typeofrole
+theme: team_london
+region: sidebar_left
+weight: -2
+provider: null
+plugin: 'facet_block:type_of_role'
+settings:
+  id: 'facet_block:type_of_role'
+  label: 'Type of Role'
+  provider: facets
+  label_display: visible
+  block_id: typeofrole
+visibility:
+  request_path:
+    id: request_path
+    pages: /search-opportunities
+    negate: false
+    context_mapping: {  }

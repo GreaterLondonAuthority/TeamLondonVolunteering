@@ -1,0 +1,4 @@
+bundle: gla
+required:
+  - core.entity_form_mode.user.register
+  - administerusersbyrole.settings

@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.step_type_opp
+  module:
+    - gla_multistep_forms
+    - multiple_registration
+    - user
+third_party_settings:
+  multiple_registration:
+    user_additional_register_form:
+      volunteer: volunteer
+      authenticated: 0
+      provider: 0
+    user_additional_register_form_required:
+      authenticated: 0
+      volunteer: 0
+      provider: 0
+id: user.user.step_type_opp
+field_name: step_type_opp
+entity_type: user
+bundle: user
+label: 'What type of opportunity are you looking for? (optional)'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

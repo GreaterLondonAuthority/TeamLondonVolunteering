@@ -1,0 +1,4 @@
+bundle: gla
+required:
+  - field.field.node.landing_page.field_component
+  - field.storage.node.field_component

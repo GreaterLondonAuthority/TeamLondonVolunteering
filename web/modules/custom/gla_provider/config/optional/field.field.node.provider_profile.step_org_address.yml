@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_org_address
+    - node.type.provider_profile
+  module:
+    - gla_multistep_forms
+id: node.provider_profile.step_org_address
+field_name: step_org_address
+entity_type: node
+bundle: provider_profile
+label: 'What is your organisation’s address?'
+description: "<p>This is the main address of your organisation’s office or headquarters.</p>\r\n\r\n<p>This information will be displayed on your organisation’s public profile page.</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

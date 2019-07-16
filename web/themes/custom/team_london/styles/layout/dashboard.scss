@@ -1,0 +1,78 @@
+/**
+ * @file
+ *
+ * Provider and volunteer dashboard styles.
+ *
+**/
+
+@import "../variables/colours";
+@import "../variables/utilities";
+@import "../variables/typography";
+
+.dashboard-links {
+  .heading {
+    margin-top: 0;
+  }
+  > div {
+    margin-top: $gutter-spacing;
+    position: relative;
+    &:not(:last-child)::after {
+      display: none;
+      content: '';
+      position: absolute;
+      right: $gutter-spacing / 2;
+      top: 0;
+      background: $key-line;
+      width: 0.1rem;
+      height: 100%;
+    }
+  }
+  a {
+    display: inline-block;
+    margin: $gutter-spacing / 2 0;
+  }
+}
+
+.dashboard-filters {
+  input,
+  .select-wrapper,
+  select {
+    width: 100%;
+  }
+}
+
+.dashboard-response-form__options {
+  margin-left: $gutter-spacing * 2;
+}
+
+.dashboard-response-form {
+  label {
+    font-weight: bold;
+  }
+  textarea {
+    margin-bottom: 0;
+  }
+}
+
+.dashboard-response-form__prefix {
+  margin: $gutter-spacing / 2 0;
+}
+
+.dashboard-response-form__suffix {
+  margin: 0.2rem 0 $gutter-spacing * 2;
+}
+
+@media (min-width: $screen-tablet) {
+  .dashboard-response-form textarea {
+    width: 80%;
+  }
+  .dashboard-links > div:not(:last-child)::after {
+    display: block;
+    }
+  }
+
+@media (min-width: $screen-full) {
+  .dashboard-links > div:not(:last-child)::after {
+    right: $gutter-spacing
+  }
+}

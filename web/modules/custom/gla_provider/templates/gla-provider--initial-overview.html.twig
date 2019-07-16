@@ -1,0 +1,97 @@
+{% if log %}
+  {{ log }}
+{% endif %}
+
+<p>{{ 'Complete the sections below to create your profile.'|t }}</p>
+
+<h2 class="heading--small">{{ 'Contact details'|t }}</h2>
+<ul class="list-unstyled">
+
+{% for field in fields.organisation_contact %}
+  <li>
+    <div class="row">
+      <div class="col-sm-8 col-md-10">
+        <h3 class="heading--text"><strong>{{ field.link }}</strong></h3>
+      </div>
+      <div class="col-sm-4 col-md-2 end-sm">
+        <div class="status-block status-block--pink text-left">{{ field.value }}</div>
+      </div>
+    </div>
+    <div class="separator"></div>
+  </li>
+{% endfor %}
+</ul>
+
+
+<h2 class="heading--small">{{ 'Website and social media pages'|t }}</h2>
+<ul class="list-unstyled">
+  {% for field in fields.organisation_online %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text"><strong>{{ field.link }}</strong></h3>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          <div class="status-block status-block--pink text-left">{{ field.value }}</div>
+        </div>
+      </div>
+      <div class="separator"></div>
+    </li>
+  {% endfor %}
+</ul>
+
+
+<h2 class="heading--small">{{ 'About your organisation'|t }}</h2>
+<ul class="list-unstyled">
+  {% for field in fields.organisation_description %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text"><strong>{{ field.link }}</strong></h3>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          <div class="status-block status-block--pink text-left">{{ field.value }}</div>
+        </div>
+      </div>
+      <div class="separator"></div>
+    </li>
+  {% endfor %}
+</ul>
+
+
+<h2 class="heading--small">{{ 'Upload a logo and profile image'|t }}</h2>
+<ul class="list-unstyled">
+  {% for field in fields.organisation_images %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text"><strong>{{ field.link }}</strong></h3>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          <div class="status-block status-block--pink text-left">{{ field.value }}</div>
+        </div>
+      </div>
+      <div class="separator"></div>
+    </li>
+  {% endfor %}
+</ul>
+
+
+<h2 class="heading--small">{{ 'Subscribe to our newsletter'|t }}</h2>
+<ul class="list-unstyled">
+  {% for field in fields.organisation_newsletter %}
+    <li>
+      <div class="row">
+        <div class="col-sm-8 col-md-10">
+          <h3 class="heading--text"><strong>{{ field.link }}</strong></h3>
+        </div>
+        <div class="col-sm-4 col-md-2 end-sm">
+          <div class="status-block status-block--pink text-left">{{ field.value }}</div>
+        </div>
+      </div>
+      <div class="separator"></div>
+    </li>
+  {% endfor %}
+</ul>
+
+{{ continue }}

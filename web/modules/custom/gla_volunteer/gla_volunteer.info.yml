@@ -1,0 +1,5 @@
+name: Volunteer
+description: 'Provides volunteer related code and configuration. '
+type: module
+core: 8.x
+package: GLA

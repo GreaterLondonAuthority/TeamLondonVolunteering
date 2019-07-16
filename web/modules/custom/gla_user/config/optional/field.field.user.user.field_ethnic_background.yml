@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_ethnic_background
+  module:
+    - multiple_registration
+    - options
+    - user
+third_party_settings:
+  multiple_registration:
+    user_additional_register_form:
+      volunteer: volunteer
+      authenticated: 0
+      provider: 0
+    user_additional_register_form_required: null
+id: user.user.field_ethnic_background
+field_name: field_ethnic_background
+entity_type: user
+bundle: user
+label: 'What is your ethnicity?'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

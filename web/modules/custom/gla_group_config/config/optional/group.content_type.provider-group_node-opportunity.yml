@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - group.type.provider
+    - node.type.opportunity
+  module:
+    - gnode
+    - node
+id: provider-group_node-opportunity
+label: 'Provider: Group node (Opportunity)'
+description: 'Adds <em class="placeholder">Opportunity</em> content to groups both publicly and privately.'
+group_type: provider
+content_plugin: 'group_node:opportunity'
+plugin_config:
+  group_cardinality: 1
+  entity_cardinality: 1
+  use_creation_wizard: true

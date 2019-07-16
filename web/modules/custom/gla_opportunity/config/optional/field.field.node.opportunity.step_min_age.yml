@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_min_age
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_min_age
+field_name: step_min_age
+entity_type: node
+bundle: opportunity
+label: 'What is the minimum age for this role?'
+description: 'Please indicate if there are any age restrictions for this role.'
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

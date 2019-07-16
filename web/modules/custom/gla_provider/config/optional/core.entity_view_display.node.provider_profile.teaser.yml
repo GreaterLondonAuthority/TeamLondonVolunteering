@@ -1,0 +1,117 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.provider_profile.body
+    - field.field.node.provider_profile.field_borough
+    - field.field.node.provider_profile.field_building_and_street
+    - field.field.node.provider_profile.field_building_and_street_2
+    - field.field.node.provider_profile.field_building_and_street_3
+    - field.field.node.provider_profile.field_lat_long
+    - field.field.node.provider_profile.field_organisation_deliver_value
+    - field.field.node.provider_profile.field_organisation_facebook
+    - field.field.node.provider_profile.field_organisation_image
+    - field.field.node.provider_profile.field_organisation_instagram
+    - field.field.node.provider_profile.field_organisation_logo
+    - field.field.node.provider_profile.field_organisation_newsletter
+    - field.field.node.provider_profile.field_organisation_tags
+    - field.field.node.provider_profile.field_organisation_twitter
+    - field.field.node.provider_profile.field_organisation_web_address
+    - field.field.node.provider_profile.field_organisation_who_benefits
+    - field.field.node.provider_profile.field_postcode
+    - field.field.node.provider_profile.field_provider_group
+    - field.field.node.provider_profile.field_reminder_email
+    - field.field.node.provider_profile.field_status
+    - field.field.node.provider_profile.field_town_or_city
+    - field.field.node.provider_profile.field_uk_telephone_number
+    - field.field.node.provider_profile.field_what_bullet_1
+    - field.field.node.provider_profile.field_what_bullet_2
+    - field.field.node.provider_profile.field_what_bullet_3
+    - field.field.node.provider_profile.field_what_bullet_4
+    - field.field.node.provider_profile.field_what_bullet_5
+    - field.field.node.provider_profile.field_what_bullet_6
+    - field.field.node.provider_profile.step_org_address
+    - field.field.node.provider_profile.step_org_fb
+    - field.field.node.provider_profile.step_org_how_deliver
+    - field.field.node.provider_profile.step_org_image
+    - field.field.node.provider_profile.step_org_insta
+    - field.field.node.provider_profile.step_org_logo
+    - field.field.node.provider_profile.step_org_name
+    - field.field.node.provider_profile.step_org_newsletter
+    - field.field.node.provider_profile.step_org_phone
+    - field.field.node.provider_profile.step_org_tags
+    - field.field.node.provider_profile.step_org_tw
+    - field.field.node.provider_profile.step_org_values
+    - field.field.node.provider_profile.step_org_web
+    - field.field.node.provider_profile.step_org_who_benefits
+    - image.style.thumbnail
+    - node.type.provider_profile
+  module:
+    - image
+    - user
+id: node.provider_profile.teaser
+targetEntityType: node
+bundle: provider_profile
+mode: teaser
+content:
+  field_organisation_logo:
+    type: image
+    weight: 0
+    region: content
+    label: hidden
+    settings:
+      image_style: thumbnail
+      image_link: ''
+    third_party_settings: {  }
+  field_what_bullet_1:
+    type: basic_string
+    weight: 1
+    region: content
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  body: true
+  content_moderation_control: true
+  field_borough: true
+  field_building_and_street: true
+  field_building_and_street_2: true
+  field_building_and_street_3: true
+  field_lat_long: true
+  field_organisation_deliver_value: true
+  field_organisation_facebook: true
+  field_organisation_image: true
+  field_organisation_instagram: true
+  field_organisation_newsletter: true
+  field_organisation_tags: true
+  field_organisation_twitter: true
+  field_organisation_web_address: true
+  field_organisation_who_benefits: true
+  field_postcode: true
+  field_provider_group: true
+  field_reminder_email: true
+  field_status: true
+  field_town_or_city: true
+  field_uk_telephone_number: true
+  field_what_bullet_2: true
+  field_what_bullet_3: true
+  field_what_bullet_4: true
+  field_what_bullet_5: true
+  field_what_bullet_6: true
+  langcode: true
+  links: true
+  step_org_address: true
+  step_org_fb: true
+  step_org_how_deliver: true
+  step_org_image: true
+  step_org_insta: true
+  step_org_logo: true
+  step_org_name: true
+  step_org_newsletter: true
+  step_org_phone: true
+  step_org_tags: true
+  step_org_tw: true
+  step_org_values: true
+  step_org_web: true
+  step_org_who_benefits: true

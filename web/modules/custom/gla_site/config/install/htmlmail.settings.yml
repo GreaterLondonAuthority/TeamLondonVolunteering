@@ -1,0 +1,13 @@
+htmlmail_debug: false
+hmtlmail_theme: ''
+htmlmail_html_with_plain: false
+htmlmail_use_mime_mail: false
+htmlmail_postfilter: basic_html
+htmlmail_test:
+  to: user@example.com
+  subject: 'subject test'
+  body:
+    value: "<p><strong>test</strong></p>\r\n"
+    format: full_html
+  class: php_mail
+htmlmail_theme: ''

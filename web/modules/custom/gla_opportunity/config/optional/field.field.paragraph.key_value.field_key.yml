@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_key
+    - paragraphs.paragraphs_type.key_value
+id: paragraph.key_value.field_key
+field_name: field_key
+entity_type: paragraph
+bundle: key_value
+label: Key
+description: 'This is auto-populated and represents the data as stored in the backend. This just ensures re-ordering these fields will not affect existing responses.'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

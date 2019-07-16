@@ -1,0 +1,299 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - search_api_solr
+    - search_api_location
+    - taxonomy
+    - node
+    - search_api
+    - gla_search
+  config:
+    - field.storage.node.field_borough
+    - field.storage.node.field_causes_supported
+    - field.storage.node.field_days_list
+    - field.storage.node.field_one_off_date
+    - field.storage.node.field_ongoing_end_date
+    - field.storage.node.field_ongoing_start_date
+    - field.storage.node.field_times_list
+    - field.storage.node.field_type_options_type
+    - field.storage.node.field_lat_long
+    - field.storage.node.field_what_skills_gain
+    - field.storage.node.field_what_skills_useful
+    - search_api.server.solr
+    - core.entity_view_mode.node.full
+third_party_settings:
+  search_api_solr:
+    finalize: false
+    commit_before_finalize: false
+    commit_after_finalize: false
+    highlighter:
+      maxAnalyzedChars: 51200
+      fragmenter: gap
+      regex:
+        slop: 0.5
+        pattern: blank
+        maxAnalyzedChars: 10000
+      usePhraseHighlighter: true
+      highlightMultiTerm: true
+      preserveMulti: false
+      highlight:
+        mergeContiguous: false
+        requireFieldMatch: false
+        snippets: 3
+        fragsize: 0
+    advanced:
+      index_prefix: ''
+id: search
+name: Search
+description: ''
+read_only: false
+field_settings:
+  date_sort:
+    label: 'Date to sort by'
+    property_path: aggregated_field
+    type: date
+    configuration:
+      type: first
+      fields:
+        - 'entity:node/field_one_off_date'
+        - 'entity:node/field_ongoing_start_date'
+  field_borough:
+    label: Borough
+    datasource_id: 'entity:node'
+    property_path: field_borough
+    type: integer
+    dependencies:
+      config:
+        - field.storage.node.field_borough
+  field_causes_supported:
+    label: 'Causes supported'
+    datasource_id: 'entity:node'
+    property_path: field_causes_supported
+    type: integer
+    dependencies:
+      config:
+        - field.storage.node.field_causes_supported
+  field_causes_supported_1:
+    label: 'Causes supported'
+    datasource_id: 'entity:node'
+    property_path: field_causes_supported
+    type: integer
+    dependencies:
+      config:
+        - field.storage.node.field_causes_supported
+  field_days_list:
+    label: Days
+    datasource_id: 'entity:node'
+    property_path: field_days_list
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_days_list
+  field_one_off_date:
+    label: 'One off date'
+    datasource_id: 'entity:node'
+    property_path: field_one_off_date
+    type: date
+    dependencies:
+      config:
+        - field.storage.node.field_one_off_date
+  field_ongoing_end_date:
+    label: 'End date (optional)'
+    datasource_id: 'entity:node'
+    property_path: field_ongoing_end_date
+    type: date
+    dependencies:
+      config:
+        - field.storage.node.field_ongoing_end_date
+  field_ongoing_start_date:
+    label: 'Start date'
+    datasource_id: 'entity:node'
+    property_path: field_ongoing_start_date
+    type: date
+    dependencies:
+      config:
+        - field.storage.node.field_ongoing_start_date
+  field_times_list:
+    label: Times
+    datasource_id: 'entity:node'
+    property_path: field_times_list
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_times_list
+  field_type_options_type:
+    label: Type
+    datasource_id: 'entity:node'
+    property_path: field_type_options_type
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_type_options_type
+  gla_search_provider_profile:
+    label: 'Provider profile ID'
+    datasource_id: 'entity:node'
+    property_path: gla_search_provider_profile
+    type: integer
+  gla_search_provider_profile_name:
+    label: 'Provider profile name'
+    datasource_id: 'entity:node'
+    property_path: gla_search_provider_profile_name
+    type: string
+  lat:
+    label: 'Lat long » Latitude'
+    datasource_id: 'entity:node'
+    property_path: 'field_lat_long:lat'
+    type: decimal
+    dependencies:
+      config:
+        - field.storage.node.field_lat_long
+  latlng:
+    label: 'Lat long » LatLong Pair'
+    datasource_id: 'entity:node'
+    property_path: 'field_lat_long:latlng'
+    type: location
+    dependencies:
+      config:
+        - field.storage.node.field_lat_long
+  lng:
+    label: 'Lat long » Longitude'
+    datasource_id: 'entity:node'
+    property_path: 'field_lat_long:lng'
+    type: decimal
+    dependencies:
+      config:
+        - field.storage.node.field_lat_long
+  name:
+    label: 'What skills gain » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_what_skills_gain:entity:name'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_what_skills_gain
+      module:
+        - taxonomy
+        - taxonomy
+  name_1:
+    label: 'What skills useful » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_what_skills_useful:entity:name'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_what_skills_useful
+      module:
+        - taxonomy
+        - taxonomy
+  name_2:
+    label: 'Causes supported » Taxonomy term » Name'
+    datasource_id: 'entity:node'
+    property_path: 'field_causes_supported:entity:name'
+    type: string
+    dependencies:
+      config:
+        - field.storage.node.field_causes_supported
+      module:
+        - taxonomy
+        - taxonomy
+  node_grants:
+    label: 'Node access information'
+    property_path: search_api_node_grants
+    type: string
+    indexed_locked: true
+    type_locked: true
+    hidden: true
+  rendered_item:
+    label: 'Rendered HTML output'
+    property_path: rendered_item
+    type: text
+    configuration:
+      roles:
+        anonymous: anonymous
+      view_mode:
+        'entity:node':
+          opportunity: full
+          provider_profile: full
+  status:
+    label: Published
+    datasource_id: 'entity:node'
+    property_path: status
+    type: boolean
+    indexed_locked: true
+    type_locked: true
+    dependencies:
+      module:
+        - node
+  title:
+    label: Title
+    datasource_id: 'entity:node'
+    property_path: title
+    type: string
+    dependencies:
+      module:
+        - node
+  type:
+    label: 'Content type'
+    datasource_id: 'entity:node'
+    property_path: type
+    type: string
+    dependencies:
+      module:
+        - node
+  uid:
+    label: uid
+    datasource_id: 'entity:node'
+    property_path: uid
+    type: integer
+    indexed_locked: true
+    type_locked: true
+    dependencies:
+      module:
+        - node
+  url:
+    label: URI
+    property_path: search_api_url
+    type: string
+datasource_settings:
+  'entity:node':
+    bundles:
+      default: false
+      selected:
+        - opportunity
+        - provider_profile
+    languages:
+      default: true
+      selected: {  }
+processor_settings:
+  add_url: {  }
+  aggregated_field: {  }
+  content_access:
+    weights:
+      preprocess_query: -30
+  gla_search_add_provider_profile: {  }
+  hierarchy:
+    fields:
+      field_causes_supported: taxonomy_term-parent
+    weights:
+      preprocess_index: -45
+  rendered_item: {  }
+  solr_date_range:
+    weights:
+      preprocess_index: 0
+  type_boost:
+    boosts:
+      'entity:node':
+        datasource_boost: !!float 1
+        bundle_boosts:
+          opportunity: !!float 3
+          provider_profile: !!float 1
+    weights:
+      preprocess_index: 0
+tracker_settings:
+  default:
+    indexing_order: fifo
+options:
+  index_directly: true
+  cron_limit: 50
+server: solr

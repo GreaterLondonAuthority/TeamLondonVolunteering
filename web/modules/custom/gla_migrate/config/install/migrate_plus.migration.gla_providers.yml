@@ -1,0 +1,37 @@
+# Providers migration
+# This will import the provider USERS - the drupal user accounts.
+
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - migrate_plus
+      - migrate_source_csv
+id: gla_providers
+class: null
+field_plugin_method: null
+cck_plugin_method: null
+migration_tags: null
+migration_group: gla
+label: 'GLA Providers users'
+source:
+  plugin: csv
+  path: 'modules/custom/gla_migrate/data/providers.csv'
+  header_row_count: 1
+  keys:
+    - content_id
+process:
+  name: login
+  mail: email
+  init: email
+  status: active
+  field_organisation_name: title
+  roles:
+    plugin: default_value
+    default_value: "provider"
+  created: created
+  changed: last_modified
+
+destination:
+  plugin: 'entity:user'

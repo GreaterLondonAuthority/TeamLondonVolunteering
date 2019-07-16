@@ -1,0 +1,136 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.user.volunteer_interests
+    - field.field.user.user.field_age_group
+    - field.field.user.user.field_best_describes
+    - field.field.user.user.field_confirm_non_profit
+    - field.field.user.user.field_consider_disabled
+    - field.field.user.user.field_ethnic_background
+    - field.field.user.user.field_ethnic_background_other
+    - field.field.user.user.field_first_name
+    - field.field.user.user.field_gender
+    - field.field.user.user.field_gender_other
+    - field.field.user.user.field_last_name
+    - field.field.user.user.field_last_password_reset
+    - field.field.user.user.field_loc_london_borough
+    - field.field.user.user.field_loc_postcode
+    - field.field.user.user.field_location
+    - field.field.user.user.field_london_borough_base
+    - field.field.user.user.field_organisation_name
+    - field.field.user.user.field_password_expiration
+    - field.field.user.user.field_signed_up_from
+    - field.field.user.user.field_skills_to_gain
+    - field.field.user.user.field_skills_to_offer
+    - field.field.user.user.field_tandc
+    - field.field.user.user.field_types_of_opportunity
+    - field.field.user.user.step_email
+    - field.field.user.user.step_mail_address
+    - field.field.user.user.step_name
+    - field.field.user.user.step_org_contact
+    - field.field.user.user.step_skills
+    - field.field.user.user.step_skills_gain
+    - field.field.user.user.step_type_opp
+    - field.field.user.user.step_where
+    - field.field.user.user.user_picture
+  module:
+    - gla_multistep_forms
+    - term_reference_tree
+    - user
+id: user.user.volunteer_interests
+targetEntityType: user
+bundle: user
+mode: volunteer_interests
+content:
+  field_loc_london_borough:
+    type: options_select
+    weight: 9
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_loc_postcode:
+    type: string_textfield
+    weight: 8
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_location:
+    type: options_buttons
+    weight: 7
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_skills_to_gain:
+    type: term_reference_tree
+    weight: 5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_skills_to_offer:
+    type: term_reference_tree
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_types_of_opportunity:
+    type: term_reference_tree
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  step_skills:
+    type: multistep_separator_widget
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  step_skills_gain:
+    type: multistep_separator_widget
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  step_type_opp:
+    type: multistep_separator_widget
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  step_where:
+    type: multistep_separator_widget
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  timezone:
+    weight: 6
+    region: content
+hidden:
+  account: true
+  contact: true
+  field_age_group: true
+  field_best_describes: true
+  field_confirm_non_profit: true
+  field_consider_disabled: true
+  field_ethnic_background: true
+  field_ethnic_background_other: true
+  field_first_name: true
+  field_gender: true
+  field_gender_other: true
+  field_last_name: true
+  field_last_password_reset: true
+  field_london_borough_base: true
+  field_organisation_name: true
+  field_password_expiration: true
+  field_signed_up_from: true
+  field_tandc: true
+  langcode: true
+  language: true
+  step_email: true
+  step_mail_address: true
+  step_name: true
+  step_org_contact: true
+  user_picture: true

@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.application_form_element.field_type
+  module:
+    - gla_opportunity
+    - options
+id: application_form_element.application_form_element.field_type
+field_name: field_type
+entity_type: application_form_element
+bundle: application_form_element
+label: Type
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

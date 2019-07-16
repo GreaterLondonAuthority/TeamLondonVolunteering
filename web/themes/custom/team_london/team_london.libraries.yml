@@ -1,0 +1,61 @@
+core:
+  css:
+    layout:
+      dist/css/core.css: {}
+
+  js:
+    dist/js/team-london.js: {}
+
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+layout:
+  css:
+    layout:
+      dist/css/layout/main.css: {}
+      dist/css/layout/team-page.css: {}
+      dist/css/layout/dashboard.css: {}
+
+user-navigation:
+  css:
+    component:
+      dist/css/components/user-navigation.css: {}
+    theme:
+      dist/css/components/user-navigation.theme.css: {}
+
+featured_component:
+  css:
+    component:
+      dist/css/components/featured-component.css: {}
+
+search_col_component:
+  css:
+    component:
+      dist/css/components/search-column-component.css: {}
+
+newsletter:
+  css:
+    component:
+      dist/css/components/newsletter.css: {}
+
+icon_cta_component:
+  css:
+    component:
+      dist/css/components/icon-cta-component.css: {}
+    theme:
+      dist/css/components/icon-cta-component.theme.css: {}
+
+# component-name:
+#   css:
+#     component:
+#       dist/css/components/component-name.css: {}
+#     theme:
+#       dist/css/components/component-name.theme.css: {}
+#
+#   js:
+#     dist/js/component-name.js: {}
+#
+#   dependencies:
+#     - core/jquery
+#     - core/drupal

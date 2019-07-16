@@ -1,0 +1,6 @@
+gla_provider.member_add:
+  route_name: gla_provider.user_add_overview
+  title: '+ add new team member'
+  appears_on:
+    - view.provider_group_members.page_1
+

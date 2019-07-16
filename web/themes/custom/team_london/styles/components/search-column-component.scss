@@ -1,0 +1,15 @@
+/**
+ * @file
+ * Featured blocks component tweaks.
+ *
+**/
+
+// Search component needs margin removal on immediate heading child.
+.component--search {
+  .field-prefix {
+    display: none;
+  }
+  > .heading {
+    margin-top: 0;
+  }
+}

@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_what_change_bullet_4
+    - node.type.opportunity
+id: node.opportunity.field_what_change_bullet_4
+field_name: field_what_change_bullet_4
+entity_type: node
+bundle: opportunity
+label: 'Bullet 4'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

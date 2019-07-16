@@ -1,0 +1,10 @@
+<div class="well well--confirmation">
+  <h3 class="heading--alt">{{ action_title }}</h3>
+  <strong>{{ title }}</strong>
+  <p>{{ description_text }}</p>
+</div>
+
+{{ 'Next steps'|t }}
+{% for link in links %}
+  {{ link }}
+{% endfor %}

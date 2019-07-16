@@ -1,0 +1,21 @@
+name: GLA Team London sub-theme
+type: theme
+description: 'GLA Team London sub-theme used for the themeing of Team London site.'
+core: 8.x
+base theme: gla_estate
+
+regions:
+  header: Header
+  breadcrumb: Breadcrumb
+  sidebar_left: Side Bar Left
+  sidebar_righr: Side Bar Right
+  content: Content
+  footer: Footer
+
+libraries:
+  - team_london/core
+  - team_london/layout
+
+  # Component libraries below should only be loaded
+  # when/where the component is present.
+  # - team_london/component

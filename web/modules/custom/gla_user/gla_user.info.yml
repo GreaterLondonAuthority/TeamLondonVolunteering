@@ -1,0 +1,14 @@
+name: User
+description: 'Provide User related configuration.'
+type: module
+core: 8.x
+package: GLA
+dependencies:
+  - administerusersbyrole
+  - email_registration
+  - field
+  - file
+  - gla_site
+  - image
+  - multiple_registration
+  - user

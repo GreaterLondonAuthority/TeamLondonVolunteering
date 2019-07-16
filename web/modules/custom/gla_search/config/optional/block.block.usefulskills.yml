@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.useful_skills
+  module:
+    - facets
+    - system
+  theme:
+    - team_london
+id: usefulskills
+theme: team_london
+region: sidebar_left
+weight: -3
+provider: null
+plugin: 'facet_block:useful_skills'
+settings:
+  id: 'facet_block:useful_skills'
+  label: 'Useful Skills'
+  provider: facets
+  label_display: visible
+  block_id: usefulskills
+visibility:
+  request_path:
+    id: request_path
+    pages: /search-opportunities
+    negate: false
+    context_mapping: {  }

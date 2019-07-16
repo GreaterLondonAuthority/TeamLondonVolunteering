@@ -1,0 +1,1250 @@
+<?php
+
+/**
+ * @file
+ * Contains gla_multistep_forms.module.
+ */
+
+/**
+ * Initialises steps on the given form.
+ */
+function gla_multistep_initiate_steps(&$form, \Drupal\Core\Form\FormStateInterface &$form_state, $entity_type_id, $bundle) {
+  // Load steps for this form.
+  gla_multistep_forms_attach_steps($form, $form_state, $entity_type_id, $bundle);
+  // Remove any steps that have only inaccessible fields.
+  $form['#steps'] = _gla_multistep_forms_remove_empty_steps($form['#steps'], $form, $form_state);
+  if (empty($form['#steps'])) {
+    // Nothing to do here.
+    return;
+  }
+
+  // Init first step if no step is set before.
+  $storage = $form_state->getStorage();
+
+  if (!isset($storage['step'])) {
+    $step_names = array_keys($form['#steps']);
+    $storage['step'] = $step_names[0];
+    $form_state->setStorage($storage);
+  }
+
+  // If one specific step should be displayed.
+  $step_num = \Drupal::request()->query->get('step');
+  if (isset($step_num)) {
+    $step_requested = (int) $step_num;
+    _gla_multistep_forms_form_step_set_current($step_requested, $form, $form_state);
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function gla_multistep_forms_form_user_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // This hook is called for all user forms.
+  // Only use multistep on specific user types.
+  $multistep_form_user_types = [
+    'volunteer',
+    'provider',
+  ];
+
+  // Check role on register form.
+  if (isset($form['rid'], $form['rid']['#value']) && !in_array($form['rid']['#value'], $multistep_form_user_types)) {
+    return;
+  }
+  elseif (!isset($form['rid'])) {
+    // Check role for existing user editing.
+    $skip = TRUE;
+    $entity = $form_state->getFormObject()->getEntity();
+    $user_roles = $entity->getRoles();
+    foreach ($user_roles as $role) {
+      if (in_array($role, $multistep_form_user_types)) {
+        $skip = FALSE;
+      }
+    }
+
+    if ($skip) {
+      return;
+    }
+
+    // If this is the volunteer edit profile form, change the text of the step.
+    if (isset($form['step_name'])) {
+      $form['step_name']['widget'][0]['step_title']['#markup'] = t('Name');
+    }
+
+    if (isset($form['step_email'])) {
+      $form['step_email']['widget'][0]['step_title']['#markup'] = t('Email');
+
+      if (is_volunteer_account_details_route()) {
+        $form['step_email']['widget'][0]['step_title']['#markup'] = '<h2 class="heading-small heading--alt">' . t('Email address') . '</h2>';
+        $form['step_email']['widget'][0]['step_description']['#markup'] = '';
+        $form['account']['mail']['#description'] = '';
+        $form['account']['current_pass']['#description'] = '';
+        $form['step_password']['widget'][0]['step_title']['#markup'] = '<h2 class="heading-small heading--alt">' . t('Password') . '</h2>';
+        $form['step_password']['widget']['#title']['#markup'] = '<h2 class="heading-small heading--alt">' . t('Password') . '</h2>';
+      }
+    }
+  }
+
+  gla_multistep_forms_transform_multistep($form, $form_state, 'user', 'user');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_multistep_forms_form_field_ui_field_storage_add_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // Add a submit before the normal one to alter the prefix.
+  array_unshift($form['#submit'], 'gla_multistep_forms_field_ui_field_storage_add_form_submit');
+  // Add note.
+  $form['gla_multistep_forms'] = [
+    '#markup' => t("Note: The field prefix will be altered to 'step_' for multistep separators"),
+  ];
+}
+
+/**
+ * Custom form submit for field_ui_field_storage_add_form.
+ */
+function gla_multistep_forms_field_ui_field_storage_add_form_submit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  // Change the field prefix for custom steps fields.
+  $field_type = $form_state->getValue('new_storage_type');
+  if ($field_type == 'multistep_separator') {
+    $field_name = $form_state->getValue('field_name');
+    $raw_field_name = substr($field_name, 6);
+    $field_name = 'step_' . $raw_field_name;
+    $form_state->setValueForElement($form['new_storage_wrapper']['field_name'], $field_name);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_multistep_forms_form_node_form_alter(&$form, \Drupal\Core\Form\FormStateInterface &$form_state, $form_id) {
+  // Only use multistep on specific node types.
+  $multistep_form_node_types = [
+    'provider_profile',
+    'opportunity',
+  ];
+
+  $entity = $form_state->getFormObject()->getEntity();
+  $bundle = $entity->bundle();
+  if (!$entity || !in_array($bundle, $multistep_form_node_types)) {
+    return;
+  }
+
+  gla_multistep_forms_transform_multistep($form, $form_state, 'node', $bundle);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_multistep_forms_form_application_submission_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // Use multistep for the application form.
+  gla_multistep_forms_transform_multistep($form, $form_state, 'application_submission', 'application_submission');
+}
+
+/**
+ * The main function for transforming standard Drupal entity edit forms into multistep forms.
+ */
+function gla_multistep_forms_transform_multistep(&$form, \Drupal\Core\Form\FormStateInterface &$form_state, $entity_type_id, $bundle) {
+
+  // For testing.
+  $disable_multistep = \Drupal::request()->query->get('disable_multistep');
+  if ($disable_multistep || isset($form['#disable_multistep'])) {
+    return;
+  }
+
+  // Disable for admins reviewing via the standard Drupal pages.
+  $route_match = \Drupal::routeMatch();
+  $current_path = $route_match->getRouteName();
+  $ignore_paths = [
+    'entity.node.edit_form',
+    'entity.user.edit_form',
+    'entity.application_submission.edit_form',
+  ];
+
+  if (\Drupal::currentUser()->hasPermission('access administration pages') && in_array($current_path, $ignore_paths)) {
+    return;
+  }
+
+  gla_multistep_initiate_steps($form, $form_state, $entity_type_id, $bundle);
+
+  // Specific handling for the member management forms.
+  if (is_provider_member_route('user_add')) {
+    // Add the check answers step on member add form.
+    $check_answers_step_num = count($form['#steps']);
+    $check_answers_step_num++;
+    $check_answers_step = new stdClass();
+    $check_answers_step->step_name = $check_answers_step_num;
+    $check_answers_step->children = ['check_answers_data'];
+    $form['#steps'][$check_answers_step_num] = $check_answers_step;
+    $form['check_answers_data']['#markup'] = '';
+
+    // If we're accessing a step of the form directly it will be a fresh form so
+    // we need to pass the vars in. Don't do this if there are values in the
+    // form storage though as these will be more recent.
+    $storage = $form_state->getStorage();
+    $passed_values = \Drupal::request()->query->get('form_values');
+    if (!isset($storage['account']) && isset($passed_values['account']) && $passed_values['account']) {
+      $form['account']['mail']['#default_value'] = $passed_values['account'];
+    }
+
+    if (!isset($storage['field_first_name']) && isset($passed_values['field_first_name']) && $passed_values['field_first_name']) {
+      $form['field_first_name']['widget'][0]['value']['#default_value'] = $passed_values['field_first_name'];
+    }
+    if (!isset($storage['field_last_name']) && isset($passed_values['field_last_name']) && $passed_values['field_last_name']) {
+      $form['field_last_name']['widget'][0]['value']['#default_value'] = $passed_values['field_last_name'];
+    }
+  }
+  elseif (is_provider_member_route('user_edit')) {
+    // Pseudo field as the user won't have the member's password.
+    $form['pseudo_mail'] = $form['account']['mail'];
+    // Find the 'account' step and replace with 'pseudo_mail'.
+    foreach ($form['#steps'] as $step_key => $step_info) {
+      $pos = array_search('account', $step_info->children);
+      if ($pos !== FALSE) {
+        $form['#steps'][$step_key]->children[$pos] = 'pseudo_mail';
+        $form['account']['#access'] = FALSE;
+        break;
+      }
+    }
+  }
+  elseif (is_volunteer_account_details_route()) {
+    // Add a new step for the email address as this is tied together with the
+    // password currently. Use a pseudo field so the user can change their email
+    // address without password as per wireframes.
+    $form['pseudo_mail'] = $form['account']['mail'];
+
+    // Find the 'account' step and replace with 'pseudo_mail'.
+    foreach ($form['#steps'] as $step_key => $step_info) {
+      $pos = array_search('account', $step_info->children);
+      if ($pos !== FALSE) {
+        $form['#steps'][$step_key]->children[$pos] = 'pseudo_mail';
+        $form['account']['#access'] = FALSE;
+        break;
+      }
+    }
+
+    $password_step_num = count($form['#steps']);
+    $password_step_num++;
+    $password_step = new stdClass();
+    $password_step->step_name = $password_step_num;
+    $password_step->children = ['step_password', 'account'];
+    $form['#steps'][$password_step_num] = $password_step;
+
+    // Check requested step number again.
+    // If one specific step should be displayed.
+    $step_num = \Drupal::request()->query->get('step');
+    if (isset($step_num)) {
+      $step_requested = (int) $step_num;
+      _gla_multistep_forms_form_step_set_current($step_requested, $form, $form_state);
+    }
+  }
+
+  if (isset($form['#steps'])) {
+    // Init static step data.
+    $step_data = &drupal_static('gla_multistep_forms_step_data');
+    $step_data = [
+      'steps' => $form['#steps'],
+      'current_step' => _gla_multistep_forms_form_step_get_current($form, $form_state),
+    ];
+
+    // Only bother fetching the data if we're displaying this step.
+    if (is_provider_member_route('user_add') && $step_data['current_step']->step_name == $check_answers_step_num) {
+      $form['check_answers_data'] = check_answers_data($form, $form_state);
+    }
+    elseif (is_volunteer_account_details_route() && $step_data['current_step']->step_name == $password_step_num) {
+      // Allow access to the account field again but hide the email part of it.
+      $form['account']['#access'] = TRUE;
+      $form['account']['mail']['#access'] = FALSE;
+    }
+  }
+
+  if (empty($form['#steps'])) {
+    // No need for further modifications.
+    return;
+  }
+
+  // Add step buttons to form.
+  _gla_multistep_forms_form_attach_buttons($form, $form_state);
+
+  // Hide all elements that do not belong to the current step.
+  _gla_multistep_forms_hide_fields($form, $form_state);
+
+  // Add a custom validation handler to rebuild the form.
+  $form['#validate'][] = 'gla_multistep_forms_entity_form_validate';
+
+  // We remove the default ::validateForm as we're saving the entity at each
+  // step and don't want this validation here. The entity is still validated
+  // before saving though as we call $entity->validate() explicitly.
+  // The user_register_form needs to run the validation as usual though.
+  // This is only needed on the provider profile and opportunity node edit forms.
+  $validation_alters = gla_get_validation_alter_form_ids();
+  if (in_array($form['#form_id'], $validation_alters) && in_array('::validateForm', $form['#validate'])) {
+    $index = array_search('::validateForm', $form['#validate']);
+    unset($form['#validate'][$index]);
+    // Reset keys.
+    $form['#validate'] = array_values($form['#validate']);
+  }
+
+  if ($current_path == 'gla_provider.user_add' && $step_data['current_step']->step_name != count($step_data['steps'])) {
+    // Add the step info to the top of the page, altered for this flow.
+    $question = t('Question @this_step of @total_steps', [
+      '@this_step' => $step_data['current_step']->step_name,
+      '@total_steps' => count($step_data['steps']) - 1,
+    ]);
+
+    $form['step_count'] = [
+      '#markup' => '<div class="step-count">' . $question . '</div>',
+      '#weight' => -1,
+    ];
+  }
+  elseif ($form['#form_id'] != 'user_register_form') {
+    // Add the step info to the top of the page and hide the form title.
+    $question = t('Question @this_step of @total_steps', [
+      '@this_step' => $step_data['current_step']->step_name,
+      '@total_steps' => count($step_data['steps']),
+    ]);
+
+    $form['step_count'] = [
+      '#markup' => '<div class="step-count">' . $question . '</div>',
+      '#weight' => -1,
+    ];
+  }
+}
+
+/**
+ * Custom function to get the field widget weighting of certain fields.
+ */
+function gla_multistep_forms_get_field_weighting(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  // For certain fields the weight returned in #weight on $form is not what's
+  // set on the form display so we have to look it up separately.
+  $form_obj = $form_state->getFormObject();
+  $form_mode = $form_obj->getOperation();
+  /** @var \Drupal\Core\Entity\Entity $entity */
+  $entity = $form_obj->getEntity();
+  $entity_type = $entity->getEntityTypeId();
+  $bundle = $entity->bundle();
+  if ($entity_type == 'node') {
+    $form_mode = 'default';
+  }
+
+  // Fields to check.
+  $fields = [
+    'account',
+    'title',
+  ];
+
+  /** @var \Drupal\Core\Entity\Entity\EntityFormDisplay $form_display */
+  $form_display = \Drupal::entityTypeManager()
+    ->getStorage('entity_form_display')
+    ->load($entity_type . '.' . $bundle . '.' . $form_mode);
+
+  $weights = [];
+  if ($form_display) {
+    foreach ($fields as $field_name) {
+      $widget = $form_display->getComponent($field_name);
+      if ($widget && isset($widget['weight'])) {
+        $weights[$field_name] = $widget['weight'];
+      }
+    }
+  }
+
+  return $weights;
+}
+
+/**
+ * Attach steps to the form.
+ */
+function gla_multistep_forms_attach_steps(&$form, &$form_state, $entity_type_id, $bundle) {
+
+  // The user_equal_opportunities_form form uses a new step for each question (without using the custom field).
+  $step_per_question = [
+    'user_equal_opportunities_form',
+  ];
+
+  $steps = [];
+  $step_num = 1;
+
+  // Check weighting of fields that ignore the form display settings.
+  $weight_overrides = gla_multistep_forms_get_field_weighting($form, $form_state);
+
+  // Get the steps separated by the custom field.
+  $skip_sub_items = [];
+  $children = [];
+  foreach ($form as $machine_name => $form_element) {
+
+    // Ignore non-arrays.
+    if (!is_array($form[$machine_name])) {
+      continue;
+    }
+
+    // Ignore form elements that aren't shown.
+    if (isset($form[$machine_name], $form[$machine_name]['#access']) && !$form[$machine_name]['#access']) {
+      continue;
+    }
+
+    $field = \Drupal\field\Entity\FieldConfig::loadByName($entity_type_id, $bundle, $machine_name);
+    if (isset($weight_overrides[$machine_name])) {
+      // Override weight.
+      $form[$machine_name]['#weight'] = $weight_overrides[$machine_name];
+      $form_element['#weight'] = $weight_overrides[$machine_name];
+    }
+    elseif (!$field) {
+      continue;
+    }
+    elseif (in_array($machine_name, $skip_sub_items)) {
+      continue;
+    }
+
+    $weight = FALSE;
+    if (isset($form_element['#weight'])) {
+      $weight = $form_element['#weight'];
+    }
+
+    // Extract the multistep separators.
+    if (($field && $field->getType() == 'multistep_separator') || in_array($form['#form_id'], $step_per_question)) {
+
+      $step_info = new stdClass();
+      $step_info->step_name = $step_num;
+      // Add the step as a child to get the title and description printed.
+      $step_info->children = [
+        $machine_name,
+      ];
+
+      // 'Other' options handling.
+      $other_field_name = $machine_name . '_other';
+      if (isset($form[$other_field_name])) {
+        // Put this on the same step and add states.
+        $step_info->children[] = $other_field_name;
+        $skip_sub_items[] = $other_field_name;
+        $form[$other_field_name]['#states'] = [
+          'visible' => [
+            ':input[name="' . $machine_name . '"]' => ['value' => 'other'],
+          ],
+        ];
+        $form[$other_field_name]['#element_validate'] = [
+          'gla_multistep_form_element_validate',
+        ];
+      }
+
+      $steps[$weight] = $step_info;
+      $step_num++;
+    }
+    else {
+      // Collect the other to add to the children.
+      $children[$machine_name] = $form_element;
+
+      // Add conditional display to locations.
+      $location_extras = [
+        'field_loc_london_borough' => 'london_borough',
+        'field_loc_postcode' => 'postcode',
+      ];
+
+      if (isset($location_extras[$machine_name]) && isset($form['field_location'])) {
+        $value = $location_extras[$machine_name];
+        $form[$machine_name]['#states'] = [
+          'visible' => [
+            ':input[name="field_location"]' => ['value' => $value],
+          ],
+        ];
+      }
+
+      // 'Other' options handling.
+      $other_field_name = $machine_name . '_other';
+      if (isset($form[$other_field_name])) {
+        $form[$other_field_name]['#states'] = [
+          'visible' => [
+            ':input[name="' . $machine_name . '"]' => ['value' => 'other'],
+          ],
+        ];
+        $form[$other_field_name]['#element_validate'] = [
+          'gla_multistep_form_element_validate',
+        ];
+      }
+
+      // 'Specific' options handling.
+      $other_field_name = $machine_name . '_specific';
+      if (isset($form[$other_field_name])) {
+        $form[$other_field_name]['#states'] = [
+          'visible' => [
+            ':input[name="' . $machine_name . '"]' => ['value' => 'specific'],
+          ],
+          'required' => [
+            ':input[name="' . $machine_name . '"]' => ['value' => 'specific'],
+          ],
+        ];
+        $form[$other_field_name]['#element_validate'] = [
+          'gla_multistep_form_element_validate',
+        ];
+
+        // Hide its label.
+        $form[$other_field_name]['widget'][0]['#title_display'] = 'invisible';
+      }
+    }
+  }
+
+  ksort($steps);
+
+  $step_weights = array_keys($steps);
+
+  $last_step_weight = end($step_weights);
+  foreach ($children as $name => $child) {
+    $step_item = 0;
+    $child_weight = $child['#weight'];
+    foreach ($steps as $step_weight => $step_info) {
+      $step_item_next = $step_item + 1;
+      if ($last_step_weight == $step_weight) {
+        // We've reached the end of the steps and not found a place for this item yet, so put it here.
+        $steps[$step_weight]->children[] = $name;
+        break;
+      }
+
+      // Check if the child element's weight is between this step's weight and the next.
+      // If not, carry on to the next.
+      $next_step_weight = $step_weights[$step_item_next];
+      if ($child_weight >= $step_weight && $child_weight < $next_step_weight) {
+        // Child goes before.
+        $steps[$step_weight]->children[] = $name;
+        break;
+      }
+
+      $step_item++;
+    }
+  }
+
+  // Refresh step keys, starting at 1. And assign step names.
+  if (!empty($steps)) {
+    $steps = array_combine(range(1, count($steps)), array_values($steps));
+    foreach ($steps as $step_num => $step) {
+      $steps[$step_num]->step_name = $step_num;
+    }
+
+    if (gla_multistep_form_is_in_provider_flow() == 'duplicate') {
+      $steps = array_slice($steps, 0, 2);
+    }
+  }
+  else {
+    $steps = [];
+  }
+
+  $form['#steps'] = $steps;
+}
+
+
+/**
+ * Custom validation callback.
+ *
+ * @param <array> $form
+ *   Form to validate.
+ * @param <array> $form_state
+ *   Current form state.
+ */
+function gla_multistep_forms_entity_form_validate($form, \Drupal\Core\Form\FormStateInterface &$form_state) {
+  if (!isset($form['#steps']) || count($form['#steps']) == 0) {
+    // Nothing to do here.
+    return;
+  }
+
+  $triggering_element = $form_state->getTriggeringElement();
+  if (!isset($triggering_element['#name']) || (!in_array($triggering_element['#name'], ['op', 'previous', 'skip', 'next', 'save_come_back']))) {
+    return;
+  }
+
+  $storage = $form_state->getStorage();
+  $form_object = $form_state->getFormObject();
+  $entity = $form_object->buildEntity($form, $form_state);
+
+  if ($triggering_element['#name'] == 'op') {
+    // Do the form validation if bypassed earlier.
+    $validation_alters = gla_get_validation_alter_form_ids();
+    if (in_array($form['#form_id'], $validation_alters)) {
+      // As we've removed the default ::validateForm call (as it picks up the
+      // wrong entity version) we need to validate the entity ourselves before
+      // saving.
+      $entity->validate();
+
+      // Set flag.
+      $entity->multistepSubmitHandling = TRUE;
+
+      $form_object->setEntity($entity);
+    }
+
+    return;
+  }
+
+  // NodeForm::setEntity() stores the entity in the form object which
+  // is used to populate form fields when the form rebuilds.
+  // This is how we keep values from previous steps.
+  $form_object->setEntity($entity);
+
+  // We need to save the entity as we progress forwards/backwards through the form.
+  // Don't do this on the user register form though as it'll create a user each time.
+  if ($form['#form_id'] != 'user_register_form') {
+    if (is_provider_member_route('user_edit') || is_volunteer_account_details_route()) {
+      $values = $form_state->getValues();
+      if (isset($values['pseudo_mail']) && $values['pseudo_mail']) {
+        // Set the email directly.
+        if ($entity->getEmail() != $values['pseudo_mail']) {
+          // Check the email is not already in use.
+          $exists = user_load_by_mail($values['pseudo_mail']);
+          if (!$exists) {
+            $entity->setEmail($values['pseudo_mail']);
+          }
+          else {
+            $form_state->setError($form, t('Email address is already in use.'));
+            return;
+          }
+        }
+      }
+    }
+
+    $validation_alters = gla_get_validation_alter_form_ids();
+    if (in_array($form['#form_id'], $validation_alters)) {
+      // As we've removed the default ::validateForm call (as it picks up the
+      // wrong entity version) we need to validate the entity ourselves before
+      // saving.
+      $entity->validate();
+    }
+
+    // Make sure the entity changes are being saved into a new draft.
+    if ($entity->getEntityType()->isRevisionable()) {
+      $entity->setNewRevision(TRUE);
+      $entity->set('moderation_state', 'draft');
+    }
+
+    $entity->save();
+  }
+  elseif (is_provider_member_route('user_add')) {
+    // Save the data to the form storage to display it later.
+    $values = $form_state->getValues();
+    if (isset($values['mail']) && $values['mail']) {
+      $storage['account'] = $values['mail'];
+    }
+
+    if (isset($values['field_first_name']) && $values['field_first_name']) {
+      $storage['field_first_name'] = $values['field_first_name'][0]['value'];
+    }
+
+    if (isset($values['field_last_name']) && $values['field_last_name']) {
+      $storage['field_last_name'] = $values['field_last_name'][0]['value'];
+    }
+
+    // Check first and last names have been entered on their step.
+    if ($form['field_first_name']['#access']) {
+      if (!isset($values['field_first_name'], $values['field_first_name'][0], $values['field_first_name'][0]['value']) || empty($values['field_first_name'][0]['value'])) {
+        $form_state->setError($form['field_first_name'], t('First name is required.'));
+      }
+    }
+
+    if ($form['field_last_name']['#access']) {
+      if (!isset($values['field_last_name'], $values['field_last_name'][0], $values['field_last_name'][0]['value']) || empty($values['field_last_name'][0]['value'])) {
+        $form_state->setError($form['field_last_name'], t('Last name is required.'));
+      }
+    }
+  }
+
+  // For previous/next buttons we need the form to rebuild, but for the save and
+  // come back button we need to continue to the submit handlers.
+  if ($triggering_element['#name'] == 'save_come_back') {
+    return;
+  }
+
+  $form_state->setRebuild();
+
+  if (($current_step = _gla_multistep_forms_form_step_get_current($form, $form_state)) === FALSE) {
+    // Step not found. Do nothing.
+    return;
+  }
+  $step_names = array_keys($form['#steps']);
+  $step_index = array_search($current_step->step_name, $step_names);
+
+  if ($triggering_element['#name'] == 'next') {
+    $step_index++;
+  }
+  elseif ($triggering_element['#name'] == 'skip') {
+    $step_index += 2;
+  }
+  elseif ($triggering_element['#name'] == 'previous') {
+    $step_index--;
+  }
+  if (isset($step_names[$step_index])) {
+    // Set name of next step to display.
+    $storage['step'] = $step_names[$step_index];
+  }
+  else {
+    // Display first step.
+    $storage['step'] = array_shift($step_names);
+  }
+
+  $form_state->setStorage($storage);
+}
+
+/**
+ * Helper function to get the current form step from $form_state.
+ *
+ * @param <array> $form
+ *   The form where the step has been defined.
+ * @param <array> $form_state
+ *   Current form state.
+ *
+ * @return <object>
+ *   The current form step or <code>FALSE</code> if the step could not be found.
+ */
+function _gla_multistep_forms_form_step_get_current($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  if (!isset($form['#steps']) || count($form['#steps']) == 0) {
+    // Nothing to do here.
+    return FALSE;
+  }
+  // Get all defined steps for this form.
+  $steps = $form['#steps'];
+
+  $storage = $form_state->getStorage();
+
+  if (!isset($storage['step'])) {
+    return array_shift($steps);
+  }
+  if (isset($steps[$storage['step']])) {
+    return $steps[$storage['step']];
+  }
+  // Fallback, step not found.
+  return FALSE;
+}
+
+/**
+ * Helper method to set the current form step.
+ *
+ * The step is set to active only, if all preceding steps are skippable. If one
+ * of the preceding steps is not skippable the first skippable step before the
+ * requested is activated.
+ *
+ * @param <string> $step_name
+ *   Name of step to set active.
+ * @param <array> $form
+ *   Reference to current entity form.
+ * @param <array> $form_state
+ *   Reference to current form state.
+ * @param <int> $limit
+ *   Maximum number of function calls to prevent recursion. Internally used
+ *   only.
+ */
+function _gla_multistep_forms_form_step_set_current($step_name, &$form, \Drupal\Core\Form\FormStateInterface &$form_state) {
+  $triggering_element = $form_state->getTriggeringElement();
+  if (!empty($triggering_element)) {
+    // Do not set the current step if the form has been submitted or the
+    // recursion limit has been reached.
+    return;
+  }
+
+  $storage = $form_state->getStorage();
+  $step_names = isset($form['#steps']) ? array_keys($form['#steps']) : [];
+  if (in_array($step_name, $step_names) && isset($storage['step'])) {
+    $storage['step'] = $step_name;
+  }
+
+  $form_state->setStorage($storage);
+}
+
+/**
+ * Helper method to add the required buttons to a form.
+ *
+ * @param <array> $form
+ *   The form where the buttons will be attached to.
+ * @param <array> $form_state
+ *   Current form state.
+ */
+function _gla_multistep_forms_form_attach_buttons(&$form, &$form_state) {
+  $steps = $form['#steps'];
+  if (($current_step = _gla_multistep_forms_form_step_get_current($form, $form_state)) === FALSE) {
+    // Step not found. Do nothing.
+    return;
+  }
+
+  // Try to load previous and next step.
+  $step_names = array_keys($steps);
+  $current_index = array_search($current_step->step_name, $step_names);
+
+  if (!isset($form['actions'])) {
+    $form['actions'] = ['#type' => 'actions', '#weight' => 100];
+  }
+
+  // Create a list of all buttons the form may have.
+  if ($current_index > 0) {
+    // Add "previous" button.
+    // We use '#executes_submit_callback' here so that the user can go back
+    // when on a required field without validation errors.
+    $form['actions']['previous'] = [
+      '#type' => 'submit',
+      '#access' => TRUE,
+      '#value' => t('Save and go back'),
+      '#name' => 'previous',
+      '#limit_validation_errors' => [],
+      '#executes_submit_callback' => FALSE,
+      '#attributes' => [
+        'class' => [
+          'link',
+        ],
+      ],
+    ];
+
+    // If this is the password step, do not allow the user to go back as there
+    // are then problems with validation.
+    if (is_volunteer_account_details_route() && in_array('step_password', $current_step->children)) {
+      unset($form['actions']['previous']);
+    }
+  }
+
+  // Get list of remaining steps.
+  $remaining_steps = array_slice($step_names, $current_index + 1);
+
+  $route_match = \Drupal::routeMatch();
+  $current_path = $route_match->getRouteName();
+
+  if ($current_index < (count($steps) - 1)) {
+    // Add "next" button.
+    $form['actions']['next'] = [
+      '#type' => 'submit',
+      '#access' => TRUE,
+      '#value' => t('Save and continue'),
+      '#weight' => -1,
+      '#name' => 'next',
+      '#limit_validation_errors' => [],
+      '#attributes' => [
+        'class' => [
+          'button',
+          'button--alt',
+        ],
+      ],
+      '#suffix' => '<br>',
+    ];
+  }
+
+  // Add "save and come back" button to some forms.
+  if (gla_has_save_and_come_back($form['#form_id'])) {
+    $form['actions']['save_come_back'] = [
+      '#type' => 'submit',
+      '#access' => TRUE,
+      '#value' => t('Save and come back later'),
+      '#name' => 'save_come_back',
+      '#limit_validation_errors' => [],
+      '#weight' => 2,
+      '#submit' => ['gla_multistep_forms_submit_and_come_back'],
+      '#attributes' => [
+        'class' => [
+          'link',
+        ],
+      ],
+    ];
+
+    if (isset($form['actions']['previous'])) {
+      $form['actions']['save_come_back']['#prefix'] = '|';
+    }
+  }
+
+  if (isset($form['actions']['delete'])) {
+    $form['actions']['delete']['#access'] = FALSE;
+  }
+
+  if (isset($form['actions']['submit'])) {
+    if ($current_index != (count($steps) - 1)) {
+      // Hide save button until we display the last step.
+      $form['actions']['submit']['#access'] = count($remaining_steps) == 0;
+    }
+
+    // Change value on save submit button and add custom submit handler to redirect to overview.
+    $form['actions']['submit']['#value'] = t('Save and continue');
+    $form['actions']['submit']['#weight'] = -1;
+    $form['actions']['submit']['#suffix'] = '<br>';
+    $form['actions']['submit']['#attributes'] = ['class' => ['button', 'button--alt']];
+    $form['actions']['submit']['#submit'][] = 'gla_multistep_forms_submit';
+
+  }
+
+  if ($current_path == 'gla_provider.user_add') {
+    if (isset($form['actions']['next'])) {
+      $form['actions']['next']['#value'] = t('Continue');
+    }
+    if (isset($form['actions']['submit'])) {
+      $form['actions']['submit']['#value'] = t('Create new team member account');
+    }
+  }
+}
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function gla_multistep_forms_element_info_alter(array &$types) {
+  if (isset($types['password_confirm'])) {
+    // Unset the password_policy process on this element as it doesn't work with
+    // the multistep setup. We're not displaying its output anyway.
+    $pos = array_search('password_policy_check_constraints_password_confirm_process', $types['password_confirm']['#process']);
+    if ($pos !== FALSE) {
+      unset($types['password_confirm']['#process'][$pos]);
+      // Reset keys.
+      $types['password_confirm']['#process'] = array_values($types['password_confirm']['#process']);
+    }
+  }
+}
+
+/**
+ * Custom submit for save and come back later button to redirect to the overview page.
+ */
+function gla_multistep_forms_submit_and_come_back($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  // Make sure we only trigger this from the last 'Save and continue' button (which is the normal 'save' button).
+  $triggering_element = $form_state->getTriggeringElement();
+  if (!isset($triggering_element['#name']) || $triggering_element['#name'] != 'save_come_back') {
+    return;
+  }
+
+  // Redirect to different places (rather than the same page of the form) depending on the form.
+  /** @var \Drupal\Core\Entity\Entity $entity */
+  $entity = $form_state->getFormObject()->getEntity();
+  switch ($form['#form_id']) {
+    case 'user_equal_opportunities_form':
+      // Redirect to the overview page.
+      $form_state->setRedirect('gla_volunteer.equal_opportunities_check', ['user' => $entity->id()]);
+      break;
+
+    case 'node_provider_profile_edit_form':
+      // Go to the 'details saved' page.
+      $form_state->setRedirect('gla_provider.saved', ['node' => $entity->id()]);
+      break;
+
+    case 'user_volunteer_interests_form':
+      // Redirect to check answer page.
+      $form_state->setRedirect('gla_volunteer.preferences_overview', ['user' => $entity->id()]);
+      break;
+
+    case 'node_opportunity_edit_form':
+      if (gla_multistep_form_is_in_provider_flow() == 'edit') {
+        // Go to the 'details saved' page.
+        $form_state->setRedirect('gla_provider.dashboard_opportunity_edit', ['node' => $entity->id()]);
+        break;
+      }
+      // Go to the 'details saved' page.
+      $form_state->setRedirect('gla_opportunity.saved', ['node' => $entity->id()]);
+      break;
+  }
+}
+
+/**
+ * Custom form submit for redirecting to the relevant place.
+ */
+function gla_multistep_forms_submit($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  // Make sure we only trigger this from the last 'Save and continue' button (which is the normal 'save' button).
+  $triggering_element = $form_state->getTriggeringElement();
+  if (!isset($triggering_element['#name']) || $triggering_element['#name'] != 'op') {
+    return;
+  }
+
+  // Redirect to different places (rather than the beginning of the form) depending on the form.
+  /** @var \Drupal\Core\Entity\Entity $entity */
+  $entity = $form_state->getFormObject()->getEntity();
+  $group = \Drupal::routeMatch()->getParameter('group');
+  switch ($form['#form_id']) {
+    case 'user_equal_opportunities_form':
+      // Redirect to the overview page
+      $form_state->setRedirect('gla_volunteer.equal_opportunities_check', ['user' => $entity->id()]);
+      break;
+
+    case 'user_register_form':
+      // Redirect to the email confirmation text page.
+      if (isset($form['rid'], $form['rid']['#value'])) {
+        $email = $form_state->getValue('mail');
+        if (is_provider_member_route('user_add')) {
+          $form_state->setRedirect('gla_provider.member_created', ['group' => $group->id(), 'email' => $email]);
+        }
+        elseif ($form['rid']['#value'] == 'volunteer' || $form['rid']['#value'] == 'provider') {
+          $form_state->setRedirect('gla_user.check_email', ['email' => $email]);
+        }
+      }
+      break;
+
+    case 'node_provider_profile_edit_form':
+      // Redirect to the check answers page.
+      $form_state->setRedirect('gla_provider.application_check', ['node' => $entity->id()]);
+      break;
+
+    case 'node_opportunity_edit_form':
+      if (gla_multistep_form_is_in_provider_flow() == 'edit') {
+        // Go to the 'details saved' page.
+        $form_state->setRedirect('gla_provider.dashboard_opportunity_edit', ['node' => $entity->id()]);
+        break;
+      }
+      elseif (gla_multistep_form_is_in_provider_flow() == 'duplicate') {
+        $form_state->setRedirect('gla_provider.dashboard_opportunity_duplicate_check', ['node' => $entity->id()]);
+        break;
+      }
+      // Redirect to the check answers page.
+      $form_state->setRedirect('gla_opportunity.opportunity_check', ['node' => $entity->id()]);
+      break;
+
+    case 'user_volunteer_interests_form':
+      // Redirect to check answer page.
+      $form_state->setRedirect('gla_volunteer.preferences_check', ['user' => $entity->id()]);
+      break;
+
+    case 'application_submission_form':
+      // Redirect to the check answers page.
+      /** @var \Drupal\gla_opportunity\Entity\ApplicationSubmission $entity */
+      $form_state->setRedirect('gla_opportunity.apply_check', ['node' => $entity->getOpportunityNode()->id()]);
+      break;
+
+    case 'user_form':
+      if (in_array('volunteer', $entity->getRoles())) {
+        // If password has been changed, add a message for confirmation.
+        $password_entered = !empty($form_state->getValue('pass'));
+        if ($password_entered) {
+          drupal_set_message(t('Password change saved.'), 'notice');
+        }
+        // Redirect back to user overview page.
+        $form_state->setRedirect('gla_volunteer.dashboard');
+      }
+      elseif (is_provider_member_route('user_edit')) {
+        $form_state->setRedirect('view.provider_group_members.page_1', ['group' => $group->id()]);
+      }
+      break;
+  }
+}
+
+/**
+ * Hide all fields that are not associated to the current step.
+ *
+ * @param <array> $form
+ *   Form to hide the fields from.
+ * @param <array> $form_state
+ *   Current form state.
+ */
+function _gla_multistep_forms_hide_fields(&$form, &$form_state) {
+  if (($current_step = _gla_multistep_forms_form_step_get_current($form, $form_state)) === FALSE) {
+    // Step not found. Do nothing.
+    return;
+  }
+
+  // Get the names of all form children.
+  $form_elements = \Drupal\Core\Render\Element::children($form);
+  // Hide all elements that do not belong to the current step.
+  foreach ($form_elements as $element_name) {
+
+    // Need to show the feedback on all steps.
+    if ($element_name == 'feedback') {
+      continue;
+    }
+
+    if (isset($form[$element_name]['#type']) && in_array($form[$element_name]['#type'], ['value', 'actions', 'token', 'hidden'])) {
+      // Value elements and actions needs to be present on each step.
+      continue;
+    }
+
+    if (isset($form['#step_children'][$element_name]) && ($form['#step_children'][$element_name] == $current_step->step_name)) {
+      // Element is a child of the current step.
+      continue;
+    }
+
+    if (!empty($form[$element_name]['#group']) && in_array($form[$element_name]['#group'], $current_step->children)) {
+      // Element is part of a group within this step. Display the element.
+      continue;
+    }
+
+    if (in_array($element_name, $current_step->children)) {
+      // Element is part of a group within this step. Display the element.
+      continue;
+    }
+
+    // Hide the element.
+    $form[$element_name]['#access'] = FALSE;
+
+    // Make sure the element is not required at this time.
+    _gla_multistep_forms_element_unset_required($form[$element_name], $form_state);
+  }
+}
+
+/**
+ * Helper method to make an element and all its children optional.
+ *
+ * @param <array> $element
+ *   The element to make optional.
+ * @param <int> $depth
+ *   Maximum depth of children to process. Internally used.
+ */
+function _gla_multistep_forms_element_unset_required(&$element, \Drupal\Core\Form\FormStateInterface $form_state, $depth = 10) {
+  // This doesn't work for the username field on account creation.
+  $user_input = $form_state->getUserInput();
+  $storage = $form_state->getStorage();
+  if (isset($element['mail']) && isset($user_input['mail'])) {
+    $element['mail']['#default_value'] = $user_input['mail'];
+  }
+  elseif (isset($element['mail']) && isset($storage['account'])) {
+    $element['mail']['#default_value'] = $storage['account'];
+  }
+
+  // If we're accessing a step of the form directly it will be a fresh form so
+  // we need to pass the vars in. Don't do this if there are values in the form
+  // storage though as these will be more recent.
+  $passed_values = \Drupal::request()->query->get('form_values');
+  if (!isset($storage['account']) && isset($passed_values['account']) && $passed_values['account']) {
+    $element['mail']['#default_value'] = $passed_values['account'];
+  }
+
+  $field_names = [
+    'field_first_name',
+    'field_last_name',
+  ];
+
+  if (!empty($passed_values) && isset($element['widget'], $element['widget'][0], $element['widget'][0]['value'])) {
+    $element_field_name = $element['widget']['#field_name'];
+    if (in_array($element_field_name, $field_names) && isset($passed_values[$element_field_name]) && !isset($storage[$element_field_name])) {
+      $element['widget'][0]['value']['#default_value'] = $passed_values[$element_field_name];
+    }
+  }
+
+  if (isset($element['#required'])) {
+    $element['#required'] = FALSE;
+  }
+  if ($depth <= 0) {
+    // Make sure we do not recurse forever.
+    return;
+  }
+  $form_elements = \Drupal\Core\Render\Element::children($element);
+  foreach ($form_elements as $key) {
+    _gla_multistep_forms_element_unset_required($element[$key], $form_state, --$depth);
+  }
+
+  // For image fields, make the alt/title fields unrequired too to suppress warnings.
+  if (isset($element[0]['#type']) && $element[0]['#type'] == 'managed_file' && isset($element[0]['#alt_field_required'])) {
+    $element[0]['#alt_field_required'] = FALSE;
+    $element[0]['##title_field_required'] = FALSE;
+  }
+}
+
+/**
+ * Helper function to remove steps with no (accessible) fields.
+ *
+ * @param <array> $steps
+ *   List of step objects.
+ * @param <array> $form
+ *   The form where the step has been defined.
+ *
+ * @return <array>
+ *   List of steps with at least one accessible field.
+ */
+function _gla_multistep_forms_remove_empty_steps($steps, $form, $form_state) {
+
+  $steps_filtered = [];
+  foreach ($steps as $step_name => $step) {
+    if (count($step->children) == 0) {
+      // Step does not have any elements attached to it. Hide it!
+      continue;
+    }
+    $entity = $form_state->getFormObject()->getEntity();
+    $access = FALSE;
+    foreach ($step->children as $field_name) {
+      if (strpos($field_name, 'step_') !== FALSE) {
+        // Ignore multistep separator fields as they will always be accessible.
+        continue;
+      }
+      // Check the access for this field on this entity.
+      if ($entity->$field_name) {
+        $access = $entity->$field_name->access('edit');
+      }
+      if (isset($form[$field_name]['#access'])) {
+        $access |= $form[$field_name]['#access'];
+      }
+      else {
+        // If an element does not have the #access-attribute we assume it is
+        // accessible.
+        $access = TRUE;
+        break; // No further processing needed.
+      }
+    }
+    if ($access) {
+      // At least one field is accessible so add this step.
+      $steps_filtered[$step_name] = $step;
+    }
+  }
+
+  // Renumber the steps.
+  if ($steps) {
+    $steps = array_combine(range(1, count($steps_filtered)), array_values($steps_filtered));
+    foreach ($steps as $num => $step) {
+      $steps[$num]->step_name = $num;
+    }
+  }
+
+  return $steps;
+}
+
+/**
+ * List of form IDs that need the default validation altered.
+ */
+function gla_get_validation_alter_form_ids() {
+  return [
+    'node_provider_profile_edit_form',
+    'node_opportunity_edit_form',
+  ];
+}
+
+/**
+ * Returns true if the form should show the 'save and come back' option.
+ */
+function gla_has_save_and_come_back($form_id) {
+  $form_ids = [
+    'node_provider_profile_edit_form',
+    'user_equal_opportunities_form',
+    'user_volunteer_interests_form',
+    'node_opportunity_edit_form',
+  ];
+  return in_array($form_id, $form_ids);
+}
+
+/**
+ * Custom element validate that validates on the item that has a parent with the other or specific option.
+ *
+ * @param $element
+ * @param $form_state
+ */
+function gla_multistep_form_element_validate($element, &$form_state) {
+  if (isset($element['widget']['#field_name'])) {
+    // Get the field name and parent field.
+    $field_name = $element['widget']['#field_name'];
+    $parent = substr($field_name, 0, strrpos($field_name, '_'));
+    $form = $form_state->getCompleteForm();
+    $step_user_input = $form_state->getUserInput();
+    // Input fields for the extra fields when other or specific is entered.
+    $extra_field_array = ['other', 'specific'];
+    if (isset($step_user_input[$parent]) && in_array($step_user_input[$parent], $extra_field_array)) {
+      if (isset($form[$parent]['widget']) && $form[$parent]['widget']['#required'] == TRUE && empty($element['widget'][0]['value']['#value'])) {
+        // Throw an error if needed.
+        $field_title = $element['widget'][0]['value']['#title'];
+        $form_state->setError($element, t($field_title . ' is required.'));
+      }
+    }
+  }
+}
+
+/**
+ * Helper function to see if we need to stay in the provider dashboard flow.
+ *
+ * @return bool
+ */
+function gla_multistep_form_is_in_provider_flow() {
+  $in_provider_flow = \Drupal::request()->query->all();
+  if (isset($in_provider_flow['provider-edit']) && $in_provider_flow['provider-edit']) {
+    return 'edit';
+  }
+  if (isset($in_provider_flow['provider-duplicate']) && $in_provider_flow['provider-duplicate']) {
+    return 'duplicate';
+  }
+  return FALSE;
+}
+
+/**
+ * Helper function for checking whether to validate values in other modules.
+ *
+ * @return bool
+ */
+function gla_multistep_forms_should_validate_field($form, $form_state, $field_name) {
+  $current_step = _gla_multistep_forms_form_step_get_current($form, $form_state);
+  if (!$current_step || in_array($field_name, $current_step->children)) {
+    return TRUE;
+  }
+
+  return FALSE;
+}

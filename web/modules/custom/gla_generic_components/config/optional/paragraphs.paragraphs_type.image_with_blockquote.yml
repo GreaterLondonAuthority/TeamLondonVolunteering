@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: image_with_blockquote
+label: 'Image with Blockquote'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }

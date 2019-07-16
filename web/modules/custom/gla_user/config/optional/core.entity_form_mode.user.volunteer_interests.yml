@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+id: user.volunteer_interests
+label: 'Volunteer interests'
+targetEntityType: user
+cache: true

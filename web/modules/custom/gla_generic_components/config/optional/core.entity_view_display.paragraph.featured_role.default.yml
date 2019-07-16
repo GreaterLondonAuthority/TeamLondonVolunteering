@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.featured_role.field_opportunity
+    - field.field.paragraph.featured_role.field_tag
+    - paragraphs.paragraphs_type.featured_role
+id: paragraph.featured_role.default
+targetEntityType: paragraph
+bundle: featured_role
+mode: default
+content:
+  field_opportunity:
+    weight: 0
+    label: hidden
+    settings:
+      view_mode: recent
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_tag:
+    weight: 1
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+hidden: {  }

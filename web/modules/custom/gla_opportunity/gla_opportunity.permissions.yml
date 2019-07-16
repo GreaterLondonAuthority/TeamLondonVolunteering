@@ -1,0 +1,38 @@
+add application form element entities:
+  title: 'Create new Application form element entities'
+
+administer application form element entities:
+  title: 'Administer Application form element entities'
+  description: 'Allow to access the administration form to configure Application form element entities.'
+  restrict access: true
+
+delete application form element entities:
+  title: 'Delete Application form element entities'
+
+edit application form element entities:
+  title: 'Edit Application form element entities'
+
+view published application form element entities:
+  title: 'View published Application form element entities'
+
+view unpublished application form element entities:
+  title: 'View unpublished Application form element entities'
+add application submission entities:
+  title: 'Create new Application submission entities'
+
+administer application submission entities:
+  title: 'Administer Application submission entities'
+  description: 'Allow to access the administration form to configure Application submission entities.'
+  restrict access: true
+
+delete application submission entities:
+  title: 'Delete Application submission entities'
+
+edit application submission entities:
+  title: 'Edit Application submission entities'
+
+view published application submission entities:
+  title: 'View published Application submission entities'
+
+view unpublished application submission entities:
+  title: 'View unpublished Application submission entities'

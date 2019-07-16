@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_dates_vol_needed
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_dates_vol_needed
+field_name: step_dates_vol_needed
+entity_type: node
+bundle: opportunity
+label: 'When is the volunteer needed?'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

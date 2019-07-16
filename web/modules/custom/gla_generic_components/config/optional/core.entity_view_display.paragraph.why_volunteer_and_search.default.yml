@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.why_volunteer_and_search.field_component_one
+    - field.field.paragraph.why_volunteer_and_search.field_search_block
+    - paragraphs.paragraphs_type.why_volunteer_and_search
+  module:
+    - entity_reference_revisions
+id: paragraph.why_volunteer_and_search.default
+targetEntityType: paragraph
+bundle: why_volunteer_and_search
+mode: default
+content:
+  field_component_one:
+    type: entity_reference_revisions_entity_view
+    weight: 0
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    region: content
+  field_search_block:
+    weight: 1
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    type: entity_reference_revisions_entity_view
+    region: content
+hidden: {  }

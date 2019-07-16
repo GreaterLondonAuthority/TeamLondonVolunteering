@@ -1,0 +1,31 @@
+{{ name }}
+<div class="separator"></div>
+
+{% if show_info %}
+  <div>
+    <h3>{{ 'Complete your profile'|t }}</h3>
+    <p>{{ 'When your profile is complete you will be able to:'|t }}</p>
+    <ul>
+      <li>{{ 'Register your interest for volunteering roles'|t }}</li>
+      <li>{{ 'See your recommended roles'|t }}</li>
+      <li>{{ 'Save progress and review your volunteering history'|t }}</li>
+    </ul>
+    {{ continue_link }}
+  </div>
+{% endif %}
+
+<h2 class="heading--alt">{{ 'Roles you have registered for'|t }}</h2>
+{{ applications }}
+
+<h3 class="heading--alt">{{ 'Actions'|t }}</h3>
+<div class="row dashboard-links">
+  {% for key, section in links %}
+    <div class="col-sm-12 col-md-4">
+      <h4 class="heading">{{ key }}</h4>
+      {% for subsection in section %}
+        <p>{{ subsection.link }}</p>
+        <p>{{ subsection.description }}</p>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>

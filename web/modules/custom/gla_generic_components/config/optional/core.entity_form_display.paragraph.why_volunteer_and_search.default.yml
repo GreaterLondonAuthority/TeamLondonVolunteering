@@ -1,0 +1,42 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.why_volunteer_and_search.field_component_one
+    - field.field.paragraph.why_volunteer_and_search.field_search_block
+    - paragraphs.paragraphs_type.why_volunteer_and_search
+  module:
+    - paragraphs
+id: paragraph.why_volunteer_and_search.default
+targetEntityType: paragraph
+bundle: why_volunteer_and_search
+mode: default
+content:
+  field_component_one:
+    type: entity_reference_paragraphs
+    weight: 0
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: closed
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: wysiwyg_with_cta
+    third_party_settings: {  }
+    region: content
+  field_search_block:
+    weight: 1
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: closed
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: search_block
+    third_party_settings: {  }
+    type: entity_reference_paragraphs
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

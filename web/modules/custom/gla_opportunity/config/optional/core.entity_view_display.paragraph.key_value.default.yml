@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.key_value.field_key
+    - field.field.paragraph.key_value.field_value
+    - paragraphs.paragraphs_type.key_value
+id: paragraph.key_value.default
+targetEntityType: paragraph
+bundle: key_value
+mode: default
+content:
+  field_key:
+    weight: 0
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_value:
+    weight: 1
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

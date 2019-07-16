@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.discover_roles.field_roles
+    - field.field.paragraph.discover_roles.field_title
+    - paragraphs.paragraphs_type.discover_roles
+id: paragraph.discover_roles.default
+targetEntityType: paragraph
+bundle: discover_roles
+mode: default
+content:
+  field_roles:
+    weight: 1
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  created: true
+  status: true
+  uid: true

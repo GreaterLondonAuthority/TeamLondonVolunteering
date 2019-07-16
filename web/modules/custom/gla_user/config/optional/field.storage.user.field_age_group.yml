@@ -1,0 +1,47 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - user
+id: user.field_age_group
+field_name: field_age_group
+entity_type: user
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: '16 – 24'
+      label: '16 – 24'
+    -
+      value: '25 – 34'
+      label: '25 – 34'
+    -
+      value: '35 – 44'
+      label: '35 – 44'
+    -
+      value: '45 – 54'
+      label: '45 – 54'
+    -
+      value: '55 – 64'
+      label: '55 – 64'
+    -
+      value: '65 – 74'
+      label: '65 – 74'
+    -
+      value: '75 – 84'
+      label: '75 – 84'
+    -
+      value: 85+
+      label: 85+
+    -
+      value: 'Prefer not to say'
+      label: 'Prefer not to say'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

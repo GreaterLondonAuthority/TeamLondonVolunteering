@@ -1,0 +1,50 @@
+cache: true
+plugins_options:
+  arcgisonline:
+    sourcecountry: UK
+    usessl: false
+  bingmaps:
+    apikey: ''
+    locale: ''
+  geonames:
+    username: ''
+    locale: ''
+  googlemaps:
+    apikey: ''
+    locale: ''
+    region: ''
+    usessl: false
+  googlemaps_business:
+    clientId: ''
+    privateKey: ''
+    locale: ''
+    region: ''
+    usessl: false
+  ipinfodb:
+    apikey: ''
+    precision: city
+  mapquest:
+    apikey: ''
+    licensed: false
+  maxmind:
+    apikey: ''
+    service: f
+    usessl: false
+  nominatim:
+    rooturl: ''
+    locale: ''
+  opencage:
+    apikey: ''
+    locale: ''
+    usessl: false
+  tomtom:
+    apikey: ''
+    locale: ''
+  file: {  }
+  freegeoip: {  }
+  geoip: {  }
+  geoplugin: {  }
+  hostip: {  }
+  openstreetmap: {  }
+  random: {  }
+  yandex: {  }

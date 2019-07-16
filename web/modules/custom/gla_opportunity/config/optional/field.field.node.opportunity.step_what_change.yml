@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_what_change
+    - node.type.opportunity
+  module:
+    - gla_multistep_forms
+id: node.opportunity.step_what_change
+field_name: step_what_change
+entity_type: node
+bundle: opportunity
+label: 'What change will the volunteer be helping to make?'
+description: "<p>Describe how volunteering in this role will make a difference.</p>\r\n<p>Notes:<br>Volunteers are more likely to register their interest if they know they can make a positive impact.<br>Minimum 3 bullet points required.</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

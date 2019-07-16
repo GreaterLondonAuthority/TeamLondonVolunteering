@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: content_image_large
+label: 'Content image large (1984px x 992px)'
+effects:
+  f852414c-425e-4b44-9176-c8204ce05915:
+    uuid: f852414c-425e-4b44-9176-c8204ce05915
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 1984
+      height: 992
+      anchor: center-center

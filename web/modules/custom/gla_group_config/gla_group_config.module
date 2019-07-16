@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * Implements hook_views_pre_execute().
+ */
+function gla_group_config_views_pre_execute(\Drupal\views\ViewExecutable $view) {
+
+  if ($view->id() == 'group_file_entity_browser') {
+
+    /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+    $provider_processor = \Drupal::service('gla_provider.processor');
+
+    // Get the user's group.
+    $current_user = \Drupal::currentUser();
+    $group = $provider_processor->getGroup($current_user);
+
+    // If the user isn't in a group (i.e. not yet approved) limit the view to
+    // files they've uploaded only.
+    $uids = [$current_user->id()];
+    if ($group) {
+      // Get all members of this group.
+      $members = $provider_processor->getUsersInGroup($group);
+      foreach ($members as $member) {
+        $uids[] = $member->id();
+      }
+    }
+
+    // Get the query.
+    $query = $view->build_info['query'];
+    $query->condition('file_managed.uid', $uids, 'IN');
+
+    // Re-construct the Views Query by adding condition.
+    $view->build_info['query'] = $query;
+    $view->build_info['count_query'] = $query;
+  }
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+function gla_group_config_field_widget_entity_browser_file_form_alter(&$element, \Drupal\Core\Form\FormStateInterface $form_state, $context) {
+  if (isset($element['current'])) {
+    // Hide the 'weight' element.
+    foreach ($element['current'] as $key => $value) {
+      if (is_numeric($key) && isset($value['_weight'])) {
+        $element['current'][$key]['_weight']['#access'] = FALSE;
+        // There'll only be one so we can break after this.
+        break;
+      }
+    }
+
+    // Change type so it displays the preview as usual and not in the table.
+    $element['current']['#type'] = 'file_managed';
+
+    // Change the entire 'details' element to a fieldset instead, so we can
+    // hide the superfluous 'add image' dropdown toggle.
+    $element['#type'] = 'fieldset';
+    $element['#title_display'] = 'invisible';
+  }
+}

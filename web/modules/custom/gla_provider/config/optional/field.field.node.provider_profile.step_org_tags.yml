@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.step_org_tags
+    - node.type.provider_profile
+  module:
+    - gla_multistep_forms
+id: node.provider_profile.step_org_tags
+field_name: step_org_tags
+entity_type: node
+bundle: provider_profile
+label: 'What is your main focus?'
+description: "<p>Select the categories below which best describe the main causes or activities which your organisation works on.<p> \r\n\r\n<p><a href=\"https://www.london.gov.uk/what-we-do/volunteering/get-touch-team-london\">Contact us</a> if you can’t see a relevant category.</p>"
+required: false
+translatable: false
+default_value:
+  -
+    value: null
+default_value_callback: ''
+settings: {  }
+field_type: multistep_separator

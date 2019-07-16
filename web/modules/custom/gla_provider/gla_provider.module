@@ -1,0 +1,1096 @@
+<?php
+
+use Drupal\Component\Utility\Html;
+use Drupal\image\Entity\ImageStyle;
+
+/**
+ * Implements hook_theme().
+ */
+function gla_provider_theme($existing, $type, $theme, $path) {
+  return [
+    'gla_provider__application_check' => [
+      'variables' => [
+        'steps' => NULL,
+        'continue' => NULL,
+      ],
+    ],
+    'gla_provider__initial_overview' => [
+      'variables' => [
+        'fields' => NULL,
+        'continue' => NULL,
+        'log' => NULL,
+      ],
+    ],
+    'gla_provider__saved' => [
+      'variables' => [
+        'return_to_profile' => NULL,
+        'read_more' => NULL,
+      ],
+    ],
+    'gla_provider__overview' => [
+      'variables' => [
+        'roles' => NULL,
+        'add_content' => NULL,
+        'organisation' => NULL,
+      ],
+    ],
+    'gla_provider__opportunity_check' => [
+      'variables' => [
+        'back_button' => NULL,
+        'title' => NULL,
+        'steps' => NULL,
+        'continue' => NULL,
+        'available_actions' => NULL,
+        'dates' => NULL,
+        'organisation' => NULL,
+        'back' => NULL,
+        'feedback' => NULL,
+        'has_changes' => NULL,
+      ],
+    ],
+    'gla_provider__dashboard' => [
+      'variables' => [
+        'name' => NULL,
+        'links' => NULL,
+        'to_do_view' => NULL,
+        'updates_view' => NULL,
+      ],
+    ],
+    'gla_provider__volunteer_interest' => [
+      'variables' => [
+        'back' => NULL,
+        'organisation' => NULL,
+        'roles_to_respond_to' => NULL,
+        'roles_responded' => NULL,
+      ],
+    ],
+    'gla_provider__duplicate_overview' => [
+      'variables' => [
+        'title' => NULL,
+        'link' => NULL,
+      ],
+    ],
+    'gla_provider__action_success' => [
+      'variables' => [
+        'action_title' => NULL,
+        'title' => NULL,
+        'links' => NULL,
+        'description_text' => NULL,
+      ],
+    ],
+    'gla_provider__change_role_overview' => [
+      'variables' => [
+        'back' => NULL,
+        'title' => NULL,
+        'link' => NULL,
+        'see_published' => NULL,
+      ],
+    ],
+    'gla_provider__dashboard_delete_archive_form' => [
+      'variables' => [
+        'action' => NULL,
+        'page_title' => NULL,
+        'node_title' => NULL,
+        'form' => NULL,
+        'back' => NULL,
+      ],
+    ],
+    'gla_provider__duplicate_check' => [
+      'variables' => [
+        'back_button' => NULL,
+        'title' => NULL,
+        'steps' => NULL,
+        'continue' => NULL,
+        'duplicate_text' => NULL,
+      ],
+    ],
+    'gla_provider__respond' => [
+      'variables' => [
+        'back' => NULL,
+        'role_details' => NULL,
+        'submission_details' => NULL,
+        'response_form' => NULL,
+      ],
+    ],
+    'gla_provider__respond_success' => [
+      'variables' => [
+        'volunteers_responded_link' => NULL,
+        'all_interest_in_role_link' => NULL,
+      ],
+    ],
+    'gla_provider__response_submitted' => [
+      'variables' => [
+        'back' => NULL,
+        'submission_details' => NULL,
+        'response' => NULL,
+      ],
+    ],
+    'gla_provider__new_member_overview' => [
+      'variables' => [
+        'back' => NULL,
+        'start' => NULL,
+      ],
+    ],
+    'gla_provider__new_member_check' => [
+      'variables' => [
+        'data' => NULL,
+        'org_name' => NULL,
+        'sections' => NULL,
+      ],
+    ],
+    'gla_provider__new_member_created' => [
+      'variables' => [
+        'email' => NULL,
+        'return_to_members' => NULL,
+        'return_to_dashboard' => NULL,
+      ],
+    ],
+    'gla_provider__member_view' => [
+      'variables' => [
+        'org_name' => NULL,
+        'password_reset' => NULL,
+        'delete_member' => NULL,
+        'sections' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function gla_provider_form_user_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+
+  if (isset($form['field_first_name']) && isset($form['field_last_name'])) {
+    $form['field_first_name']['#prefix'] = '<div class="row"><div class="col-sm-12 col-lg-6 full-width-form-input">';
+    $form['field_first_name']['#suffix'] = '</div>';
+    $form['field_last_name']['#prefix'] = '<div class="col-sm-12 col-lg-6 full-width-form-input">';
+    $form['field_last_name']['#suffix'] = '</div></div>';
+  }
+
+  // Alterations for the custom provider user create and edit.
+  if (is_provider_member_route('user_add') || is_provider_member_route('user_edit') || is_provider_member_route('user_view')) {
+    // New member specific logic.
+    if (is_provider_member_route('user_add')) {
+      $form['account']['notify']['#value'] = TRUE;
+      // Without this we can't create a new account without it logging us into that account.
+      $form['administer_users']['#value'] = TRUE;
+
+      $form['#validate'][] = 'multiple_registration_user_register_form_validate';
+    }
+
+    $form['rid'] = ['#type' => 'value', '#value' => 'provider'];
+
+    // Make sure all the fields are shown.
+    $form['step_email']['#access'] = TRUE;
+    $form['step_email']['widget'][0]['#access'] = TRUE;
+    $form['step_org_contact']['#access'] = TRUE;
+    $form['step_org_contact']['widget'][0]['#access'] = TRUE;
+    $form['field_first_name']['#access'] = TRUE;
+    $form['field_first_name']['widget'][0]['#access'] = TRUE;
+    $form['field_last_name']['#access'] = TRUE;
+    $form['field_last_name']['widget'][0]['#access'] = TRUE;
+
+    // Alter text specifically for this route.
+    $form['step_email']['widget'][0]['step_title']['#markup'] = '<h2 class="heading--alt">' . t('Email address of team member') . '</h2>';
+    $form['step_email']['widget'][0]['step_description']['#markup'] = '<p>' . t('This email address will be used to log into the Team London website.') . '</p>';
+    $form['account']['mail']['#description'] = '';
+
+    $form['step_org_contact']['widget'][0]['step_title']['#markup'] = '<h2 class="heading--alt">' . t('Full name of team member') . '</h2>';
+    $form['step_org_contact']['widget'][0]['step_description']['#markup'] = t('');
+  }
+  elseif (isset($form['rid'], $form['rid']['#value']) && $form['rid']['#value'] == 'provider') {
+    // Add custom submit for provider registrations.
+    $form['actions']['submit']['#submit'][] = 'gla_provider_provider_user_register_form_submit';
+  }
+}
+
+/**
+ * Custom submit handler.
+ */
+function gla_provider_provider_user_register_form_submit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  // Create stub provider_profile node and redirect user to edit form.
+  // We do this so we can avoid giving providers the permission to create provider profile nodes - as there should only be one per provider.
+  $nid = \Drupal::service('gla_provider.processor')->createStubProfile($form_state);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function gla_provider_user_insert(\Drupal\Core\Entity\EntityInterface $entity) {
+  if (is_provider_member_route('user_add')) {
+    // Add this new user to the current user's group.
+    \Drupal::service('gla_provider.processor')->addUserToCurrentGroup($entity);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function gla_provider_node_presave(\Drupal\Core\Entity\EntityInterface $entity) {
+
+  if (isset($entity->multistepSubmitHandling) && $entity->multistepSubmitHandling) {
+    // This is done in the module for inbetween steps, but isn't working for the
+    // last step so we'll handle it here.
+    // Make sure the entity changes are being saved into a new draft.
+    $entity->setNewRevision(TRUE);
+    $entity->set('moderation_state', 'draft');
+    $entity->multistepSubmitHandling = NULL;
+  }
+
+  $send_email = TRUE;
+  if (isset($entity->glaSkipEmails) && $entity->glaSkipEmails) {
+    $send_email = FALSE;
+  }
+
+  if ($entity->bundle() == 'provider_profile') {
+    \Drupal::service('gla_provider.processor')->processProfileNode($entity);
+    // Location work.
+    gla_opportunity_location_processing($entity);
+
+    $feedback = $entity->get('revision_log')->value;
+    // If opportunity has been given feedback.
+    if ($send_email && PHP_SAPI !== 'cli' && !empty($entity->id())) {
+      $current_state = $entity->moderation_state->value;
+      if ($feedback && $current_state == 'draft') {
+        // Send email.
+        gla_provider_message($entity, 'provider_feedback');
+
+        // Reset reminder email status.
+        $entity->set('field_reminder_email', 0);
+      }
+
+      if ($current_state != 'draft') {
+        // Set reminder email status as 'sent' so it's not triggered from old
+        // revisions now.
+        $entity->set('field_reminder_email', 1);
+      }
+    }
+  }
+
+  /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+  $provider_processor = \Drupal::service('gla_provider.processor');
+
+  // Update the node status on save.
+  if ($entity->bundle() == 'opportunity' || $entity->bundle() == 'provider_profile') {
+    if ($entity->isNew()) {
+      $state = 'is_new';
+      $before_save_mod = '';
+    }
+    else {
+      // This is the version before saved.
+      $before_save_rev = $provider_processor->loadLatestRevision($entity);
+      $before_save_mod = $before_save_rev->get('moderation_state')->value;
+      $state = $entity->get('moderation_state')->value;
+    }
+
+    switch ($state) {
+      case 'is_new':
+        $entity->set('field_status', 'to_do');
+        break;
+      case 'draft':
+        if ($before_save_mod == 'ready_for_review') {
+          // Node is transitioning from ready_for_review to draft, therefore
+          // has feedback.
+          $entity->set('field_status', 'feedback');
+          break;
+        }
+        if ($provider_processor->latestRevisionHasFeedback($entity)) {
+          $entity->set('field_status', 'feedback');
+          break;
+        }
+        if ($provider_processor->roleExpired($entity)) {
+          $entity->set('field_status', 'expired');
+          break;
+        }
+        if ($provider_processor->roleApproved($entity)) {
+          $entity->set('field_status', 'approved');
+          break;
+        }
+        $entity->set('field_status', 'to_do');
+        break;
+      case 'published':
+        if ($before_save_mod == 'ready_for_review') {
+          // Node is transitioning from ready_for_review to published, therefore
+          // has just been approved.
+          $entity->set('field_status', 'approved');
+          break;
+        }
+        if ($provider_processor->roleHasSubmissions($entity, FALSE)) {
+          $entity->set('field_status', 'response_needed');
+          break;
+        }
+        if ($provider_processor->roleHasSubmissions($entity, TRUE)) {
+          $entity->set('field_status', 'responded');
+          break;
+        }
+        if ($provider_processor->roleIsExpiring($entity)) {
+          $entity->set('field_status', 'expiring');
+          break;
+        }
+        $entity->set('field_status', $state);
+        break;
+      case 'ready_for_review':
+        $entity->set('field_status', 'review');
+        break;
+      case 'archived':
+      case 'unpublished':
+        if ($before_save_mod == 'published') {
+          // Node is transitioning from published to unpublished, therefore
+          // check if it has expired.
+          if ($provider_processor->roleExpired($entity)) {
+            $entity->set('field_status', 'expired');
+            break;
+          }
+        }
+      case 'approved':
+        $entity->set('field_status', $state);
+        break;
+      default:
+        $entity->set('field_status', '_none');
+        break;
+    }
+
+    // If there is a published version of the node, and the before and after
+    // states are the same (i.e. triggered from volunteer submission), then
+    // check submissions.
+    $published_version = $provider_processor->nodeIsPublished($entity);
+    if ($published_version && $before_save_mod == $state) {
+      if ($provider_processor->roleHasSubmissions($entity, FALSE)) {
+        $entity->set('field_status', 'response_needed');
+      }
+      elseif ($provider_processor->roleHasSubmissions($entity, TRUE)) {
+        $entity->set('field_status', 'responded');
+      }
+      elseif ($provider_processor->roleIsExpiring($entity)) {
+        $entity->set('field_status', 'expiring');
+      }
+    }
+  }
+}
+
+/**
+ * Check if we're on the specified provider route.
+ */
+function is_provider_member_route($type) {
+  $route_match = \Drupal::routeMatch();
+  if ($route_match->getRouteName() == 'gla_provider.' . $type) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_provider_form_content_moderation_entity_moderation_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $routes_with_moderation = [
+    'gla_provider.application_check',
+    'gla_provider.dashboard_opportunity_edit',
+    'gla_provider.dashboard_opportunity_duplicate_check'
+  ];
+  // Change how the moderation form is displayed on the provider check answers page.
+  $route_match = \Drupal::routeMatch();
+  if (in_array($route_match->getRouteName(), $routes_with_moderation)) {
+    // Hide other parts of the form and set the new state as ready for review.
+    $form['#theme'][0] = '';
+    $form['current']['#access'] = FALSE;
+    $form['revision_log']['#access'] = FALSE;
+    $form['submit']['#value'] = t('Submit');
+    $form['#submit'][] = 'gla_provider_post_submit_redirect';
+    $form['new_state'] = [
+      '#type' => 'value',
+      '#value' => 'ready_for_review',
+    ];
+    // Custom submit buttons for the different routes.
+    if ($route_match->getRouteName() == 'gla_provider.dashboard_opportunity_edit') {
+      $form['submit']['#value'] = t('Submit for review');
+    }
+    elseif ($route_match->getRouteName() == 'gla_provider.dashboard_opportunity_duplicate_check') {
+      $form['submit']['#value'] = t('Create Duplicate');
+      $form['new_state'] = [
+        '#type' => 'value',
+        '#value' => 'draft',
+      ];
+    }
+    // We need to add validation here to ensure the provider profile node can
+    // only be submitted when all required fields validation etc passes.
+    $form['#validate'][] = 'gla_provider_submission_validate';
+  }
+
+  // Alter the log field so GLA admins can enter more text.
+  if (isset($form['new_state'])) {
+    $form['new_state']['#title'] = t('New state');
+  }
+  if (isset($form['revision_log'])) {
+    $form['revision_log']['#title'] = t('Feedback');
+    $form['revision_log']['#type'] = 'textarea';
+    unset($form['revision_log']['#size']);
+  }
+}
+
+/**
+ * Custom validation handler to validate the node before it is submitted for approval.
+ */
+function gla_provider_submission_validate($form, \Drupal\Core\Form\FormStateInterface &$form_state) {
+  // This is based on what happens in \Drupal\Core\Entity\ContentEntityForm::validateForm.
+  $storage = $form_state->getStorage();
+
+  /** @var \Drupal\node\Entity\Node $entity */
+  $entity = $storage['entity'];
+  if (!$entity) {
+    // If we get here, something has gone wrong.
+    $form_state->setError($form['current'], t('There was a problem with your submission, please refresh the page and try again.'));
+    return;
+  }
+
+  /** @var \Drupal\Core\Entity\EntityConstraintViolationList $violations[] */
+  $violations = $entity->validate();
+
+  // Remove violations of inaccessible fields.
+  $current_user = \Drupal::currentUser();
+  $violations->filterByFieldAccess($current_user);
+
+  // Get the node form to lookup the title to use in the validation error message.
+  $node_form_obj = \Drupal::entityTypeManager()
+    ->getFormObject($entity->getEntityTypeId(), 'default')
+    ->setEntity($entity);
+  $node_form =  \Drupal::formBuilder()->getForm($node_form_obj);
+
+  $scheduler_fields = [
+    'unpublish_on',
+    'publish_on',
+    'unpublish_state',
+    'publish_state',
+    'moderation_state',
+  ];
+
+  $errors = [];
+  foreach ($violations->getFieldNames() as $field_name) {
+    // Handle the scheduler validation separately.
+    if (in_array($field_name, $scheduler_fields)) {
+      continue;
+    }
+
+    // Set a form error for every node save validation violation. As we're not
+    // actually acting on the node form (i.e. don't have these fields in the
+    // form) we group all the errors together in one setError.
+    // Find the step this question is on to get the message to display. Fallback
+    // to the field name in case we can't find the step title for some reason.
+    $errors[$field_name] = $field_name;
+    foreach ($node_form['#steps'] as $step_number => $step_data) {
+      if (in_array($field_name, $step_data->children)) {
+        $label_field = $step_data->children[0];
+        $label = $node_form[$label_field]['widget'][0]['#title'];
+        $errors[$step_data->children[0]] = t('@label is required', ['@label' => $label]);
+        if (isset($errors[$field_name])) {
+          unset($errors[$field_name]);
+        }
+        break;
+      }
+    }
+  }
+
+  // Check the ad start and end dates make sense.
+  $current_date = date('Y-m-d');
+  $current_timestamp = strtotime($current_date);
+  if ($entity->hasField('field_start_of_ad_specific') && $entity->hasField('field_end_of_ad_specific')) {
+    $start_ad = strtotime($entity->get('field_start_of_ad_specific')->value);
+    if ($start_ad && $start_ad < $current_timestamp) {
+      $errors[] = t('Start of advertisement is invalid');
+    }
+
+    $end_ad = strtotime($entity->get('field_end_of_ad_specific')->value);
+    if ($end_ad && $end_ad < $current_timestamp) {
+      $errors[] = t('End of advertisement is invalid');
+    }
+
+    // If both dates are entered then the unpublish-on date must be later than
+    // the publish-on date.
+    if (!empty($start_ad) && !empty($end_ad) && $end_ad < $start_ad) {
+      $errors[] = t('Start of advertisement is invalid');
+    }
+
+    // Check 6 month limit.
+    if ($end_ad) {
+      // If $start_ad isn't set from above then we need to use the current time
+      // for this check.
+      $start_ad_tmp = $start_ad;
+      if (!$start_ad_tmp) {
+        $start_ad_tmp = time();
+      }
+
+      // Check time between them.
+      $six_months_from_start = gla_opportunity_six_months_from_date($start_ad_tmp);
+      if ($end_ad > $six_months_from_start) {
+        $errors[] = t('The end date cannot be more than 6 months after the start date.');
+      }
+    }
+  }
+
+  if (!empty($errors)) {
+    $items = [
+      '#theme' => 'item_list',
+      '#list_type' => 'ul',
+      '#items' => $errors,
+    ];
+
+    $type = 'provider profile';
+    if ($entity->bundle() == 'opportunity') {
+      $type = 'role';
+    }
+
+    $form_state->setError($form, t('You must fix the following issues before you can submit your @type for review: <br> @items', [
+      '@type' => $type,
+      '@items' => render($items),
+    ]));
+  }
+}
+
+/**
+ * Form alter on exposed view filters to change the redirect path.
+ *
+ * Note: Couldn't use form_state->setRedirect() so was forced to change the action path.
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param $form_id
+ */
+function gla_provider_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  if ($form['#id'] == 'views-exposed-form-provider-to-do-page-1' || $form['#id'] == 'views-exposed-form-provider-to-do-no-group') {
+    $route_match = \Drupal::routeMatch();
+    $route_name = $route_match->getRouteName();
+    if ($route_name == 'gla_provider.dashboard') {
+      $redirect_url = \Drupal\Core\Url::fromRoute($route_name);
+      $form['#action'] = $redirect_url->toString();
+    }
+
+    $form['actions']['submit']['#attributes']['class'][] = 'sr-only';
+    $form['title_1']['#prefix'] = '<div class="col-sm-12 col-md-6">';
+    $form['title_1']['#suffix'] = '</div>';
+    $form['field_status_value_1']['#prefix'] = '<div class="col-sm-12 col-md-6">';
+    $form['field_status_value_1']['#suffix'] = '</div>';
+  }
+  elseif ($form['#id'] == 'views-exposed-form-applications-all-applications') {
+    $form['actions']['submit']['#attributes']['class'][] = 'sr-only';
+    $form['volunteer_name']['#prefix'] = '<div class="col-sm-12 col-md-4">';
+    $form['volunteer_name']['#suffix'] = '</div>';
+    $form['title']['#prefix'] = '<div class="col-sm-12 col-md-4">';
+    $form['title']['#suffix'] = '</div>';
+    $form['responded']['#prefix'] = '<div class="col-sm-12 col-md-4">';
+    $form['responded']['#suffix'] = '</div>';
+  }
+  elseif ($form['#id'] == 'views-exposed-form-applications-pending-applications-opportunity' || $form['#id'] == 'views-exposed-form-applications-responded-applications-opportunity') {
+    $form['actions']['submit']['#attributes']['class'][] = 'sr-only';
+    $form['volunteer_name']['#prefix'] = '<div class="col-sm-12 col-md-6">';
+    $form['volunteer_name']['#suffix'] = '</div>';
+    $form['title']['#prefix'] = '<div class="col-sm-12 col-md-6">';
+    $form['title']['#suffix'] = '</div>';
+  }
+  elseif ($form['#id'] == 'views-exposed-form-applications-page-1') {
+    $form['actions']['submit']['#attributes']['class'][] = 'sr-only';
+    $form['volunteer_name']['#prefix'] = '<div class="col-sm-12 col-md-6">';
+    $form['volunteer_name']['#suffix'] = '</div>';
+    $form['title']['#prefix'] = '<div class="col-sm-12 col-md-6">';
+    $form['title']['#suffix'] = '</div>';
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_provider_form_node_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+
+  /** @var \Drupal\node\Entity\Node $node */
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node->bundle() !== 'provider_profile') {
+    return;
+  }
+
+  /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+  $provider_processor = \Drupal::service('gla_provider.processor');
+  $log = $provider_processor->getLatestFeedback($node)['log'];
+
+  // Get state.
+  $state = $node->moderation_state->value;
+
+  // Show log message.
+  if (!empty($log) && $state == 'draft') {
+    $form['feedback'] = [
+      '#markup' => $log,
+      '#weight' => -100,
+      '#type' => 'markup',
+      '#prefix' => '<div class="well"><h4>' . t('You have received feedback on this application. Please address this and resubmit for review.') . '</h4>',
+      '#suffix' => '</div>',
+    ];
+  }
+
+  // Tweaks to the node form display.
+  if (isset($form['field_organisation_image']) || isset($form['field_organisation_logo'])) {
+    $form['#after_build'][] = 'gla_provider_after_build';
+  }
+
+  // Hide some fields labels in the provider journey.
+  $form['title']['widget'][0]['value']['#title_display'] = 'invisible';
+  $form['field_organisation_values']['widget'][0]['value']['#title_display'] = 'invisible';
+  $form['field_organisation_deliver_value']['widget'][0]['value']['#title_display'] = 'invisible';
+  $form['field_organisation_who_benefits']['widget'][0]['value']['#title_display'] = 'invisible';
+  $form['field_organisation_tags']['widget']['#title_display'] = 'invisible';
+
+  // Make the borough field an autocomplete.
+  if (isset($form['field_borough'], $form['field_borough']['widget'])) {
+    $form['field_borough']['widget']['#options']['_none'] = '';
+    $form['field_borough']['widget']['#attributes']['class'][] = 'select--autocomplete';
+    $form['field_borough']['widget']['#attributes']['class'][] = 'js-autocomplete';
+    $form['#attached']['library'][] = 'gla_estate/auto-complete';
+  }
+}
+
+/**
+ * Add redirect to correct place after submitting values.
+ */
+function gla_provider_post_submit_redirect($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+
+  /** @var \Drupal\user\Entity\User $user */
+  if ($form['#form_id'] == 'content_moderation_entity_moderation_form') {
+
+    $user = \Drupal::currentUser();
+    $user_roles = $user->getRoles();
+    if (in_array('provider', $user_roles)) {
+      $post_submit_content_nid = Drupal::config('gla_site.registration_flow_settings')->get('node:post_submit');
+
+      $storage = $form_state->getStorage();
+      if (isset($storage['entity'])) {
+        /** @var \Drupal\node\Entity\Node $node */
+        $node = $storage['entity'];
+        if ($node && $node->bundle() == 'opportunity') {
+          $post_submit_content_nid = Drupal::config('gla_site.registration_flow_settings')->get('node:post_submit_opportunity');
+        }
+      }
+
+      if (\Drupal::routeMatch()->getRouteName() == 'gla_provider.dashboard_opportunity_duplicate_check' && $node instanceof \Drupal\node\Entity\Node) {
+        $form_state->setRedirect('gla_provider.dashboard_opportunity_duplicate_success', ['node' => $node->id()]);
+      }
+      else {
+        $form_state->setRedirect('entity.node.canonical', ['node' => $post_submit_content_nid]);
+      }
+    }
+  }
+}
+
+/**
+ * Alter form after build.
+ */
+function gla_provider_after_build($form, &$form_state) {
+  // Change help text for alternative text field on logo and image upload sections.
+  $image_field_names = ['field_organisation_image', 'field_organisation_logo'];
+  foreach ($image_field_names as $image_field_name) {
+    if (isset($form[$image_field_name], $form[$image_field_name]['widget'], $form[$image_field_name]['widget']['current'])) {
+      foreach ($form[$image_field_name]['widget']['current'] as $key => $value) {
+        if (is_numeric($key) && isset($value['meta'], $value['meta']['alt'], $value['meta']['alt']['#description'])) {
+          $form[$image_field_name]['widget']['current'][$key]['meta']['alt']['#description'] = t('This will be used by screen readers, search engines and when the image can\'t be loaded.');
+        }
+      }
+    }
+
+    // Hide description text for logo and image file upload fields.
+    // Moved this here to add additional checks, though it's not used at the
+    // moment with the entity browser. Keeping it in case the image fields are
+    // ever switched back to default.
+    if (isset($form[$image_field_name], $form[$image_field_name]['widget'], $form[$image_field_name]['widget'][0], $form[$image_field_name]['widget'][0]['#description'])) {
+      $form[$image_field_name]['widget'][0]['#description']['#access'] = FALSE;
+    }
+  }
+
+  return $form;
+}
+
+/**
+ * Implements hook_mail().
+ */
+function gla_provider_mail($key, &$message, $params) {
+  $options = [
+    'langcode' => $message['langcode'],
+  ];
+  switch ($key) {
+    case 'accepted':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Team London: @title', ['@title' => $params['title']], $options);
+      $message['body'][] = $params['message'];
+      break;
+    case 'rejected':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Team London: @title', ['@title' => $params['title']], $options);
+      $message['body'][] = $params['message'];
+      break;
+    case 'provider_feedback':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Team London: @title', ['@title' => $params['title']], $options);
+      $message['body'][] = $params['message'];
+      $message['link'] = $params['link'];
+      break;
+    case 'provider_feedback_reminder':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Team London: @title', ['@title' => $params['title']], $options);
+      $message['body'][] = $params['message'];
+      $message['link'] = $params['link'];
+      break;
+    case 'application_submitted':
+    case 'application_submitted_confirmation':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = $params['title'];
+      $message['body'][] = $params['message'];
+      break;
+  }
+}
+
+/**
+ * Sends mail message.
+ */
+function gla_provider_message(Drupal\Core\Entity\EntityInterface $entity, $key, $base_url = FALSE) {
+  $mail_manager = \Drupal::service('plugin.manager.mail');
+  $module = 'gla_provider';
+  $langcode = \Drupal::currentUser()->getPreferredLangcode();
+  $send = TRUE;
+
+  // Get applicant email and organisation name.
+  $user = $entity->getOwner();
+  $to = $user->getEmail();
+  $first_name = $user->get('field_first_name')->value;
+  $last_name = $user->get('field_last_name')->value;
+  $provider_name = $first_name . ' ' . $last_name;
+
+  $nid = $entity->id();
+  $options = [
+    'absolute' => TRUE,
+  ];
+
+  if ($base_url) {
+    $options['base_url'] = $base_url;
+  }
+
+  $provider_dashboard_link = \Drupal\Core\Url::fromRoute('gla_provider.dashboard', [], $options)->toString();
+
+  // Send provider profile feedback given message.
+  if ($key == 'provider_feedback') {
+      // Pass link to email template.
+    $params['link'] = $provider_dashboard_link;
+
+    // Set top of body for email template.
+    $params['message'] = t('Dear @provider,', ['@provider' => $provider_name,]);
+
+    // Title of email.
+    $params['title'] = t('Changes needed to your Team London provider profile');
+  }
+  // Send provider profile feedback reminder message.
+  elseif ($key == 'provider_feedback_reminder') {
+    $params['link'] = $provider_dashboard_link;
+    $params['message'] = t('Dear @provider,', ['@provider' => $provider_name,]);
+    $params['title'] = t('Reminder, you have feedback on your provider profile');
+  }
+
+  $messenger = \Drupal::messenger();
+  $result = $mail_manager->mail($module, $key, $to, $langcode, $params, NULL, $send);
+  if ($result['result'] != TRUE) {
+    $message = t('There was a problem sending your email notification to @email.', ['@email' => $to]);
+    $messenger->addMessage($message, $messenger::TYPE_ERROR);
+    return;
+  }
+
+  $message = t('An email notification has been sent to @email ', ['@email' => $to]);
+  $messenger->addMessage($message);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ *
+ * @param $variables
+ */
+
+function gla_provider_preprocess_node__provider_profile(&$variables) {
+  /** @var \Drupal\node\Entity\Node $node */
+  $node = $variables['node'];
+  if ($node && $variables['view_mode'] == 'full') {
+    $nid = $node->id();
+    $args = [$nid];
+    $display_id = 'default';
+    $view_name = 'current_roles';
+    $view = \Drupal\views\Views::getView($view_name);
+    if (is_object($view)) {
+      $view->setArguments($args);
+      $view->setDisplay($display_id);
+      $view->preExecute();
+      $view->execute();
+      $content = $view->render();
+      $variables['embedded_view'] = $content;
+    }
+  }
+
+  // MEDIA.
+
+  // Logo as url.
+  if ($node->hasField('field_organisation_logo') && $node->get('field_organisation_logo')->target_id) {
+    $image_id = $node->get('field_organisation_logo')->target_id;
+    $file = Drupal\file\Entity\File::load($image_id);
+    if ($file) {
+      $image_path = $file->getFileUri();
+      $image_alt = $node->get('field_organisation_logo')->alt;
+      $image_url = ImageStyle::load('content_image_extra_small')->buildUrl($image_path);
+      $variables['provider_logo'] = $image_url;
+      $variables['provider_logo_alt'] = $image_alt;
+    }
+  }
+
+  // Image as url.
+  if ($node->hasField('field_organisation_image') && $node->get('field_organisation_image')->target_id) {
+    $image_id = $node->get('field_organisation_image')->target_id;
+    $file = Drupal\file\Entity\File::load($image_id);
+    if ($file) {
+      $image_path = $file->getFileUri();
+      $image_alt = $node->get('field_organisation_image')->alt;
+      $image_url = ImageStyle::load('content_image_medium')->buildUrl($image_path);
+      $variables['provider_image'] = $image_url;
+      $variables['provider_image_alt'] = $image_alt;
+    }
+  }
+
+  // CONTACT DETAILS.
+
+  // Get provider full address.
+  $variables['provider_location'][] = $node->get('field_building_and_street')->value;
+  $variables['provider_location'][] = $node->get('field_building_and_street_2')->value;
+  $variables['provider_location'][] = $node->get('field_building_and_street_3')->value;
+  $variables['provider_location'][] = $node->get('field_town_or_city')->value;
+  $variables['provider_location'][] = $node->get('field_postcode')->value;
+
+  // Number and website.
+  $variables['provider_number'] = $node->get('field_uk_telephone_number')->value;
+  $variables['provider_website'] = $node->get('field_organisation_web_address')->value;
+
+
+  // SOCIAL MEDIA.
+
+  // Facebook, twitter and instagram.
+  if (isset($node->get('field_organisation_facebook')->value)) {
+    $variables['provider_social_media']['provider_fb'] = $node->get('field_organisation_facebook')->value;
+  }
+  if (isset($node->get('field_organisation_twitter')->value)) {
+    $variables['provider_social_media']['provider_twitter'] = $node->get('field_organisation_twitter')->value;
+  }
+  if (isset($node->get('field_organisation_instagram')->value)) {
+    $variables['provider_social_media']['provider_ig'] = $node->get('field_organisation_instagram')->value;
+  }
+  // ABOUT
+
+  // Getting all the provider aims bullet points.
+  for ($i = 1; $i < 7; $i++) {
+    if (isset($variables['content']["field_what_bullet_$i"]) && !empty($variables['content']["field_what_bullet_$i"][0])) {
+      $variables['provider_aims'][] = $variables['content']["field_what_bullet_$i"];
+    }
+  }
+
+  // How provider acheives these aims.
+  $variables['provider_how_aims'] = $node->get('field_organisation_deliver_value')->value;
+
+  // Who benefits.
+  $variables['provider_who_benefits'] = $node->get('field_organisation_who_benefits')->value;
+
+  // Main focus.
+  if ($node->hasField('field_organisation_tags')) {
+    foreach ($node->get('field_organisation_tags')->getValue() as $tag) {
+      $term = Drupal\taxonomy\Entity\Term::load($tag['target_id']);
+      if ($term) {
+        // Generate search link for tag.
+        $search_url = \Drupal\Core\Url::fromRoute('view.profile_search.page_1', [], [
+          'query' => [
+            'f' => [
+              'causes:' . $tag['target_id'],
+            ],
+          ],
+        ]);
+
+        $variables['provider_focus'][] = [
+          'label' => $term->label(),
+          'url' => $search_url,
+        ];
+      }
+    }
+  }
+
+  // Add lat/long for map in template.
+  if ($node->hasField('field_lat_long')) {
+    $latlong = $node->get('field_lat_long')->getValue();
+    $variables['#attached']['library'][] = 'gla_estate/maps';
+    if (isset($latlong[0], $latlong[0]['lat'], $latlong[0]['lng']) && !empty($latlong[0]['lat']) && !empty($latlong[0]['lng'])) {
+      $variables['lat'] = $latlong[0]['lat'];
+      $variables['long'] = $latlong[0]['lng'];
+
+      // Add travel info.
+      $variables['travel']['#markup'] = gla_opportunity_get_travel_info($variables['lat'], $variables['long']);
+    }
+  }
+
+  // Show notice if coming from the dashboard.
+  $from_dashboard = \Drupal::request()->query->get('dashboard');
+  if ($node->moderation_state->value == 'ready_for_review' && $from_dashboard) {
+    $variables['node_status_info'] = [
+      '#markup' => t('Your profile is currently in review and you will be notified when it is approved or feedback is given.') ,
+      '#type' => 'markup',
+    ];
+  }
+}
+
+/**
+ * Global helper function to check if in the provider dashboard flow.
+ *
+ * @return bool
+ */
+function gla_provider_in_dashboard_overview_flow() {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if ($route_name == 'gla_provider.dashboard_opportunity_edit') {
+    return 'edit';
+  }
+  if ($route_name == 'gla_provider.dashboard_opportunity_duplicate_check') {
+    return 'duplicate';
+  }
+}
+
+/**
+ * Returns the renderable array for the member add check answers page.
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *
+ * @return array
+ */
+function check_answers_data($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+
+  /** @var \Drupal\gla_provider\ProviderProcessor $provider_processor */
+  $provider_processor = \Drupal::service('gla_provider.processor');
+  $storage = $form_state->getStorage();
+  $group = \Drupal::routeMatch()->getParameter('group');
+  $provider_profile = $provider_processor->getProviderProfileFromEntity($group);
+  $org_name = $provider_profile ? $provider_profile->getTitle() : '';
+
+  // Sort through form to get step for each question.
+  $step_map = [];
+  foreach ($form['#steps'] as $step_num => $step_data) {
+    foreach ($step_data->children as $child) {
+      if (substr($child, 0, 5) !== 'step_') {
+        $step_map[$child] = $step_num;
+      }
+    }
+  }
+
+  // Extract the values to display and generate the edit link.
+  $sections = [
+    'email' => [
+      'label' => t('Email address'),
+      'fields' => [
+        'account',
+      ],
+    ],
+    'full_name' => [
+      'label' => t('Full name'),
+      'fields' => [
+        'field_first_name',
+        'field_last_name',
+      ],
+    ],
+  ];
+
+  $form_values = [
+    'account' => $storage['account'],
+    'field_first_name' => $storage['field_first_name'],
+    'field_last_name' => $storage['field_last_name'],
+  ];
+
+  $data = [];
+  $weight = 0;
+  foreach ($sections as $key => $info) {
+    $fields = $info['fields'];
+    $section_values = [];
+
+    // Collect the field values in this section.
+    $step_num = FALSE;
+    foreach ($fields as $field) {
+      if (isset($storage[$field], $step_map[$field])) {
+        $step_num = $step_map[$field];
+        $section_values[] = trim($storage[$field]);
+      }
+    }
+
+    if (!$step_num) {
+      continue;
+    }
+
+    // Grab title.
+    if (isset($info['label'])) {
+      $label = $info['label'];
+    }
+    else {
+      // We want to show the step title in the output.
+      $step_field_name = $form['#steps'][$step_num]->children[0];
+      $label = $form[$step_field_name]['widget']['#title'];
+    }
+
+    // Get the link to change the answer.
+    $link_classes = 'link link--edit';
+    $link_title = t('Change');
+    $edit_link = \Drupal\Core\Link::createFromRoute($link_title, 'gla_provider.user_add', ['group' => $group->id()], [
+      'query' => [
+        'step' => $step_num,
+        'form_values' => $form_values,
+      ],
+      'attributes' => [
+        'class' => $link_classes,
+      ],
+    ]);
+
+    $weight++;
+    $data[$key] = [
+      'label' => $label,
+      'value' => implode(' ', $section_values),
+      'link' => $edit_link,
+    ];
+  }
+
+  return [
+    '#theme' => 'gla_provider__new_member_check',
+    '#org_name' => $org_name,
+    '#sections' => $data,
+  ];
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_provider_preprocess_page__provider__members(&$variables) {
+  // Add back link to dashboard.
+  $variables['back'] = \Drupal\Core\Link::createFromRoute(t('Back'), 'gla_provider.dashboard', [], ['attributes' => ['class' => 'link link--chevron-back']]);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function gla_provider_preprocess_page__provider__dashboard__applications(&$variables) {
+  // Add back link to dashboard.
+  $variables['back'] = \Drupal\Core\Link::createFromRoute(t('Back'), 'gla_provider.dashboard', [], ['attributes' => ['class' => 'link link--chevron-back']]);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function gla_provider_form_views_exposed_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $view = $form_state->getStorage('view');
+  if ($view && $form['#id'] == 'views-exposed-form-provider-to-do-page-1') {
+    // Make to do list filter submit when changed.
+    $route = \Drupal::routeMatch()->getRouteName();
+    if ($route == 'gla_provider.dashboard' || $route == 'view.provider_to_do.page_1') {
+      $form['field_status_value_1']['#attributes'] = [
+        'onChange' => 'this.form.submit();',
+      ];
+    }
+  }
+}

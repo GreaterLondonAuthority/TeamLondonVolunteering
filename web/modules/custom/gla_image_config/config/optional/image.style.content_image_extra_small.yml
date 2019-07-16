@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - crop.type.content_image
+  module:
+    - crop
+name: content_image_extra_small
+label: 'Content image extra small (320px x 160px)'
+effects:
+  be4b640b-cbea-40a0-aa42-45cde53e48a6:
+    uuid: be4b640b-cbea-40a0-aa42-45cde53e48a6
+    id: image_scale_and_crop
+    weight: -9
+    data:
+      width: 320
+      height: 160
+      anchor: center-center
+  9a5f4fda-c9b7-4955-a6ae-60096b407d73:
+    uuid: 9a5f4fda-c9b7-4955-a6ae-60096b407d73
+    id: crop_crop
+    weight: -10
+    data:
+      crop_type: content_image
